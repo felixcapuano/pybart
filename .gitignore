@@ -1,6 +1,6 @@
 
-# Created by https://www.gitignore.io/api/python,visualstudio
-# Edit at https://www.gitignore.io/?templates=python,visualstudio
+# Created by https://www.gitignore.io/api/python,visualstudio,visualstudiocode
+# Edit at https://www.gitignore.io/?templates=python,visualstudio,visualstudiocode
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -106,6 +106,17 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+.history
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -456,4 +467,4 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
-# End of https://www.gitignore.io/api/python,visualstudio
+# End of https://www.gitignore.io/api/python,visualstudio,visualstudiocode
