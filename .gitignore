@@ -78,6 +78,15 @@ target/
 #   install all needed dependencies.
 #Pipfile.lock
 
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
 # celery beat schedule file
 celerybeat-schedule
 
@@ -108,8 +117,8 @@ dmypy.json
 .pyre/
 
 ### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
+.vscode/
+.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
