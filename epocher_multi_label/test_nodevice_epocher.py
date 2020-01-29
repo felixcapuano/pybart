@@ -53,7 +53,7 @@ def test_brainampsocket():
     """
     te = TriggerEmulator()
     te.configure()
-    te.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+    te.outputs['triggers'].configure(protocol='tcp', transfermode='plaindata',)
     te.initialize()
     te.show()
     
