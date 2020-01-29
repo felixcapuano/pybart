@@ -29,7 +29,8 @@ class ThreadPollInputUntilPosWaited(ThreadPollInput):
             if self.pos_waited == 0: return
 
             if pos >= self.pos_waited:
-                self.pos_reached.emit(self)
+                self.pos_reached.emit(pos)
+                print("position reached")
 
 
 class EpocherMultiLabel(Node,  QtCore.QObject):
@@ -87,21 +88,20 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
         
     # TODO ValueError: not enough values to unpack (expected 2, got 1). Check logs.txt
     def on_new_trig(self, trig_num, trig_indexes):
-        if trig_num != 0:
-            for pos, pts, chan, classification, name in trig_indexes:
-                
-                trig = {}
-                trig['pos'] = pos
-                trig['name'] = name.decode('ascii')
+        for pos, pts, channel, classification, name in trig_indexes:
+            
+            trig = {}
+            trig['pos'] = pos
+            trig['name'] = name.decode('ascii')
 
-                trig['pos_waited'] = trig['pos'] + self.parameters[trig['name']]['right_limit']
+            trig['pos_waited'] = trig['pos'] + self.parameters[trig['name']]['right_limit']
 
-                thread_waiting = ThreadPollInputUntilPosWaited(self.inputs['signals'])
-                thread_waiting.set_trigger(trig)
-                thread_waiting.pos_reached.connect(self.on_pos_reached)
-                thread_waiting.start()
+            thread_waiting = ThreadPollInputUntilPosWaited(self.inputs['triggers'])
+            thread_waiting.set_trigger(trig)
+            thread_waiting.pos_reached.connect(self.on_pos_reached)
+            thread_waiting.start()
 
-                self.thread_waiting_list.append(thread_waiting)
+            self.thread_waiting_list.append(thread_waiting)
                 
     def on_pos_reached(self, thread):
         thread.stop()
