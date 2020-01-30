@@ -55,8 +55,8 @@ class TriggerEmulator(WidgetNode):
         trig['points'] = 0
         trig['channel'] = -1
         trig['type'] = b'Stimulus'
-        description = [b'S  1', b'S  2', b'S  3', b'S  4', b'S  5', b'S  6', b'S  7']
-        trig['description'] = random.choice(description) 
+        # description = [b'S  1', b'S  2', b'S  3', b'S  4', b'S  5', b'S  6', b'S  7']
+        trig['description'] = b'S  1' # = random.choice(description) 
         
         print('Trigger lauch : {}'.format(trig))
         

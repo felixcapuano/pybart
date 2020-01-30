@@ -1,117 +1,151 @@
-from pyqtgraph.Qt import QtCore
-import pyqtgraph as pg
+import pdb
+
 import numpy as np
+import pyqtgraph as pg
+from pyacq.core import Node, ThreadPollInput
+from pyqtgraph.Qt import QtCore
 from pyqtgraph.util.mutex import Mutex
 
-from pyacq.core import Node, ThreadPollInput
-
-import pdb
-import time
 
 class ThreadPollInputUntilPosWaited(ThreadPollInput):
     """
     Thread waiting a futur pos in a stream.
     """
-    pos_reached = QtCore.pyqtSignal(int)
+    pos_reached = QtCore.pyqtSignal(int, str)
+
     def __init__(self, input_stream,  **kargs):
         ThreadPollInput.__init__(self, input_stream, **kargs)
-        
-        self.locker = Mutex()
-        self.pos_waited = 0
 
-    def set_trigger(self, pos_waited):
-        self.pos_waited = pos_waited
+        self.locker = Mutex()
+        self.pos_waited_list = []
+
+    def append_limit(self, name, pos_waited):
+        self.pos_waited_list.append((name, pos_waited))
+
+    def reset(self):
+        with self.locker:
+            self.pos_waited_list = []
 
     def process_data(self, pos, data):
         with self.locker:
-            
-            if self.pos_waited == 0: return
 
-            if pos >= self.pos_waited:
-                self.pos_reached.emit(pos)
-                print("position reached")
-                self.stop()
+            if len(self.pos_waited_list) == 0:
+                return
+
+            for pos_waited, name in self.pos_waited_list:
+                if pos >= pos_waited:
+                    self.pos_reached.emit(pos_waited, name)
+            self.pos_waited_list = [pos_waited for pos_waited in self.pos_waited_list if pos < pos_waited[0]]
 
 
 class EpocherMultiLabel(Node,  QtCore.QObject):
 
-    _input_specs = {'signals' : dict(streamtype = 'signals'), 
-                                'triggers' : dict(streamtype = 'events',  shape = (-1, )), #dtype ='int64',
-                                }
+    _input_specs = {'signals': dict(streamtype='signals'),
+                    # dtype ='int64',
+                    'triggers': dict(streamtype='events',  shape=(-1, )),
+                    }
     _output_specs = {}
 
     _params_ex = {
-            'left_sweep': -0.2,
-            'right_sweep': 0.6,
-            'stack_size' : 2,
-        }
+        'left_sweep': 0,
+        'right_sweep': 0.01,
+        'stack_size': 2,
+    }
     _default_params = {
-        'S  1' : _params_ex,
-        'S  2' : _params_ex,
-        'S  3' : _params_ex,
-        'S  4' : _params_ex,
-        'S  5' : _params_ex,
-        'S  6' : _params_ex,
-        'S  7' : _params_ex,
+        'S  1': _params_ex,
+        'S  2': _params_ex,
+        'S  3': _params_ex,
+        'S  4': _params_ex,
+        'S  5': _params_ex,
+        'S  6': _params_ex,
+        'S  7': _params_ex,
     }
 
     # ?
     new_chunk = QtCore.pyqtSignal(int)
 
-    def __init__(self, parent = None, **kargs):
+    def __init__(self, parent=None, **kargs):
         QtCore.QObject.__init__(self, parent)
         Node.__init__(self, **kargs)
 
-    def _configure(self, parameters = _default_params):
+    def _configure(self, parameters=_default_params, max_xsize=2.):
         self.parameters = parameters
+
+        self.max_xsize = max_xsize
+        
 
     def after_input_connect(self, inputname):
         if inputname == 'signals':
             self.nb_channel = self.inputs['signals'].params['shape'][1]
             self.sample_rate = self.inputs['signals'].params['sample_rate']
+
+            self.configure_triggers_parameters()
         elif inputname == 'triggers':
             pass
 
     def _initialize(self):
+        buf_size = int(self.inputs['signals'].params['sample_rate'] * self.max_xsize)
+        self.inputs['signals'].set_buffer(size=buf_size, axisorder=[1,0], double=True)
+
         self.trig_poller = ThreadPollInput(self.inputs['triggers'], return_data=True)
         self.trig_poller.new_data.connect(self.on_new_trig)
 
-        self.initialize_stack()
+        self.pos_waiter = ThreadPollInputUntilPosWaited(self.inputs['signals'])
+        self.pos_waiter.pos_reached.connect(self.on_pos_reached)
 
+        self.initialize_storage()
 
     def _start(self):
         self.trig_poller.start()
+        self.pos_waiter.start()
 
     def _stop(self):
         self.trig_poller.stop()
         self.trig_poller.wait()
-        
-    # TODO ValueError: not enough values to unpack (expected 2, got 1). Check logs.txt
+
+        self.pos_waiter.stop()
+        self.pos_waiter.wait()
+
     def on_new_trig(self, trig_num, trig_indexes):
-        
+
         for pos, pts, channel, classification, name in trig_indexes:
+            print('Just captured new triger : {}, Position : {}'.format(trig_indexes, pos))
 
-            print('Just captured new triger : {}'.format(trig_indexes))
-            print('Position : {}'.format(pos))
-    
+            # TODO raise error syntax name of trigger in the dict parameter
+            name = name.decode()
+            pos_waited = pos + self.parameters[name]['right_limit']
+            self.pos_waiter.append_limit(pos_waited, name)
 
-            thread_waiting = ThreadPollInputUntilPosWaited(self.inputs['signals'])
-            thread_waiting.set_trigger(pos+3000)
-            thread_waiting.pos_reached.connect(self.on_pos_reached)
-            thread_waiting.start()
+    def on_pos_reached(self, pos, name):
+        print('{} reach the pos at {}!'.format(name, pos))
 
-            # self.thread_waiting_list.append(thread_waiting)
-                
-    def on_pos_reached(self, pos):
-        # thread.stop()
-        # thread.wait()
-        print('End thread at position {}!'.format(pos))
+        stack = self.inputs['signals'].get_data(pos-self.parameters[name]['size'], pos).transpose()
+        if stack is not None:
+            weight = self.epoch_storage[name]['weight']
+            self.epoch_storage[name]['stock'][weight,:,:] = stack
+            self.epoch_storage[name]['weight'] += 1
 
-    def initialize_stack(self):
+            print(self.epoch_storage[name]['stock'])            
+        
+        for name in self.epoch_storage.keys():
+            if self.epoch_storage[name]['weight'] >= self.parameters[name]['stack_size']:
+                self.reset_stock(name)
+
+    def configure_triggers_parameters(self):
         for trigger_parameter in self.parameters.values():
             trigger_parameter['left_limit'] = int(trigger_parameter['left_sweep']*self.sample_rate)
             trigger_parameter['right_limit'] = int(trigger_parameter['right_sweep']*self.sample_rate)
 
-            trigger_parameter['size'] = trigger_parameter['right_limit'] - trigger_parameter['left_limit']
+            trigger_parameter['size'] = trigger_parameter['right_limit'] -  trigger_parameter['left_limit']
 
-        self.thread_waiting_list = []
+    def initialize_storage(self):
+        self.epoch_storage = {}
+        for name in self.parameters.keys():
+            self.epoch_storage[name] = {}
+            self.reset_stock(name)
+            self.pos_waiter.reset()
+
+    def reset_stock(self, name):
+        parameter = self.parameters[name]
+        self.epoch_storage[name]['stock'] = np.zeros((parameter['stack_size'], self.nb_channel, parameter['size']), dtype = self.inputs['signals'].params['dtype'])
+        self.epoch_storage[name]['weight'] = 0
