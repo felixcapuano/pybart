@@ -6,31 +6,31 @@ from pyqtgraph.util.mutex import Mutex
 from pyacq.core import Node, ThreadPollInput
 
 import pdb
+import time
 
 class ThreadPollInputUntilPosWaited(ThreadPollInput):
     """
     Thread waiting a futur pos in a stream.
     """
-
     pos_reached = QtCore.pyqtSignal(int)
-
     def __init__(self, input_stream,  **kargs):
         ThreadPollInput.__init__(self, input_stream, **kargs)
         
         self.locker = Mutex()
         self.pos_waited = 0
 
-    def set_trigger(self, trigger):
-        self.trigger = trigger
-        self.pos_waited = trigger['pos_waited']
+    def set_trigger(self, pos_waited):
+        self.pos_waited = pos_waited
 
     def process_data(self, pos, data):
         with self.locker:
+            
             if self.pos_waited == 0: return
 
             if pos >= self.pos_waited:
                 self.pos_reached.emit(pos)
                 print("position reached")
+                self.stop()
 
 
 class EpocherMultiLabel(Node,  QtCore.QObject):
@@ -89,28 +89,23 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
     # TODO ValueError: not enough values to unpack (expected 2, got 1). Check logs.txt
     def on_new_trig(self, trig_num, trig_indexes):
         
-        print('Just captured new triger : {}'.format(trig_indexes))
-        
         for pos, pts, channel, classification, name in trig_indexes:
-            
-            trig = {}
-            trig['pos'] = pos
-            trig['name'] = name.decode('ascii')
 
-            trig['pos_waited'] = trig['pos'] + self.parameters[trig['name']]['right_limit']
+            print('Just captured new triger : {}'.format(trig_indexes))
+            print('Position : {}'.format(pos))
+    
 
             thread_waiting = ThreadPollInputUntilPosWaited(self.inputs['signals'])
-            thread_waiting.set_trigger(trig)
+            thread_waiting.set_trigger(pos+3000)
             thread_waiting.pos_reached.connect(self.on_pos_reached)
             thread_waiting.start()
 
-            self.thread_waiting_list.append(thread_waiting)
+            # self.thread_waiting_list.append(thread_waiting)
                 
-    def on_pos_reached(self, thread):
-        thread.stop()
-        thread.wait()
-        print('End thread!')
-        # print("Trigger named {} over at {}.".format(trig['name'], trig['pos_waited']))
+    def on_pos_reached(self, pos):
+        # thread.stop()
+        # thread.wait()
+        print('End thread at position {}!'.format(pos))
 
     def initialize_stack(self):
         for trigger_parameter in self.parameters.values():

@@ -53,7 +53,7 @@ def test_brainampsocket():
     """
     te = TriggerEmulator()
     te.configure()
-    te.outputs['triggers'].configure(protocol='tcp', transfermode='plaindata',)
+    te.outputs['triggers'].configure(protocol='tcp',transfermode='plaindata',)
     te.initialize()
     te.show()
     
@@ -70,7 +70,7 @@ def test_brainampsocket():
     """
     ng = NoiseGenerator()
     ng.configure()
-    ng.output.configure(protocol='inproc', transfermode='plaindata')
+    ng.output.configure(protocol='tcp', transfermode='plaindata')
     ng.initialize()
 
     """

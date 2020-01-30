@@ -5,6 +5,7 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QPushButton
 from pyqtgraph.Qt import QtCore, QtGui
 import time
+import random
 
 _dtype_trigger = [('pos', 'int64'),
             ('points', 'int64'),
@@ -38,7 +39,8 @@ class TriggerEmulator(WidgetNode):
         self.setGeometry(self.left, self.top, self.width, self.height)
         
         button = QPushButton('Send trigger', self)
-        button.move(100,70)
+        button.move(0,0)
+        button.resize(self.width,self.height)
         button.clicked.connect(self.on_click)
         
 
@@ -53,7 +55,8 @@ class TriggerEmulator(WidgetNode):
         trig['points'] = 0
         trig['channel'] = -1
         trig['type'] = b'Stimulus'
-        trig['description'] = b'S  1'
+        description = [b'S  1', b'S  2', b'S  3', b'S  4', b'S  5', b'S  6', b'S  7']
+        trig['description'] = random.choice(description) 
         
         print('Trigger lauch : {}'.format(trig))
         
