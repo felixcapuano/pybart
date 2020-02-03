@@ -16,11 +16,11 @@ class NoiseGenerator(Node):
         self.timer = QtCore.QTimer(singleShot=False)
         self.timer.timeout.connect(self.send_data)
 
-    def _configure(self, chunksize=100, sample_rate=1000.):
+    def _configure(self, chunksize=100, sample_rate=1000., number_channel = 1):
         self.chunksize = chunksize
         self.sample_rate = sample_rate
         
-        self.output.spec['shape'] = (-1, 16)
+        self.output.spec['shape'] = (-1, number_channel)
         self.output.spec['sample_rate'] = sample_rate
         self.output.spec['buffer_size'] = 1000
 
@@ -39,26 +39,3 @@ class NoiseGenerator(Node):
     def send_data(self):
         self.head += self.chunksize
         self.output.send(np.random.normal(size=(self.chunksize, 1)).astype('float32'), index=self.head)
-
-def test_noisegen():
-    app = QtGui.QApplication([])
-
-    ng = NoiseGenerator()
-    ng.configure()
-    ng.output.configure(protocol='inproc', transfermode='plaindata')
-    ng.initialize()
-
-    viewer = QOscilloscope()
-    viewer.input.connect(ng.output)
-    viewer.configure()
-    viewer.initialize()
-    viewer.show()
-
-    ng.start()
-    viewer.start()
-
-    app.exec_()
-
-
-if __name__ == '__main__':
-    test_noisegen()

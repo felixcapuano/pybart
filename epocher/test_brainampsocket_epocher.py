@@ -3,16 +3,15 @@
 # Distributed under the (new) BSD License. See LICENSE for more info.
 
 
+import pytest
+from pyqtgraph.Qt import QtCore, QtGui
+
 import pyacq
+from mypyacqextended.epochermultilabel import EpocherMultiLabel
 from pyacq import create_manager
 from pyacq.devices.brainampsocket import BrainAmpSocket
 from pyacq.viewers.qoscilloscope import QOscilloscope
 
-from epochermultilabel import EpocherMultiLabel
-
-from pyqtgraph.Qt import QtCore, QtGui
-
-import pytest
 
 @pytest.mark.skipif(True, reason='Need brainamp device to test')
 def test_brainampsocket():
@@ -26,7 +25,7 @@ def test_brainampsocket():
     dev.configure(brainamp_host='127.0.0.1', brainamp_port=51244)
     dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
     dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-    dev.initialize() 
+    dev.initialize()
     
     """
     Oscilloscope Node
