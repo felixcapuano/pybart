@@ -8,7 +8,7 @@ This tutorial will help you to install pyacq and to be able to work on it.
 ## Pyacq installation
 
 
-**[Visual Studio](https://visualstudio.microsoft.com/fr/downloads/) must be installed.**
+**Visual Studio 2017 must be installed.**
 
 
 # Install dependencies packages
