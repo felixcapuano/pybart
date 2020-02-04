@@ -13,9 +13,10 @@ from pyacq.devices.brainampsocket import BrainAmpSocket
 from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyqtgraph.Qt import QtCore, QtGui
 
-from mypyacqextended.epochermultilabel import EpocherMultiLabel
-from mypyacqextended.noisegenerator import NoiseGenerator
-from mypyacqextended.triggeremulator import TriggerEmulator
+from myextendedpyacq.epochermultilabel import EpocherMultiLabel
+from myextendedpyacq.triggeremulator import TriggerEmulator
+from myextendedpyacq.noisegenerator import NoiseGenerator
+
 
 
 def test_brainampsocket():

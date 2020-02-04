@@ -8,11 +8,13 @@ import scipy.signal
 from pyqtgraph.Qt import QtCore, QtGui
 
 import pyacq
+import numpy as np
 from pyacq import create_manager
 from pyacq.devices.brainampsocket import BrainAmpSocket
 from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
 from mypyacqextended.epochermultilabel import EpocherMultiLabel
+from mypyacqextended.triggeremulator import TriggerEmulator
 
 
 @pytest.mark.skipif(True, reason='Need brainamp device to test')
@@ -55,6 +57,14 @@ def test_brainampsocket():
     viewer.initialize()
     viewer.show()
 
+    """
+    Triggers Laucher Node
+    """
+    te = TriggerEmulator()
+    te.configure()
+    te.outputs['triggers'].configure(protocol='tcp', transfermode='plaindata',)
+    te.initialize()
+    te.show()
 
     """
     Epocher Node
@@ -62,13 +72,12 @@ def test_brainampsocket():
     epocher = EpocherMultiLabel()
     epocher.configure()
     epocher.inputs['signals'].connect(filt.outputs['signals'])
-    epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+    epocher.inputs['triggers'].connect(te.output)
     epocher.initialize()
 
     def on_new_chunk(name, new_chunk):
         print('Stack of {name} is full'.format(name = name))
-
-        
+        print(np.average(new_chunk, axis=1))
 
     epocher.new_chunk.connect(on_new_chunk)
 
@@ -76,6 +85,7 @@ def test_brainampsocket():
     viewer.start()
     filt.start()
     epocher.start()
+    te.start()
 
     app.exec_()
 
