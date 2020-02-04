@@ -92,9 +92,10 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
         max_xsize: int, optional
             The maximum sample chunk size
         """
-
         self.parameters = parameters
         self.max_xsize = max_xsize
+        
+        self._dict_format()
 
     def after_input_connect(self, inputname):
         if inputname == 'signals':
@@ -153,8 +154,6 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
             self.epoch_storage[label]['stock'][weight, :, :] = epoch
             self.epoch_storage[label]['weight'] += 1
 
-            # print(epoch)
-
         for label in self.epoch_storage.keys():
             if self.epoch_storage[label]['weight'] >= self.parameters[label]['max_stock']:
                 self.new_chunk.emit(label, self.epoch_storage[label]['stock'])
@@ -180,3 +179,13 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
         parameter = self.parameters[label]
         self.epoch_storage[label]['stock'] = np.zeros((parameter['max_stock'], self.nb_channel, parameter['size']), dtype=self.inputs['signals'].params['dtype'])
         self.epoch_storage[label]['weight'] = 0
+
+    def _dict_format(self):
+        if type(self.parameters) is not dict:
+            raise Exception('Argument :parameters: has to be type `dict`')
+        
+        for params in self.parameters.values():
+            if params.keys() != self._params_ex.keys():
+                raise Exception(':parameters: wrong format')
+                
+
