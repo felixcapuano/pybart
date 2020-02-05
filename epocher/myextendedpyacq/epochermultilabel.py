@@ -57,7 +57,7 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
     _params_ex = {
         'left_sweep': 0.002,
         'right_sweep': 0.003,
-        'max_stock': 6,
+        'max_stock': 1,
     }
     _default_params = {
         'S  1': _params_ex,

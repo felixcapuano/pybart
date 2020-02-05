@@ -7,7 +7,7 @@ import pytest
 from pyqtgraph.Qt import QtCore, QtGui
 
 import pyacq
-from mypyacqextended.epochermultilabel import EpocherMultiLabel
+from myextendedpyacq.epochermultilabel import EpocherMultiLabel
 from pyacq import create_manager
 from pyacq.devices.brainampsocket import BrainAmpSocket
 from pyacq.viewers.qoscilloscope import QOscilloscope

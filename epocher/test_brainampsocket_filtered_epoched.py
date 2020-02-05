@@ -13,8 +13,8 @@ from pyacq import create_manager
 from pyacq.devices.brainampsocket import BrainAmpSocket
 from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
-from mypyacqextended.epochermultilabel import EpocherMultiLabel
-from mypyacqextended.triggeremulator import TriggerEmulator
+from myextendedpyacq.epochermultilabel import EpocherMultiLabel
+from myextendedpyacq.triggeremulator import TriggerEmulator
 
 
 @pytest.mark.skipif(True, reason='Need brainamp device to test')
