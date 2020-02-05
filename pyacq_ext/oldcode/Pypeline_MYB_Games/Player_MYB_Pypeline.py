@@ -1,30 +1,26 @@
-from PyQt4 import QtCore, QtGui
-import pyqtgraph as pg
-
-import pyacq as pyacq
-
-import pyacq.gui
-import numpy as np
-
-
-import RiemannTemplateLearn
-
-
-import sys
+import datetime
 import os
 import pickle
-import datetime
+import sys
+
+import numpy as np
+import pyqtgraph as pg
+import scipy.io
+from scipy.linalg import eigvalsh
+
+import h5py
+import pyacq as pyacq
+import pyacq.gui
+import pylyonbci
+import RiemannTemplateLearn
+from pathlib2 import Path
+from pylyonbci import pyrte
+from pylyonbci.CustomTermcolor import *
+from PyQt4 import QtCore, QtGui
 
 sys.path.append('..\..\python_crnl_bci\PyLyonBci')
 
-import pylyonbci
-from pylyonbci.CustomTermcolor import *
-from pylyonbci import pyrte
-import scipy.io 
-from scipy.linalg import eigvalsh
-import h5py
 
-from pathlib2 import Path
 
 
 
@@ -443,5 +439,3 @@ class Player_MYB_Pypeline(QtCore.QObject): #inherits QObject to send signals
 		
 
         return np.array([lf0 , lf1])               
-                
-                

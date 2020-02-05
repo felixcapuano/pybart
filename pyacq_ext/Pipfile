@@ -1,0 +1,23 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+numpy = "==1.18.1"
+pyzmq = "*"
+pytest = "*"
+scipy = "*"
+pyqtgraph = "*"
+vispy = "*"
+colorama = "*"
+msgpack-python = "*"
+pyqt5 = "*"
+pyaudio-0-2-11-cp37-cp37m-win-amd64-whl = "*"
+blosc = "*"
+
+[requires]
+python_version = "3.7"

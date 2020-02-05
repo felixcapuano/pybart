@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import scipy.signal
-from pyqtgraph.Qt import QtCore, QtGui
+from pyqtgraph.Qt import QtCore
 
 from epochermultilabel import EpocherMultiLabel
 from noisegenerator import NoiseGenerator
@@ -14,9 +14,8 @@ from pyacq.viewers.qoscilloscope import QOscilloscope
 class NodeWeb(QtCore.QObject):
 
     node_list = list()
-    new_chunk = QtCore.pyqtSignal(str, np.ndarray)
 
-    def __init__(self, brainamp_host = '127.0.0.1', brainamp_port = 51244, parent=None):
+    def __init__(self, brainamp_host='127.0.0.1', brainamp_port=51244, parent=None):
         QtCore.QObject.__init__(self, parent)
 
         self.sample_rate = 0
@@ -24,11 +23,7 @@ class NodeWeb(QtCore.QObject):
         self.brainamp_host = brainamp_host
         self.brainamp_port = brainamp_port
 
-        self.configuration_amp()
-
-    def configuration_amp(self):
-        app = QtGui.QApplication([])
-        
+    def configuration_amp(self, slot_on_new_chunk):
         amp_out = self.brain_amp_socket_node()
 
         filt_out = self.filter_node(amp_out, 1., 20.)
@@ -37,11 +32,11 @@ class NodeWeb(QtCore.QObject):
         
         trig_out = self.trigger_emulator_node()
         
-        self.epocher_node(filt_out, trig_out)
+        self.epocher_node(filt_out, trig_out, slot_on_new_chunk)
 
-        self.start_node()
-
-        app.exec_() 
+    # TODO set the web for no device application
+    def configuration_noamp(self):
+        pass
 
     def brain_amp_socket_node(self):
         """
@@ -57,7 +52,7 @@ class NodeWeb(QtCore.QObject):
 
         return dev.outputs
 
-    def noise_generator_node(self, nbr_channel = 1):
+    def noise_generator_node(self, nbr_channel=1):
         """
         Noise Generator Node
         """
@@ -116,7 +111,8 @@ class NodeWeb(QtCore.QObject):
 
         self.node_list.append(viewer)
 
-    def epocher_node(self, signal_plug, trigger_plug):
+    # TODO adding dict parameter in argument
+    def epocher_node(self, signal_plug, trigger_plug, slot_on_new_chunk):
         """
         Epocher Node
         """
@@ -128,14 +124,8 @@ class NodeWeb(QtCore.QObject):
 
         self.node_list.append(epocher)
 
-        epocher.new_chunk.connect(self.on_new_chunk)
-
-    def on_new_chunk(self, label, chunk):
-        self.new_chunk.emit(label, chunk)
-        print('Just got : {}'.format(label))
+        epocher.new_chunk.connect(slot_on_new_chunk)
 
     def start_node(self):
         for node in self.node_list:
             node.start()
-
-ex = NodeWeb()

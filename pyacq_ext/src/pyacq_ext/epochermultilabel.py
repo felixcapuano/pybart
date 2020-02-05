@@ -8,9 +8,8 @@ from pyqtgraph.util.mutex import Mutex
 
 
 class ThreadPollInputUntilPosWaited(ThreadPollInput):
-    """
-    Thread waiting a futur pos in a stream.
-    """
+    """Thread waiting a futur pos in a stream."""
+    
     pos_reached = QtCore.pyqtSignal(int, str)
 
     def __init__(self, input_stream,  **kargs):
@@ -40,8 +39,7 @@ class ThreadPollInputUntilPosWaited(ThreadPollInput):
 
 
 class EpocherMultiLabel(Node,  QtCore.QObject):
-    """
-    Node that accumulate in a ring buffer chunk of a multi signals on trigger events configurable.
+    """Node that accumulate in a ring buffer chunk of a multi signals on trigger events configurable.
 
     This Node have no output.
 
@@ -76,25 +74,25 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
         Node.__init__(self, **kargs)
 
     def _configure(self, parameters=_default_params, max_xsize=2.):
-        """
-        Parameters
+        """Parameters
         ----------
         parameters : dict
             The parameters that configure each triggers event :
             {
-                (str)``trigger_name`` : {
-                    'left_sweep': (float)``left_shift``,
-                    'right_sweep': (float)``left_shift``,
-                    'max_stock': (int)``stack_max``,
+                trigger_name (str) : {
+                    left_sweep -- the left shift (float),
+                    right_sweep -- the left shift (float),
+                    max_stock -- the stack maximum (int),
                 }
                 ...
             } 
         max_xsize: int, optional
             The maximum sample chunk size
+
         """
         self.parameters = parameters
         self.max_xsize = max_xsize
-        
+
         self._dict_format()
 
     def after_input_connect(self, inputname):
@@ -146,7 +144,8 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
         print('{} reach the pos at {}!'.format(label, pos))
 
         size_stock = self.parameters[label]['size']
-        epoch = self.inputs['signals'].get_data(pos - size_stock, pos).transpose()
+        epoch = self.inputs['signals'].get_data(
+            pos - size_stock, pos).transpose()
 
         if epoch is not None:
             weight = self.epoch_storage[label]['weight']
@@ -166,7 +165,8 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
             trigger_parameter['right_limit'] = int(
                 trigger_parameter['right_sweep']*self.sample_rate)
 
-            trigger_parameter['size'] = trigger_parameter['right_limit'] - trigger_parameter['left_limit']
+            trigger_parameter['size'] = trigger_parameter['right_limit'] - \
+                trigger_parameter['left_limit']
 
     def initialize_storage(self):
         self.epoch_storage = {}
@@ -177,15 +177,14 @@ class EpocherMultiLabel(Node,  QtCore.QObject):
 
     def reset_stock(self, label):
         parameter = self.parameters[label]
-        self.epoch_storage[label]['stock'] = np.zeros((parameter['max_stock'], self.nb_channel, parameter['size']), dtype=self.inputs['signals'].params['dtype'])
+        self.epoch_storage[label]['stock'] = np.zeros(
+            (parameter['max_stock'], self.nb_channel, parameter['size']), dtype=self.inputs['signals'].params['dtype'])
         self.epoch_storage[label]['weight'] = 0
 
     def _dict_format(self):
         if type(self.parameters) is not dict:
             raise Exception('Argument :parameters: has to be type `dict`')
-        
+
         for params in self.parameters.values():
             if params.keys() != self._params_ex.keys():
                 raise Exception(':parameters: wrong format')
-                
-
