@@ -11,7 +11,7 @@ from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
 
 
-class NodeWeb(QtCore.QObject):
+class StreamHandler(QtCore.QObject):
 
     node_list = list()
 
@@ -36,25 +36,13 @@ class NodeWeb(QtCore.QObject):
 
     # TODO set the web for no device application
     def configuration_noamp(self, slot_on_new_chunk):
-        """
-        Noise Generator Node
-        """
-        ng = NoiseGenerator()
-        ng.configure()
-        ng.output.configure(protocol='tcp', transfermode='plaindata')
-        ng.initialize()
+        noise_out = self.noise_generator_node()
 
-        """
-        Oscilloscope Node
-        """
-        viewer = QOscilloscope()
-        viewer.configure()
-        viewer.input.connect(ng.output)
-        viewer.initialize()
-        viewer.show()
+        self.oscilloscope_node(noise_out)
+
+        trig_out = self.trigger_emulator_node()
         
-        ng.start()
-        viewer.start()
+        self.epocher_node(noise_out, trig_out, slot_on_new_chunk)
 
     def brain_amp_socket_node(self):
         """
