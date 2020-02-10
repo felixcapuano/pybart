@@ -36,7 +36,7 @@ def test_brainampsocket():
     Noise Generator Node
     """
     ng = NoiseGenerator()
-    ng.configure(number_channel=16)
+    ng.configure()
     ng.output.configure(protocol='tcp', transfermode='plaindata')
     ng.initialize()
 

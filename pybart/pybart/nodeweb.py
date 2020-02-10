@@ -3,9 +3,9 @@ import pytest
 import scipy.signal
 from pyqtgraph.Qt import QtCore
 
-from epochermultilabel import EpocherMultiLabel
-from noisegenerator import NoiseGenerator
-from triggeremulator import TriggerEmulator
+from pyacq_ext.epochermultilabel import EpocherMultiLabel
+from pyacq_ext.noisegenerator import NoiseGenerator
+from pyacq_ext.triggeremulator import TriggerEmulator
 from pyacq.devices.brainampsocket import BrainAmpSocket
 from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
@@ -35,8 +35,26 @@ class NodeWeb(QtCore.QObject):
         self.epocher_node(filt_out, trig_out, slot_on_new_chunk)
 
     # TODO set the web for no device application
-    def configuration_noamp(self):
-        pass
+    def configuration_noamp(self, slot_on_new_chunk):
+        """
+        Noise Generator Node
+        """
+        ng = NoiseGenerator()
+        ng.configure()
+        ng.output.configure(protocol='tcp', transfermode='plaindata')
+        ng.initialize()
+
+        """
+        Oscilloscope Node
+        """
+        viewer = QOscilloscope()
+        viewer.configure()
+        viewer.input.connect(ng.output)
+        viewer.initialize()
+        viewer.show()
+        
+        ng.start()
+        viewer.start()
 
     def brain_amp_socket_node(self):
         """
@@ -57,7 +75,7 @@ class NodeWeb(QtCore.QObject):
         Noise Generator Node
         """
         ng = NoiseGenerator()
-        ng.configure(number_channel=nbr_channel)
+        ng.configure()
         ng.output.configure(protocol='tcp', transfermode='plaindata')
         ng.initialize()
 

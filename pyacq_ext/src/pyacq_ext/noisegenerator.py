@@ -1,8 +1,17 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2016, French National Center for Scientific Research (CNRS)
+# Distributed under the (new) BSD License. See LICENSE for more info.
+"""
+Noise generator node
+
+Simple example of a custom Node class that generates a stream of random
+values. 
+
+"""
 import numpy as np
 
-from pyacq.core import Node
+from pyacq.core import Node, register_node_type
 from pyqtgraph.Qt import QtCore, QtGui
-from pyacq.viewers.qoscilloscope import QOscilloscope
 
 
 class NoiseGenerator(Node):
@@ -16,11 +25,11 @@ class NoiseGenerator(Node):
         self.timer = QtCore.QTimer(singleShot=False)
         self.timer.timeout.connect(self.send_data)
 
-    def _configure(self, chunksize=100, sample_rate=1000., number_channel = 1):
+    def _configure(self, chunksize=100, sample_rate=1000.):
         self.chunksize = chunksize
         self.sample_rate = sample_rate
         
-        self.output.spec['shape'] = (-1, number_channel)
+        self.output.spec['shape'] = (-1, 1)
         self.output.spec['sample_rate'] = sample_rate
         self.output.spec['buffer_size'] = 1000
 
