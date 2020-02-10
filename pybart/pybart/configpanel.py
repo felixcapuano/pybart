@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from pyqtgraph.Qt import QtGui
 
 
@@ -21,3 +22,19 @@ if __name__ == '__main__':
 
     app.exec_()
 
+=======
+from nodeweb import NodeWeb
+from pyqtgraph.Qt import QtGui
+
+def on_new_chunk(label, chunk):
+    print(chunk)
+
+if __name__ == '__main__':
+
+    app = QtGui.QApplication([])
+
+    ex = NodeWeb()
+    ex.configuration_noamp(on_new_chunk)
+    
+    app.exec_()    
+>>>>>>> c9d6e69bfa738a65137cf21e53ae20c8933626ea
