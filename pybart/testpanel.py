@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'controlpanel.ui'
+# Form implementation generated from reading ui file 'testpanel.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.0
 #
@@ -8,7 +8,6 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from streamhandler import StreamHandler
 
 
 class Ui_ConfigPanel(object):
@@ -70,8 +69,6 @@ class Ui_ConfigPanel(object):
         self.groupBox.setTitle(_translate("ConfigPanel", "Brainamp configuation"))
         self.label_host.setText(_translate("ConfigPanel", "Host"))
         self.label_port.setText(_translate("ConfigPanel", "Port"))
-        self.line_host.setText(_translate("ConfigPanel", "127.0.0.1"))
-        self.lin_port.setText(_translate("ConfigPanel", "51244"))
         self.groupBox_2.setTitle(_translate("ConfigPanel", "Trigger configuration"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("ConfigPanel", "label"))
@@ -82,15 +79,7 @@ class Ui_ConfigPanel(object):
         item = self.tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("ConfigPanel", "max stack"))
         self.button_start.setText(_translate("ConfigPanel", "Start"))
-        self.button_start.clicked.connect(self.on_start)
 
-    def on_start(self):
-        self.nw = StreamHandler()
-        self.nw.configuration_amp(self.on_new_chunk)
-        self.nw.start_node()
-
-    def on_new_chunk(self, label, chunk):
-            print(label)
 
 if __name__ == "__main__":
     import sys

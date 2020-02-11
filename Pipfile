@@ -13,7 +13,6 @@ pyqtgraph = "==0.10.0"
 vispy = "==0.6.4"
 pyqt5 = "==5.14.1"
 PyQt5-sip= "==12.7.1"
-pyacq = "==0.2.0.dev0"
 pytest = "==5.3.5"
 
 [requires]
