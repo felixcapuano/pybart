@@ -9,6 +9,34 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from streamhandler import StreamHandler
+import time
+import psutil
+
+class ProcessDetector(QtCore.QThread):
+
+    _process_waited = []
+    _process_running = []
+    refresh_time = 2
+
+    process_detected = QtCore.pyqtSignal(list)
+
+    def set_process_waited(self, pw):
+        self._process_waited = pw
+
+    def run(self):
+        while True:
+            last_process_running = self._process_running
+
+            self._process_running = []
+            for process in psutil.process_iter():
+                if process.name() in self._process_waited:
+                    self._process_running.append(process.name())
+                
+            if last_process_running != self._process_running:
+                self.process_detected.emit(self._process_running)
+
+            time.sleep(self.refresh_time)
+
 
 class Ui_ConfigPanel(object):
     def setupUi(self, ConfigPanel):
@@ -142,14 +170,27 @@ class Ui_ConfigPanel(object):
         self.label_high.setText(_translate("ConfigPanel", "High"))
         self.checkBox_trigEmul.setText(_translate("ConfigPanel", "triggers emulation"))
 
+
+        self.threadUI()
         self.connectUI()
     
+    def threadUI(self):
+        self.thread_detector = ProcessDetector()
+        self.thread_detector.set_process_waited(["MYB_Multi.exe","chrome.exe"])
+        self.thread_detector.start()
+
     def connectUI(self):
         self.button_start.clicked.connect(self.on_start)
         self.button_stop.clicked.connect(self.on_stop)
 
         self.add_trig.clicked.connect(self.on_adding_trig)
         self.del_trig.clicked.connect(self.on_deleting_trig)
+
+        self.thread_detector.process_detected.connect(self.on_new_process)
+
+    def on_new_process(self, process_running):
+        self.combo_programm.clear()
+        self.combo_programm.addItems(process_running)
 
     def on_adding_trig(self):
         self.table_trigs_params.insertRow(0)
@@ -189,7 +230,6 @@ class Ui_ConfigPanel(object):
 
     def on_new_chunk(self, label, chunk):
             print(label)
-
 
 if __name__ == "__main__":
     import sys
