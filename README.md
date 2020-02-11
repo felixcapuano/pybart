@@ -24,9 +24,7 @@ git clone https://github.com/pyacq/pyacq.git
 git clone https://gitlab.com/manu.maby/pyacq_ext.git
 
 # install pyacq and pyacq_ext
-cd ..\pyacq_ex\
-pip install .
-cd ..\pyacq\
-pip install .
+pip install .\pyacq_ex\
+pip install .\pyacq\
 ```
 

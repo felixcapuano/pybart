@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>642</height>
+    <width>532</width>
+    <height>616</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -21,7 +21,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
+      <y>40</y>
       <width>501</width>
       <height>80</height>
      </rect>
@@ -68,7 +68,7 @@
       <string>127.0.0.1</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lin_port">
+    <widget class="QLineEdit" name="line_port">
      <property name="geometry">
       <rect>
        <x>110</x>
@@ -86,7 +86,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>100</y>
+      <y>130</y>
       <width>501</width>
       <height>371</height>
      </rect>
@@ -200,7 +200,7 @@
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>550</y>
+      <y>10</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -216,7 +216,7 @@
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>550</y>
+      <y>10</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -238,8 +238,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>479</y>
-      <width>501</width>
+      <y>509</y>
+      <width>231</width>
       <height>61</height>
      </rect>
     </property>
@@ -249,9 +249,9 @@
     <widget class="QLineEdit" name="line_low_freq">
      <property name="geometry">
       <rect>
-       <x>50</x>
+       <x>40</x>
        <y>20</y>
-       <width>111</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -262,9 +262,9 @@
     <widget class="QLineEdit" name="line_high_freq">
      <property name="geometry">
       <rect>
-       <x>240</x>
+       <x>150</x>
        <y>20</y>
-       <width>111</width>
+       <width>61</width>
        <height>21</height>
       </rect>
      </property>
@@ -277,7 +277,7 @@
       <rect>
        <x>20</x>
        <y>20</y>
-       <width>31</width>
+       <width>21</width>
        <height>21</height>
       </rect>
      </property>
@@ -288,7 +288,7 @@
     <widget class="QLabel" name="label_high">
      <property name="geometry">
       <rect>
-       <x>210</x>
+       <x>120</x>
        <y>20</y>
        <width>31</width>
        <height>21</height>
@@ -299,13 +299,26 @@
      </property>
     </widget>
    </widget>
+   <widget class="QCheckBox" name="checkBox_trigEmul">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>10</y>
+      <width>131</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>triggers emulation</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>531</width>
+     <width>532</width>
      <height>21</height>
     </rect>
    </property>
