@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>527</width>
-    <height>562</height>
+    <width>531</width>
+    <height>642</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -200,7 +200,7 @@
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>480</y>
+      <y>550</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -209,11 +209,14 @@
      <string>Start</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="button_start_2">
+   <widget class="QPushButton" name="button_stop">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>480</y>
+      <y>550</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -221,6 +224,80 @@
     <property name="text">
      <string>Stop</string>
     </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>479</y>
+      <width>501</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Passband Filter</string>
+    </property>
+    <widget class="QLineEdit" name="line_low_freq">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>20</y>
+       <width>111</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="line_high_freq">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>20</y>
+       <width>111</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>20</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_low">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Low</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_high">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>20</y>
+       <width>31</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>High</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -228,7 +305,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>527</width>
+     <width>531</width>
      <height>21</height>
     </rect>
    </property>

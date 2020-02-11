@@ -23,18 +23,57 @@ class StreamHandler(QtCore.QObject):
         self.brainamp_host = brainamp_host
         self.brainamp_port = brainamp_port
 
-    def configuration_amp(self, slot_on_new_chunk):
-        amp_out = self.brain_amp_socket_node()
+    def configuration(self, low_fequency, high_frequency, trig_simulate = False):
+        """
+        Data Acquisition Node
+        """
+        dev = BrainAmpSocket()
+        dev.configure(brainamp_host=self.brainamp_host, brainamp_port=self.brainamp_port)
+        dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+        dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+        dev.initialize() 
 
-        filt_out = self.filter_node(amp_out, 1., 20.)
-        
-        self.oscilloscope_node(filt_out)
-        
-        trig_out = self.trigger_emulator_node()
-        
-        self.epocher_node(filt_out, trig_out, slot_on_new_chunk)
+        self.node_list.append(dev)
 
-    # TODO set the web for no device application
+        """
+        Filter Node
+        """
+        f1, f2 = low_fequency, high_frequency
+        sample_rate = dev.outputs['signals'].spec['sample_rate']
+        
+        coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
+                    btype = 'bandpass', ftype = 'butter', output = 'sos')
+        
+        filt = SosFilter()
+        filt.configure(coefficients = coefficients)
+        filt.input.connect(dev.outputs['signals'])
+        filt.output.configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+        filt.initialize()
+
+        self.node_list.append(filt)
+
+        """
+        Epocher Node
+        """
+        self.epocher = EpocherMultiLabel()
+        self.epocher.configure()
+        self.epocher.inputs['signals'].connect(filt.output)
+        if trig_simulate:
+            self.epocher.inputs['triggers'].connect(self.trigger_emulator_node())
+        else:
+            self.epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+        self.epocher.initialize()
+
+        self.node_list.append(self.epocher)
+
+        """
+        Oscilloscope Node
+        """
+        self.oscilloscope_node(filt.output)
+
+    def set_slot_new(self, slot_on_new_chunk):
+        self.epocher.new_chunk.connect(slot_on_new_chunk)
+
     def configuration_noamp(self, slot_on_new_chunk):
         noise_out = self.noise_generator_node()
 
@@ -83,7 +122,7 @@ class StreamHandler(QtCore.QObject):
         
         self.node_list.append(te)
 
-        return te.output # ???
+        return te.output
     
     def filter_node(self, plug, lf, hf):
         """
