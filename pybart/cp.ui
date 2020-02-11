@@ -158,7 +158,7 @@
        <normaloff>../resources/iconfinder_Cancel_132620.png</normaloff>../resources/iconfinder_Cancel_132620.png</iconset>
      </property>
     </widget>
-    <widget class="QComboBox" name="combo_programm">
+    <widget class="QComboBox" name="combo_program">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -169,7 +169,7 @@
      </property>
      <item>
       <property name="text">
-       <string>test</string>
+       <string>New Parameters</string>
       </property>
      </item>
     </widget>
