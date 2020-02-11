@@ -9,6 +9,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from streamhandler import StreamHandler
+
 
 class Ui_ConfigPanel(object):
     def setupUi(self, ConfigPanel):
@@ -29,9 +31,9 @@ class Ui_ConfigPanel(object):
         self.line_host = QtWidgets.QLineEdit(self.groupBox)
         self.line_host.setGeometry(QtCore.QRect(110, 20, 381, 20))
         self.line_host.setObjectName("line_host")
-        self.lin_port = QtWidgets.QLineEdit(self.groupBox)
-        self.lin_port.setGeometry(QtCore.QRect(110, 50, 381, 20))
-        self.lin_port.setObjectName("lin_port")
+        self.line_port = QtWidgets.QLineEdit(self.groupBox)
+        self.line_port.setGeometry(QtCore.QRect(110, 50, 381, 20))
+        self.line_port.setObjectName("line_port")
         self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_2.setGeometry(QtCore.QRect(10, 100, 501, 371))
         self.groupBox_2.setObjectName("groupBox_2")
@@ -65,20 +67,20 @@ class Ui_ConfigPanel(object):
         self.combo_programm = QtWidgets.QComboBox(self.groupBox_2)
         self.combo_programm.setGeometry(QtCore.QRect(10, 20, 331, 22))
         self.combo_programm.setObjectName("combo_programm")
-        self.label = QtWidgets.QLabel(self.groupBox_2)
-        self.label.setGeometry(QtCore.QRect(340, 20, 141, 21))
+        self.label_detected = QtWidgets.QLabel(self.groupBox_2)
+        self.label_detected.setGeometry(QtCore.QRect(340, 20, 141, 21))
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
-        self.label.setFont(font)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setObjectName("label")
+        self.label_detected.setFont(font)
+        self.label_detected.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_detected.setObjectName("label_detected")
         self.button_start = QtWidgets.QPushButton(self.centralwidget)
         self.button_start.setGeometry(QtCore.QRect(400, 480, 111, 31))
         self.button_start.setObjectName("button_start")
-        self.button_start_2 = QtWidgets.QPushButton(self.centralwidget)
-        self.button_start_2.setGeometry(QtCore.QRect(280, 480, 111, 31))
-        self.button_start_2.setObjectName("button_start_2")
+        self.button_stop = QtWidgets.QPushButton(self.centralwidget)
+        self.button_stop.setGeometry(QtCore.QRect(280, 480, 111, 31))
+        self.button_stop.setObjectName("button_stop")
         ConfigPanel.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(ConfigPanel)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 527, 21))
@@ -98,7 +100,7 @@ class Ui_ConfigPanel(object):
         self.label_host.setText(_translate("ConfigPanel", "Host"))
         self.label_port.setText(_translate("ConfigPanel", "Port"))
         self.line_host.setText(_translate("ConfigPanel", "127.0.0.1"))
-        self.lin_port.setText(_translate("ConfigPanel", "51244"))
+        self.line_port.setText(_translate("ConfigPanel", "51244"))
         self.groupBox_2.setTitle(_translate("ConfigPanel", "Trigger configuration"))
         item = self.table_trigs_params.horizontalHeaderItem(0)
         item.setText(_translate("ConfigPanel", "label"))
@@ -108,10 +110,33 @@ class Ui_ConfigPanel(object):
         item.setText(_translate("ConfigPanel", "right sweep"))
         item = self.table_trigs_params.horizontalHeaderItem(3)
         item.setText(_translate("ConfigPanel", "max stack"))
-        self.label.setText(_translate("ConfigPanel", "Detected"))
+        self.label_detected.setText(_translate("ConfigPanel", "Detected"))
         self.button_start.setText(_translate("ConfigPanel", "Start"))
-        self.button_start_2.setText(_translate("ConfigPanel", "Stop"))
+        self.button_stop.setText(_translate("ConfigPanel", "Stop"))
+        self.button_stop.setEnabled(False)
 
+        self.connectUI()
+    
+    def connectUI(self):
+        self.button_start.clicked.connect(self.on_start)
+        self.button_stop.clicked.connect(self.on_stop)
+
+    def on_start(self):
+        self.nw = StreamHandler()
+        self.nw.configuration_amp(self.on_new_chunk)
+        self.nw.start_node()
+        
+        self.button_stop.setEnabled(True)
+        self.button_start.setEnabled(False)
+
+    def on_stop(self):
+        self.nw.stop_node()
+
+        self.button_stop.setEnabled(False)
+        self.button_start.setEnabled(True)
+
+    def on_new_chunk(self, label, chunk):
+            print(label)
 
 if __name__ == "__main__":
     import sys

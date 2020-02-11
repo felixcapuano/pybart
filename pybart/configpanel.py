@@ -82,6 +82,7 @@ class Ui_ConfigPanel(object):
         item = self.tableWidget.horizontalHeaderItem(3)
         item.setText(_translate("ConfigPanel", "max stack"))
         self.button_start.setText(_translate("ConfigPanel", "Start"))
+        
         self.button_start.clicked.connect(self.on_start)
 
     def on_start(self):

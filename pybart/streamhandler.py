@@ -1,14 +1,14 @@
 import numpy as np
 import pytest
 import scipy.signal
+from pyacq.devices.brainampsocket import BrainAmpSocket
+from pyacq.dsp.sosfilter import SosFilter
+from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyqtgraph.Qt import QtCore
 
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.noisegenerator import NoiseGenerator
 from pyacq_ext.triggeremulator import TriggerEmulator
-from pyacq.devices.brainampsocket import BrainAmpSocket
-from pyacq.dsp.sosfilter import SosFilter
-from pyacq.viewers.qoscilloscope import QOscilloscope
 
 
 class StreamHandler(QtCore.QObject):
@@ -135,3 +135,9 @@ class StreamHandler(QtCore.QObject):
     def start_node(self):
         for node in self.node_list:
             node.start()
+
+    def stop_node(self):
+        for node in self.node_list:
+            node.stop()
+            node.close()
+
