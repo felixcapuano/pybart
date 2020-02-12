@@ -7,17 +7,20 @@
 # WARNING! All changes made in this file will be lost!
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from streamhandler import StreamHandler
-import time
-import psutil
 import json
+import time
+
+import psutil
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+from streamhandler import StreamHandler
+
 
 class ProcessDetector(QtCore.QThread):
 
     _process_waited = []
     _process_running = []
-    refresh_time = 2
+    refresh_time = 1
 
     process_detected = QtCore.pyqtSignal(list)
 
@@ -32,7 +35,7 @@ class ProcessDetector(QtCore.QThread):
             for process in psutil.process_iter():
                 if process.name() in self._process_waited:
                     self._process_running.append(process.name())
-                
+
             if last_process_running != self._process_running:
                 self.process_detected.emit(self._process_running)
 
@@ -81,14 +84,16 @@ class Ui_ConfigPanel(object):
         self.add_trig.setGeometry(QtCore.QRect(470, 340, 21, 23))
         self.add_trig.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("../resources/iconfinder_Create_132699.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(
+            "../resources/iconfinder_Create_132699.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.add_trig.setIcon(icon)
         self.add_trig.setObjectName("add_trig")
         self.del_trig = QtWidgets.QPushButton(self.groupBox_2)
         self.del_trig.setGeometry(QtCore.QRect(440, 340, 21, 23))
         self.del_trig.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("../resources/iconfinder_Cancel_132620.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(
+            "../resources/iconfinder_Cancel_132620.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.del_trig.setIcon(icon1)
         self.del_trig.setObjectName("del_trig")
         self.combo_program = QtWidgets.QComboBox(self.groupBox_2)
@@ -148,13 +153,16 @@ class Ui_ConfigPanel(object):
 
     def retranslateUi(self, ConfigPanel):
         _translate = QtCore.QCoreApplication.translate
-        ConfigPanel.setWindowTitle(_translate("ConfigPanel", "Configuration Panel"))
-        self.groupBox.setTitle(_translate("ConfigPanel", "Brainamp configuation"))
+        ConfigPanel.setWindowTitle(_translate(
+            "ConfigPanel", "Configuration Panel"))
+        self.groupBox.setTitle(_translate(
+            "ConfigPanel", "Brainamp configuation"))
         self.label_host.setText(_translate("ConfigPanel", "Host"))
         self.label_port.setText(_translate("ConfigPanel", "Port"))
         self.line_host.setText(_translate("ConfigPanel", "127.0.0.1"))
         self.line_port.setText(_translate("ConfigPanel", "51244"))
-        self.groupBox_2.setTitle(_translate("ConfigPanel", "Trigger configuration"))
+        self.groupBox_2.setTitle(_translate(
+            "ConfigPanel", "Trigger configuration"))
         item = self.table_trigs_params.horizontalHeaderItem(0)
         item.setText(_translate("ConfigPanel", "label"))
         item = self.table_trigs_params.horizontalHeaderItem(1)
@@ -171,23 +179,17 @@ class Ui_ConfigPanel(object):
         self.line_high_freq.setText(_translate("ConfigPanel", "20"))
         self.label_low.setText(_translate("ConfigPanel", "Low"))
         self.label_high.setText(_translate("ConfigPanel", "High"))
-        self.checkBox_trigEmul.setText(_translate("ConfigPanel", "triggers emulation"))
+        self.checkBox_trigEmul.setText(
+            _translate("ConfigPanel", "triggers emulation"))
 
-    
     def initThreadUI(self):
 
-        self.open_configuration()
+        self.read_configuration()
 
         self.thread_detector = ProcessDetector()
-        self.thread_detector.set_process_waited(self.triggers_parameters.keys())
+        self.thread_detector.set_process_waited(
+            self.triggers_parameters.keys())
         self.thread_detector.start()
-
-    def open_configuration(self):
-
-        with open('pybart\\configuration.json') as params:
-            self.triggers_parameters = json.load(params)
-        
-        return self.triggers_parameters
 
     def connectUI(self):
         self.button_start.clicked.connect(self.on_start_running)
@@ -198,37 +200,89 @@ class Ui_ConfigPanel(object):
 
         self.thread_detector.process_detected.connect(self.on_new_process)
 
-        self.combo_program.currentIndexChanged.connect(self.on_change_process)
+        self.combo_program.currentIndexChanged.connect(self.on_program)
 
-    def on_change_process(self):
+    def read_configuration(self):
+        """This function read all setup parameter from json configuration file"""
+
+        with open('pybart\\configuration.json') as params:
+            self.triggers_parameters = json.load(params)
+
+    def get_table_params(self):
+        """This function return current parameter from de table"""
+
+        params = {}
+        row = 0
+        t = self.table_trigs_params
+
+        for row in range(t.rowCount()):
+            try:
+                params[t.item(row, 0).text()] = {}
+                params[t.item(row, 0).text()]['left_sweep'] = float(
+                    t.item(row, 1).text())
+                params[t.item(row, 0).text()]['right_sweep'] = float(
+                    t.item(row, 2).text())
+                params[t.item(row, 0).text()]['max_stock'] = int(
+                    t.item(row, 3).text())
+            except ValueError:
+                print(
+                    'Left and right sweep has to be Float value, and the maximum stock Integer value.')
+                return
+
+        return params
+
+    def on_program(self):
+        """This function is a slot whaiting for an index change
+        from the comboBox.
+        -delete all row
+        -adding parameter according to the json configuration file
+
+        """
+
         # clear table
         self.table_trigs_params.setRowCount(0)
 
         program = self.combo_program.currentText()
         if program != "":
             triggers = self.triggers_parameters[program]
-            
+
             row_count = 0
             for label, params in triggers.items():
                 self.table_trigs_params.insertRow(row_count)
-                print(params)
-                self.table_trigs_params.setItem(row_count,0, QtGui.QTableWidgetItem(label))
-                self.table_trigs_params.setItem(row_count,1, QtGui.QTableWidgetItem(str(params['left_sweep'])))
-                self.table_trigs_params.setItem(row_count,2, QtGui.QTableWidgetItem(str(params['right_sweep'])))
-                self.table_trigs_params.setItem(row_count,3, QtGui.QTableWidgetItem(str(params['max_stock'])))
-                row_count=+1
+
+                self.table_trigs_params.setItem(
+                    row_count, 0, QtGui.QTableWidgetItem(label))
+                self.table_trigs_params.setItem(
+                    row_count, 1, QtGui.QTableWidgetItem(str(params['left_sweep'])))
+                self.table_trigs_params.setItem(
+                    row_count, 2, QtGui.QTableWidgetItem(str(params['right_sweep'])))
+                self.table_trigs_params.setItem(
+                    row_count, 3, QtGui.QTableWidgetItem(str(params['max_stock'])))
+                row_count = +1
 
     def on_new_process(self, process_running):
+        """This function is a slot who received process running
+        from the thead(ProcessDetector)
+
+        """
+
         self.combo_program.clear()
         self.combo_program.addItems(process_running)
 
+    # TODO set icon add modify method
     def on_adding_trigger(self):
         self.table_trigs_params.insertRow(0)
 
+    # TODO set icon add modify method
     def on_deleting_trigger(self):
         self.table_trigs_params.removeRow(0)
 
     def on_start_running(self):
+        """This function is a slot who collect parameter from the
+        control panel and initialise the pyacq web(StreamHandler)
+
+        """
+
         try:
             lf = float(self.line_low_freq.text())
             hf = float(self.line_high_freq.text())
@@ -244,22 +298,25 @@ class Ui_ConfigPanel(object):
             return
 
         self.nw = StreamHandler(brainamp_host=host, brainamp_port=port)
-        self.nw.configuration(lf, hf, trig_simulate=False)
+        self.nw.configuration(lf, hf, trig_simulate=self.checkBox_trigEmul.isChecked())
         self.nw.set_slot_new(self.on_new_epochs)
 
         self.nw.start_node()
-        
+
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
 
     def on_stop_running(self):
+        """This function is a slot who stop pyacq all pyacq node"""
         self.nw.stop_node()
 
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
 
     def on_new_epochs(self, label, epochs):
-            print(label)
+        """This function is a slot who receive a stack of epochs"""
+        print(label)
+
 
 if __name__ == "__main__":
     import sys
