@@ -10,7 +10,6 @@ from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.noisegenerator import NoiseGenerator
 from pyacq_ext.triggeremulator import TriggerEmulator
 
-
 class StreamHandler(QtCore.QObject):
 
     _secondary_node = []
@@ -32,7 +31,6 @@ class StreamHandler(QtCore.QObject):
         self.dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
         self.dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
         self.dev.initialize() 
-
         
         # Filter Node
         f1, f2 = low_fequency, high_frequency
@@ -59,15 +57,39 @@ class StreamHandler(QtCore.QObject):
             self.epocher.inputs['triggers'].connect(self.dev.outputs['triggers'])
         self.epocher.initialize()
 
+        """
+        ISSUE QOscilloscope don't work with
+        """
+        # # Oscilloscope Node
+        # self.viewer = QOscilloscope()
+        # self.viewer.configure()
+        # self.viewer.input.connect(self.filt.output)
+        # self.viewer.initialize()
+
+    def start_node(self):
+        self.dev.start()
+        self.filt.start()
+        self.epocher.start()
+
+        # self.viewer.show()
+        # self.viewer.start()
+
+
+        for node in self._secondary_node:
+            node.start()
+
+    def stop_node(self):
+        self.dev.stop()
+        self.filt.stop()
+        self.epocher.stop()
+        # self.viewer.stop()
         
-        # Oscilloscope Node
-        self.viewer = QOscilloscope()
-        self.viewer.configure()
-        self.viewer.input.connect(self.filt.output)
-        self.viewer.initialize()
+        for node in self._secondary_node:
+            node.stop()
+        
+        self.viewer.close()
 
-
-    def set_slot_new(self, slot_on_new_chunk):
+    def set_slot_new_epochs(self, slot_on_new_chunk):
         self.epocher.new_chunk.connect(slot_on_new_chunk)
 
 
@@ -98,25 +120,4 @@ class StreamHandler(QtCore.QObject):
 
         return te.output
 
-    def start_node(self):
-        self.dev.start()
-        self.filt.start()
-        self.epocher.start()
-        self.viewer.start()
-
-        for node in self._secondary_node:
-            node.start()
-
-        self.viewer.show()
-
-    def stop_node(self):
-        self.dev.stop()
-        self.filt.stop()
-        self.epocher.stop()
-        self.viewer.stop()
-        
-        for node in self._secondary_node:
-            node.stop()
-        
-        self.viewer.close()
 

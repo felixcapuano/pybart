@@ -299,7 +299,7 @@ class Ui_ConfigPanel(object):
 
         self.nw = StreamHandler(brainamp_host=host, brainamp_port=port)
         self.nw.configuration(lf, hf, trig_params=self.get_table_params(), trig_simulate=self.checkBox_trigEmul.isChecked())
-        self.nw.set_slot_new(self.on_new_epochs)
+        self.nw.set_slot_new_epochs(self.on_new_epochs)
 
         self.nw.start_node()
 
