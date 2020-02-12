@@ -24,7 +24,7 @@ class StreamHandler(QtCore.QObject):
         self.brainamp_port = brainamp_port
 
 
-    def configuration(self, low_fequency, high_frequency, trig_simulate = False):
+    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate = False):
         
         # Data Acquisition Node
         self.dev = BrainAmpSocket()
@@ -51,7 +51,7 @@ class StreamHandler(QtCore.QObject):
         
         # Epocher Node
         self.epocher = EpocherMultiLabel()
-        self.epocher.configure()
+        self.epocher.configure(parameters=trig_params)
         self.epocher.inputs['signals'].connect(self.filt.output)
         if trig_simulate:
             self.epocher.inputs['triggers'].connect(self.trigger_emulator_node())
