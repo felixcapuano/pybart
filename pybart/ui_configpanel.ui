@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Ui_ConfigPanel</class>
- <widget class="QMainWindow" name="Ui_ConfigPanel">
+ <class>ConfigPanel</class>
+ <widget class="QMainWindow" name="ConfigPanel">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -91,7 +91,7 @@
       <x>10</x>
       <y>130</y>
       <width>501</width>
-      <height>421</height>
+      <height>371</height>
      </rect>
     </property>
     <property name="title">
@@ -176,45 +176,6 @@
       </property>
      </item>
     </widget>
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>350</y>
-       <width>421</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Select Template</string>
-     </property>
-     <widget class="QLabel" name="label_name_file">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>20</y>
-        <width>351</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>File name</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="button_select_file">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>41</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>File</string>
-      </property>
-     </widget>
-    </widget>
    </widget>
    <widget class="QPushButton" name="button_start">
     <property name="geometry">
@@ -258,7 +219,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>560</y>
+      <y>570</y>
       <width>231</width>
       <height>51</height>
      </rect>
@@ -331,6 +292,48 @@
     <property name="text">
      <string>triggers emulation</string>
     </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>510</y>
+      <width>501</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Select Template</string>
+    </property>
+    <widget class="QLabel" name="label_name_file">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>20</y>
+       <width>411</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_select_file">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>41</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>File</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

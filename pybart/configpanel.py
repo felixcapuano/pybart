@@ -34,21 +34,33 @@ class ProcessDetector(QtCore.QThread):
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
+
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
         
+        self.error_dialog = QtWidgets.QErrorMessage()
+
         self.setupUi(self)
-        self.initThreadUi()
-        self.connectUi()
-        
-    def initThreadUi(self):
-        self.read_configuration()
+        self.init_thread()
+        self.connect_ui()
+
+    def init_thread(self):
+        """This function initialise the process detector
+
+        - load configuration.json file
+        - initialise ProcessDetector who checking if programm listed in configuration.json is running
+
+        """
+        self.load_configuration()
 
         self.process_detector = ProcessDetector()
-        self.process_detector.set_process_waited(self.triggers_parameters.keys())
+        self.process_detector.set_process_waited(
+            self.triggers_parameters.keys())
         self.process_detector.start()
 
-    def connectUi(self):
+    def connect_ui(self):
+        """This function connect UI elements to all respective slot"""
+        
         self.button_start.clicked.connect(self.on_start_running)
         self.button_stop.clicked.connect(self.on_stop_running)
 
@@ -61,7 +73,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.button_select_file.clicked.connect(self.on_select_template)
 
-    def read_configuration(self):
+    def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
 
         with open('pybart\\configuration.json') as params:
@@ -98,26 +110,30 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         """
 
         try:
+            # get the low and high frequency in float
             lf = float(self.line_low_freq.text())
             hf = float(self.line_high_freq.text())
         except ValueError:
-            
             # TODO popup message
-            print("High and low frequency has to be float type.")
+            self.error_dialog.showMessage("High and low frequency has to be float type.")
             return
 
         host = str(self.line_host.text())
         try:
+            # get the port number in int
             port = int(self.line_port.text())
         except ValueError:
             # TODO popup message
             print("The port has to be int type.")
             return
 
+        # setup parmeter in the stream handler
         self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
-        self.sh.configuration(lf, hf, trig_params=self.get_table_params(), trig_simulate=self.checkBox_trigEmul.isChecked())
+        self.sh.configuration(lf, hf, trig_params=self.get_table_params(
+        ), trig_simulate=self.checkBox_trigEmul.isChecked())
+        # set the emission slot for each new stack of epochs
         self.sh.set_slot_new_epochs(self.on_new_epochs)
-
+        # start the stream handler
         self.sh.start_node()
 
         self.button_stop.setEnabled(True)
@@ -142,6 +158,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # clear table
         self.table_trigs_params.setRowCount(0)
 
+        # fill table with triggers parameters according to the current programm
         program = self.combo_program.currentText()
         if program != "":
             triggers = self.triggers_parameters[program]
@@ -178,12 +195,18 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.table_trigs_params.removeRow(0)
 
     def on_select_template(self):
-        self.dialog = QtWidgets.QFileDialog.getOpenFileName(self,
-            self.tr("Open Template"), "TemplateRiemann/", self.tr("Image Files (*.h5)")) 
+        """This function is a slot who open a open file window
+        and set the name of the file selected in the label
+
+        """
+        dialog = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                       self.tr("Open Template"), "TemplateRiemann/", self.tr("Image Files (*.h5)"))
+        self.label_name_file.setText(dialog[0])
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        print(label)
+        pass
+
 
 if __name__ == "__main__":
     import sys
