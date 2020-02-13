@@ -36,6 +36,16 @@
             "right_sweep": 0.2,
             "left_sweep": 0.1,
             "max_stock": 1
+        },
+        "S  8": { 
+            "right_sweep": 0.2,
+            "left_sweep": 0.1,
+            "max_stock": 1
+        },
+        "S  9": { 
+            "right_sweep": 0.2,
+            "left_sweep": 0.1,
+            "max_stock": 1
         }
     }
 }

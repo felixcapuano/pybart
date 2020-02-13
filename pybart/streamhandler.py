@@ -74,7 +74,6 @@ class StreamHandler(QtCore.QObject):
         # self.viewer.show()
         # self.viewer.start()
 
-
         for node in self._secondary_node:
             node.start()
 
@@ -87,7 +86,7 @@ class StreamHandler(QtCore.QObject):
         for node in self._secondary_node:
             node.stop()
         
-        self.viewer.close()
+        # self.viewer.close()
 
     def set_slot_new_epochs(self, slot_on_new_chunk):
         self.epocher.new_chunk.connect(slot_on_new_chunk)

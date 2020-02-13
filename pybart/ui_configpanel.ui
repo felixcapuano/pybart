@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>532</width>
-    <height>616</height>
+    <height>666</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -91,7 +91,7 @@
       <x>10</x>
       <y>130</y>
       <width>501</width>
-      <height>371</height>
+      <height>421</height>
      </rect>
     </property>
     <property name="title">
@@ -176,27 +176,44 @@
       </property>
      </item>
     </widget>
-    <widget class="QLabel" name="label">
+    <widget class="QGroupBox" name="groupBox_4">
      <property name="geometry">
       <rect>
-       <x>340</x>
-       <y>20</y>
-       <width>141</width>
-       <height>21</height>
+       <x>10</x>
+       <y>350</y>
+       <width>421</width>
+       <height>51</height>
       </rect>
      </property>
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
+     <property name="title">
+      <string>Select Template</string>
      </property>
-     <property name="text">
-      <string>Detected</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
+     <widget class="QLabel" name="label_name_file">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>20</y>
+        <width>351</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>File name</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="button_select_file">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>41</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>File</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QPushButton" name="button_start">
@@ -241,9 +258,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>509</y>
+      <y>560</y>
       <width>231</width>
-      <height>61</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="title">

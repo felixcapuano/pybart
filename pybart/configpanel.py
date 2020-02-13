@@ -4,7 +4,7 @@ import time
 import psutil
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from ui_configpanelW import Ui_ConfigPanel
+from ui_configpanel import Ui_ConfigPanel
 from streamhandler import StreamHandler
 
 
@@ -32,10 +32,10 @@ class ProcessDetector(QtCore.QThread):
                 self.process_detected.emit(self._process_running)
 
 
-class ConfigPanel(QtWidgets.QWidget, Ui_ConfigPanel):
+class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
+        QtWidgets.QMainWindow.__init__(self, parent)
         
         self.setupUi(self)
         self.initThreadUi()
@@ -58,6 +58,8 @@ class ConfigPanel(QtWidgets.QWidget, Ui_ConfigPanel):
         self.process_detector.process_detected.connect(self.on_new_process)
 
         self.combo_program.currentIndexChanged.connect(self.on_program)
+
+        self.button_select_file.clicked.connect(self.on_select_template)
 
     def read_configuration(self):
         """This function read all setup parameter from json configuration file"""
@@ -112,11 +114,11 @@ class ConfigPanel(QtWidgets.QWidget, Ui_ConfigPanel):
             print("The port has to be int type.")
             return
 
-        self.nw = StreamHandler(brainamp_host=host, brainamp_port=port)
-        self.nw.configuration(lf, hf, trig_params=self.get_table_params(), trig_simulate=self.checkBox_trigEmul.isChecked())
-        self.nw.set_slot_new_epochs(self.on_new_epochs)
+        self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
+        self.sh.configuration(lf, hf, trig_params=self.get_table_params(), trig_simulate=self.checkBox_trigEmul.isChecked())
+        self.sh.set_slot_new_epochs(self.on_new_epochs)
 
-        self.nw.start_node()
+        self.sh.start_node()
 
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
@@ -124,7 +126,7 @@ class ConfigPanel(QtWidgets.QWidget, Ui_ConfigPanel):
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
 
-        self.nw.stop_node()
+        self.sh.stop_node()
 
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
@@ -174,6 +176,10 @@ class ConfigPanel(QtWidgets.QWidget, Ui_ConfigPanel):
     # TODO set icon add modify method
     def on_deleting_trigger(self):
         self.table_trigs_params.removeRow(0)
+
+    def on_select_template(self):
+        self.dialog = QtWidgets.QFileDialog.getOpenFileName(self,
+            self.tr("Open Template"), "TemplateRiemann/", self.tr("Image Files (*.h5)")) 
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
