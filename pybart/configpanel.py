@@ -96,12 +96,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                 params[t.item(row, 0).text()]['max_stock'] = int(
                     t.item(row, 3).text())
             except ValueError:
-                # TODO popup message
-                print(
-                    'Left and right sweep has to be Float value, and the maximum stock Integer value.')
-                return
+                return 'Left and right sweep has to be Float value, and the maximum stock Integer value.'
 
         return params
+        
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
@@ -111,10 +109,9 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         try:
             # get the low and high frequency in float
-            lf = float(self.line_low_freq.text())
-            hf = float(self.line_high_freq.text())
+            low_frequency = float(self.line_low_freq.text())
+            high_frequency = float(self.line_high_freq.text())
         except ValueError:
-            # TODO popup message
             self.error_dialog.showMessage("High and low frequency has to be float type.")
             return
 
@@ -124,15 +121,25 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             port = int(self.line_port.text())
         except ValueError:
             # TODO popup message
-            print("The port has to be int type.")
+            self.error_dialog.showMessage("The port has to be int type.")
             return
 
+        # get parameter of the table
+        params = self.get_table_params()
+        if type(params) is str:
+            self.error_dialog.showMessage(params)
+            return
+        
         # setup parmeter in the stream handler
         self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
-        self.sh.configuration(lf, hf, trig_params=self.get_table_params(
-        ), trig_simulate=self.checkBox_trigEmul.isChecked())
+        self.sh.configuration(low_frequency,
+                              high_frequency, 
+                              trig_params=params,
+                              trig_simulate=self.checkBox_trigEmul.isChecked())
+        
         # set the emission slot for each new stack of epochs
         self.sh.set_slot_new_epochs(self.on_new_epochs)
+        
         # start the stream handler
         self.sh.start_node()
 

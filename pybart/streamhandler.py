@@ -1,3 +1,8 @@
+"""
+ISSUE : QOscilloscope don't work, need to inherit the MainWindow
+WARNING : Simulate mode ON (Marker : TEST offline)
+"""
+
 import numpy as np
 import pytest
 import scipy.signal
@@ -12,7 +17,7 @@ from pyacq_ext.triggeremulator import TriggerEmulator
 
 class StreamHandler(QtCore.QObject):
 
-    _secondary_node = []
+    _simulation_node = []
 
     def __init__(self, brainamp_host='127.0.0.1', brainamp_port=51244, parent=None):
         QtCore.QObject.__init__(self, parent)
@@ -23,43 +28,45 @@ class StreamHandler(QtCore.QObject):
         self.brainamp_port = brainamp_port
 
 
-    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate = False):
+    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate = False, sig_simulate = True):
+        
+        self.trig_simulate = trig_simulate
+        self.sig_simulate = sig_simulate
         
         # Data Acquisition Node
-        self.dev = BrainAmpSocket()
-        self.dev.configure(brainamp_host=self.brainamp_host, brainamp_port=self.brainamp_port)
-        self.dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-        self.dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-        self.dev.initialize() 
+        if not trig_simulate and not sig_simulate: ## TEST offline
+            self.dev = BrainAmpSocket()
+            self.dev.configure(brainamp_host=self.brainamp_host, brainamp_port=self.brainamp_port)
+            self.dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+            self.dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+            self.dev.initialize() 
         
-        # Filter Node
-        f1, f2 = low_fequency, high_frequency
-        sample_rate = self.dev.outputs['signals'].spec['sample_rate']
-        
-        coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
-                    btype = 'bandpass', ftype = 'butter', output = 'sos')
-        
-        self.filt = SosFilter()
-        self.filt.configure(coefficients = coefficients)
-        self.filt.input.connect(self.dev.outputs['signals'])
-        self.filt.output.configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-        self.filt.initialize()
-
-
+            # Filter Node
+            f1, f2 = low_fequency, high_frequency
+            sample_rate = self.dev.outputs['signals'].spec['sample_rate']
+            
+            coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
+                        btype = 'bandpass', ftype = 'butter', output = 'sos')
+            
+            self.filt = SosFilter()
+            self.filt.configure(coefficients = coefficients)
+            self.filt.input.connect(self.dev.outputs['signals'])
+            self.filt.output.configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+            self.filt.initialize()
         
         # Epocher Node
         self.epocher = EpocherMultiLabel()
         self.epocher.configure(parameters=trig_params)
-        self.epocher.inputs['signals'].connect(self.filt.output)
-        if trig_simulate:
+        if sig_simulate: ## TEST offline
+            self.epocher.inputs['signals'].connect(self.noise_generator_node())
+        else:
+            self.epocher.inputs['signals'].connect(self.filt.output)
+        if trig_simulate: ## TEST offline
             self.epocher.inputs['triggers'].connect(self.trigger_emulator_node())
         else:
             self.epocher.inputs['triggers'].connect(self.dev.outputs['triggers'])
         self.epocher.initialize()
 
-        """
-        ISSUE QOscilloscope don't work with
-        """
         # # Oscilloscope Node
         # self.viewer = QOscilloscope()
         # self.viewer.configure()
@@ -67,23 +74,26 @@ class StreamHandler(QtCore.QObject):
         # self.viewer.initialize()
 
     def start_node(self):
-        self.dev.start()
-        self.filt.start()
+        if not self.trig_simulate and not self.sig_simulate: ## TEST offline
+            self.dev.start()
+            self.filt.start()
         self.epocher.start()
 
         # self.viewer.show()
         # self.viewer.start()
 
-        for node in self._secondary_node:
+        for node in self._simulation_node:
             node.start()
 
     def stop_node(self):
-        self.dev.stop()
-        self.filt.stop()
+        if not self.trig_simulate and not self.sig_simulate: ## TEST offline
+            self.dev.stop()
+            self.filt.stop()
         self.epocher.stop()
+        
         # self.viewer.stop()
         
-        for node in self._secondary_node:
+        for node in self._simulation_node:
             node.stop()
         
         # self.viewer.close()
@@ -101,7 +111,7 @@ class StreamHandler(QtCore.QObject):
         ng.output.configure(protocol='tcp', transfermode='plaindata')
         ng.initialize()
 
-        self.secondary_node.append(ng)
+        self._simulation_node.append(ng)
 
         return ng.output
 
@@ -115,7 +125,7 @@ class StreamHandler(QtCore.QObject):
         te.initialize()
         te.show()
         
-        self._secondary_node.append(te)
+        self._simulation_node.append(te)
 
         return te.output
 
