@@ -1,6 +1,7 @@
 from pyqtgraph.Qt import QtCore
 from scipy.linalg import eigvalsh
 import numpy as np
+import h5py
 
 
 class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
@@ -10,12 +11,14 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
     def __init__(self, template_path, parent=None):
         # Default setting
         self.template_path = "TemplateRiemann/Template.h5"
+        self.init_template()
 
     def set_template_name(self, template_path):
         self.template_path = template_path
+        self.init_template()
 
     def init_template(self):
-        pass
+        self._init_Template_Riemann(self.template_path)
 
     def new_epochs_classifier(self, label, epoch):
         """This function is a slot who classifies epoch according to learning parameters
@@ -91,3 +94,18 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         lf1 = - 0.5 * (Vec1 + ld1)
 
         return np.array([lf0, lf1])
+
+    def _init_Template_Riemann(self,Template_H5Filename):
+        self.f = h5py.File(Template_H5Filename, 'r')
+        
+        print('## Lecture du fichier {}'.format(Template_H5Filename))
+        
+        self.dict = {}
+        for element in self.f:
+            groupe = self.f[element]
+                        
+            for element in groupe:
+                self.dict[element] = groupe[element]
+                
+        self.TemplateRiemann = self.dict
+#        print('template',TemplateParams['mu_Epoch_T'][...])

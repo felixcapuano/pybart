@@ -156,9 +156,7 @@ class Player_MYB_Pypeline(QtCore.QObject): #inherits QObject to send signals
 #_______________________________________________________________________________
     def _init_Template_Riemann(self,Template_H5Filename):
         self.f = h5py.File(Template_H5Filename, 'r')
-        
-        print('## Lecture du fichier {}'.format(Template_H5Filename))
-        
+                
         self.dict = {}
         for element in self.f:
             groupe = self.f[element]

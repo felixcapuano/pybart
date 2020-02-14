@@ -34,10 +34,9 @@ class ProcessDetector(QtCore.QThread):
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
-
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
-        
+
         self.error_dialog = QtWidgets.QErrorMessage()
 
         self.setupUi(self)
@@ -60,7 +59,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
-        
+
         self.button_start.clicked.connect(self.on_start_running)
         self.button_stop.clicked.connect(self.on_stop_running)
 
@@ -88,18 +87,23 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         for row in range(t.rowCount()):
             try:
-                params[t.item(row, 0).text()] = {}
-                params[t.item(row, 0).text()]['left_sweep'] = float(
-                    t.item(row, 1).text())
-                params[t.item(row, 0).text()]['right_sweep'] = float(
-                    t.item(row, 2).text())
-                params[t.item(row, 0).text()]['max_stock'] = int(
-                    t.item(row, 3).text())
+                label = str(t.item(row, 0).text())
+                left_sweep = float(t.item(row, 1).text())
+                right_sweep = float(t.item(row, 2).text())
             except ValueError:
-                return 'Left and right sweep has to be Float value, and the maximum stock Integer value.'
+                return 'Left and right sweep has to be Float value.'
+
+            try:
+                max_stock = int(t.item(row, 3).text())
+            except ValueError:
+                return 'Maximum stock has to be Integer value.'
+
+            params[label] = {}
+            params[label]['left_sweep'] = float(left_sweep)
+            params[label]['right_sweep'] = float(right_sweep)
+            params[label]['max_stock'] = int(max_stock)
 
         return params
-        
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
@@ -112,7 +116,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             low_frequency = float(self.line_low_freq.text())
             high_frequency = float(self.line_high_freq.text())
         except ValueError:
-            self.error_dialog.showMessage("High and low frequency has to be float type.")
+            self.error_dialog.showMessage(
+                "High and low frequency has to be float type.")
             return
 
         host = str(self.line_host.text())
@@ -129,17 +134,18 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         if type(params) is str:
             self.error_dialog.showMessage(params)
             return
-        
+
         # setup parmeter in the stream handler
         self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
         self.sh.configuration(low_frequency,
-                              high_frequency, 
+                              high_frequency,
                               trig_params=params,
-                              trig_simulate=self.checkBox_trigEmul.isChecked())
-        
+                              trig_simulate=self.checkBox_trigEmul.isChecked(),
+                              sig_simulate=self.checkBox_trigEmul.isChecked())
+
         # set the emission slot for each new stack of epochs
         self.sh.set_slot_new_epochs(self.on_new_epochs)
-        
+
         # start the stream handler
         self.sh.start_node()
 
@@ -174,14 +180,22 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             for label, params in triggers.items():
                 self.table_trigs_params.insertRow(row_count)
 
-                self.table_trigs_params.setItem(
-                    row_count, 0, QtGui.QTableWidgetItem(label))
-                self.table_trigs_params.setItem(
-                    row_count, 1, QtGui.QTableWidgetItem(str(params['left_sweep'])))
-                self.table_trigs_params.setItem(
-                    row_count, 2, QtGui.QTableWidgetItem(str(params['right_sweep'])))
-                self.table_trigs_params.setItem(
-                    row_count, 3, QtGui.QTableWidgetItem(str(params['max_stock'])))
+                self.table_trigs_params.setItem(row_count,
+                                                0,
+                                                QtGui.QTableWidgetItem(label))
+
+                self.table_trigs_params.setItem(row_count,
+                                                1,
+                                                QtGui.QTableWidgetItem(str(params['left_sweep'])))
+
+                self.table_trigs_params.setItem(row_count,
+                                                2,
+                                                QtGui.QTableWidgetItem(str(params['right_sweep'])))
+
+                self.table_trigs_params.setItem(row_count,
+                                                3,
+                                                QtGui.QTableWidgetItem(str(params['max_stock'])))
+
                 row_count = +1
 
     def on_new_process(self, process_running):
@@ -207,7 +221,9 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         """
         dialog = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                       self.tr("Open Template"), "TemplateRiemann/", self.tr("Image Files (*.h5)"))
+                                                       self.tr("Open Template"),
+                                                       "TemplateRiemann/",
+                                                       self.tr("Image Files (*.h5)"))
         self.label_name_file.setText(dialog[0])
 
     def on_new_epochs(self, label, epochs):

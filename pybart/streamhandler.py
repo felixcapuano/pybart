@@ -28,7 +28,7 @@ class StreamHandler(QtCore.QObject):
         self.brainamp_port = brainamp_port
 
 
-    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate = False, sig_simulate = True):
+    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate = False, sig_simulate = False):
         
         self.trig_simulate = trig_simulate
         self.sig_simulate = sig_simulate
@@ -100,7 +100,6 @@ class StreamHandler(QtCore.QObject):
 
     def set_slot_new_epochs(self, slot_on_new_chunk):
         self.epocher.new_chunk.connect(slot_on_new_chunk)
-
 
     def noise_generator_node(self, nbr_channel=1):
         """
