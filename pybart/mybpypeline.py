@@ -15,7 +15,6 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
 
     def set_template_name(self, template_path):
         self.template_path = template_path
-        self.init_template()
 
     def init_template(self):
         self._init_Template_Riemann(self.template_path)

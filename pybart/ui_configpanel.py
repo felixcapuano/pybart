@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_configpanel.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ConfigPanel(object):
     def setupUi(self, ConfigPanel):
         ConfigPanel.setObjectName("ConfigPanel")
-        ConfigPanel.resize(532, 666)
+        ConfigPanel.resize(523, 613)
         ConfigPanel.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.centralwidget = QtWidgets.QWidget(ConfigPanel)
         self.centralwidget.setObjectName("centralwidget")
@@ -66,7 +66,10 @@ class Ui_ConfigPanel(object):
         self.combo_program = QtWidgets.QComboBox(self.groupBox_2)
         self.combo_program.setGeometry(QtCore.QRect(10, 20, 331, 22))
         self.combo_program.setObjectName("combo_program")
-        self.combo_program.addItem("")
+        self.button_option = QtWidgets.QPushButton(self.groupBox_2)
+        self.button_option.setEnabled(False)
+        self.button_option.setGeometry(QtCore.QRect(350, 20, 141, 23))
+        self.button_option.setObjectName("button_option")
         self.button_start = QtWidgets.QPushButton(self.centralwidget)
         self.button_start.setGeometry(QtCore.QRect(400, 10, 111, 31))
         self.button_start.setObjectName("button_start")
@@ -78,7 +81,7 @@ class Ui_ConfigPanel(object):
         self.button_stop.setFlat(False)
         self.button_stop.setObjectName("button_stop")
         self.groupBox_3 = QtWidgets.QGroupBox(self.centralwidget)
-        self.groupBox_3.setGeometry(QtCore.QRect(10, 570, 231, 51))
+        self.groupBox_3.setGeometry(QtCore.QRect(10, 510, 231, 51))
         self.groupBox_3.setObjectName("groupBox_3")
         self.line_low_freq = QtWidgets.QLineEdit(self.groupBox_3)
         self.line_low_freq.setGeometry(QtCore.QRect(40, 20, 61, 21))
@@ -95,20 +98,9 @@ class Ui_ConfigPanel(object):
         self.checkBox_trigEmul = QtWidgets.QCheckBox(self.centralwidget)
         self.checkBox_trigEmul.setGeometry(QtCore.QRect(40, 10, 131, 17))
         self.checkBox_trigEmul.setObjectName("checkBox_trigEmul")
-        self.groupBox_4 = QtWidgets.QGroupBox(self.centralwidget)
-        self.groupBox_4.setGeometry(QtCore.QRect(10, 510, 501, 51))
-        self.groupBox_4.setObjectName("groupBox_4")
-        self.label_name_file = QtWidgets.QLabel(self.groupBox_4)
-        self.label_name_file.setGeometry(QtCore.QRect(60, 20, 411, 21))
-        self.label_name_file.setAutoFillBackground(False)
-        self.label_name_file.setText("")
-        self.label_name_file.setObjectName("label_name_file")
-        self.button_select_file = QtWidgets.QPushButton(self.groupBox_4)
-        self.button_select_file.setGeometry(QtCore.QRect(10, 20, 41, 23))
-        self.button_select_file.setObjectName("button_select_file")
         ConfigPanel.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(ConfigPanel)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 532, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 523, 21))
         self.menubar.setObjectName("menubar")
         ConfigPanel.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(ConfigPanel)
@@ -135,7 +127,7 @@ class Ui_ConfigPanel(object):
         item.setText(_translate("ConfigPanel", "right sweep"))
         item = self.table_trigs_params.horizontalHeaderItem(3)
         item.setText(_translate("ConfigPanel", "max stack"))
-        self.combo_program.setItemText(0, _translate("ConfigPanel", "New Parameters"))
+        self.button_option.setText(_translate("ConfigPanel", "Option"))
         self.button_start.setText(_translate("ConfigPanel", "Start"))
         self.button_stop.setText(_translate("ConfigPanel", "Stop"))
         self.groupBox_3.setTitle(_translate("ConfigPanel", "Passband Filter"))
@@ -144,8 +136,6 @@ class Ui_ConfigPanel(object):
         self.label_low.setText(_translate("ConfigPanel", "Low"))
         self.label_high.setText(_translate("ConfigPanel", "High"))
         self.checkBox_trigEmul.setText(_translate("ConfigPanel", "triggers emulation"))
-        self.groupBox_4.setTitle(_translate("ConfigPanel", "Select Template"))
-        self.button_select_file.setText(_translate("ConfigPanel", "File"))
 
 
 if __name__ == "__main__":

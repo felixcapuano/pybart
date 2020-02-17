@@ -30,6 +30,11 @@ class ProcessDetector(QtCore.QThread):
 
             if last_process_running != self._process_running:
                 self.process_detected.emit(self._process_running)
+            
+            time.sleep(self.refresh_time)
+
+    def stop(self):
+        self.terminate()
 
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
@@ -70,7 +75,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.combo_program.currentIndexChanged.connect(self.on_program)
 
-        self.button_select_file.clicked.connect(self.on_select_template)
+        self.button_option.clicked.connect(self.on_select_template)
 
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
@@ -110,7 +115,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         control panel and initialise the pyacq web(StreamHandler)
 
         """
-
+        self.process_detector.stop()
+        
         try:
             # get the low and high frequency in float
             low_frequency = float(self.line_low_freq.text())
@@ -141,7 +147,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                               high_frequency,
                               trig_params=params,
                               trig_simulate=self.checkBox_trigEmul.isChecked(),
-                              sig_simulate=self.checkBox_trigEmul.isChecked())
+                              sig_simulate=False)
 
         # set the emission slot for each new stack of epochs
         self.sh.set_slot_new_epochs(self.on_new_epochs)
@@ -155,6 +161,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
 
+        self.process_detector.start()
+        
         self.sh.stop_node()
 
         self.button_stop.setEnabled(False)
@@ -167,6 +175,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         -adding parameter according to the json configuration file
 
         """
+        if self.combo_program.count() > 0:
+            self.button_option.setEnabled(True)
+        else:
+            self.button_option.setEnabled(False)
 
         # clear table
         self.table_trigs_params.setRowCount(0)
@@ -220,15 +232,14 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         and set the name of the file selected in the label
 
         """
-        dialog = QtWidgets.QFileDialog.getOpenFileName(self,
+        self.dialog = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "TemplateRiemann/",
                                                        self.tr("Image Files (*.h5)"))
-        self.label_name_file.setText(dialog[0])
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        pass
+        print(label)
 
 
 if __name__ == "__main__":

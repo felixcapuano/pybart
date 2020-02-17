@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>666</height>
+    <width>523</width>
+    <height>613</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -170,11 +170,22 @@
        <height>22</height>
       </rect>
      </property>
-     <item>
-      <property name="text">
-       <string>New Parameters</string>
-      </property>
-     </item>
+    </widget>
+    <widget class="QPushButton" name="button_option">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>20</y>
+       <width>141</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Option</string>
+     </property>
     </widget>
    </widget>
    <widget class="QPushButton" name="button_start">
@@ -219,7 +230,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>570</y>
+      <y>510</y>
       <width>231</width>
       <height>51</height>
      </rect>
@@ -293,55 +304,13 @@
      <string>triggers emulation</string>
     </property>
    </widget>
-   <widget class="QGroupBox" name="groupBox_4">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>510</y>
-      <width>501</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Select Template</string>
-    </property>
-    <widget class="QLabel" name="label_name_file">
-     <property name="geometry">
-      <rect>
-       <x>60</x>
-       <y>20</y>
-       <width>411</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="button_select_file">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>41</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>File</string>
-     </property>
-    </widget>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>532</width>
+     <width>523</width>
      <height>21</height>
     </rect>
    </property>

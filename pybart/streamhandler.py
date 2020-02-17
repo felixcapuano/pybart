@@ -6,11 +6,11 @@ WARNING : Simulate mode ON (Marker : TEST offline)
 import numpy as np
 import pytest
 import scipy.signal
-from pyacq.devices.brainampsocket import BrainAmpSocket
 from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyqtgraph.Qt import QtCore
 
+from pyacq_ext.brainampsocket import BrainAmpSocket
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.noisegenerator import NoiseGenerator
 from pyacq_ext.triggeremulator import TriggerEmulator
@@ -34,33 +34,29 @@ class StreamHandler(QtCore.QObject):
         self.sig_simulate = sig_simulate
         
         # Data Acquisition Node
-        if not trig_simulate and not sig_simulate: ## TEST offline
-            self.dev = BrainAmpSocket()
-            self.dev.configure(brainamp_host=self.brainamp_host, brainamp_port=self.brainamp_port)
-            self.dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-            self.dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-            self.dev.initialize() 
+        self.dev = BrainAmpSocket()
+        self.dev.configure(brainamp_host=self.brainamp_host, brainamp_port=self.brainamp_port)
+        self.dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+        self.dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+        self.dev.initialize() 
+    
+        # Filter Node
+        f1, f2 = low_fequency, high_frequency
+        sample_rate = self.dev.outputs['signals'].spec['sample_rate']
         
-            # Filter Node
-            f1, f2 = low_fequency, high_frequency
-            sample_rate = self.dev.outputs['signals'].spec['sample_rate']
-            
-            coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
-                        btype = 'bandpass', ftype = 'butter', output = 'sos')
-            
-            self.filt = SosFilter()
-            self.filt.configure(coefficients = coefficients)
-            self.filt.input.connect(self.dev.outputs['signals'])
-            self.filt.output.configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-            self.filt.initialize()
+        coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
+                    btype = 'bandpass', ftype = 'butter', output = 'sos')
+        
+        self.filt = SosFilter()
+        self.filt.configure(coefficients = coefficients)
+        self.filt.input.connect(self.dev.outputs['signals'])
+        self.filt.output.configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+        self.filt.initialize()
         
         # Epocher Node
         self.epocher = EpocherMultiLabel()
         self.epocher.configure(parameters=trig_params)
-        if sig_simulate: ## TEST offline
-            self.epocher.inputs['signals'].connect(self.noise_generator_node())
-        else:
-            self.epocher.inputs['signals'].connect(self.filt.output)
+        self.epocher.inputs['signals'].connect(self.filt.output)
         if trig_simulate: ## TEST offline
             self.epocher.inputs['triggers'].connect(self.trigger_emulator_node())
         else:
@@ -68,15 +64,14 @@ class StreamHandler(QtCore.QObject):
         self.epocher.initialize()
 
         # # Oscilloscope Node
-        # self.viewer = QOscilloscope()
+        # self.viewer = QOscilloscope(parent=self)
         # self.viewer.configure()
         # self.viewer.input.connect(self.filt.output)
         # self.viewer.initialize()
 
     def start_node(self):
-        if not self.trig_simulate and not self.sig_simulate: ## TEST offline
-            self.dev.start()
-            self.filt.start()
+        self.dev.start()
+        self.filt.start()
         self.epocher.start()
 
         # self.viewer.show()
@@ -86,9 +81,8 @@ class StreamHandler(QtCore.QObject):
             node.start()
 
     def stop_node(self):
-        if not self.trig_simulate and not self.sig_simulate: ## TEST offline
-            self.dev.stop()
-            self.filt.stop()
+        self.dev.stop()
+        self.filt.stop()
         self.epocher.stop()
         
         # self.viewer.stop()
