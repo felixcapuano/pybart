@@ -8,7 +8,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
 
     signal_new_likelihoodFunction_result = QtCore.pyqtSignal(np.ndarray)
 
-    def __init__(self, template_path, parent=None):
+    def __init__(self, parent=None):
         # Default setting
         self.template_path = "TemplateRiemann/Template.h5"
         self.init_template()
@@ -39,10 +39,13 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         sigma_rTNT_T = self.TemplateRiemann['sigma_rTNT_T'][...]
         sigma_rTNT_NT = self.TemplateRiemann['sigma_rTNT_NT'][...]
 
-        likelihoodFunction = self.compute_likelihood(
-            curr_r_TNT, mu_rTNT_T, mu_rTNT_NT, sigma_rTNT_T, sigma_rTNT_NT)
-
-        self.signal_new_likelihoodFunction_result.emit(likelihoodFunction)
+        likelihood = self.compute_likelihood(curr_r_TNT,
+                                                mu_rTNT_T,
+                                                mu_rTNT_NT,
+                                                sigma_rTNT_T,
+                                                sigma_rTNT_NT)
+        print(likelihood)
+        self.signal_new_likelihoodFunction_result.emit(likelihood)
 
     def covariances_EP(self, X, P):
         """
@@ -95,8 +98,9 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         return np.array([lf0, lf1])
 
     def _init_Template_Riemann(self,Template_H5Filename):
-        self.f = h5py.File(Template_H5Filename, 'r')
         
+        self.f = h5py.File(Template_H5Filename, 'r')
+            
         print('## Lecture du fichier {}'.format(Template_H5Filename))
         
         self.dict = {}

@@ -6,13 +6,16 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui_configpanel import Ui_ConfigPanel
 from streamhandler import StreamHandler
+from mybpypeline import MybPypeline
 
 
 class ProcessDetector(QtCore.QThread):
 
     _process_waited = []
     _process_running = []
-    refresh_time = 1
+    refresh_time = 2
+
+    _mutex = QtCore.QMutex()
 
     process_detected = QtCore.pyqtSignal(list)
 
@@ -21,17 +24,20 @@ class ProcessDetector(QtCore.QThread):
 
     def run(self):
         while True:
-            last_process_running = self._process_running
+            try:
+                self._mutex.lock()
+                last_process_running = self._process_running
 
-            self._process_running = []
-            for process in psutil.process_iter():
-                if process.name() in self._process_waited:
-                    self._process_running.append(process.name())
-
-            if last_process_running != self._process_running:
-                self.process_detected.emit(self._process_running)
-            
-            time.sleep(self.refresh_time)
+                self._process_running = []
+                for process in psutil.process_iter():
+                    if process.name() in self._process_waited:
+                        self._process_running.append(process.name())
+                self._mutex.unlock()
+                if last_process_running != self._process_running:
+                    self.process_detected.emit(self._process_running)
+                
+                time.sleep(self.refresh_time)
+            except: pass
 
     def stop(self):
         self.terminate()
@@ -175,10 +181,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         -adding parameter according to the json configuration file
 
         """
-        if self.combo_program.count() > 0:
-            self.button_option.setEnabled(True)
-        else:
-            self.button_option.setEnabled(False)
 
         # clear table
         self.table_trigs_params.setRowCount(0)
@@ -209,6 +211,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                                 QtGui.QTableWidgetItem(str(params['max_stock'])))
 
                 row_count = +1
+        
+        self.pypline = MybPypeline()
+
+        if self.combo_program.count() > 0:
+            self.button_option.setEnabled(True)
+        else:
+            self.button_option.setEnabled(False)
 
     def on_new_process(self, process_running):
         """This function is a slot who received process running
@@ -239,7 +248,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        print(label)
+        # self.pypline.new_epochs_classifier(label, epochs)
+        print(epochs)
 
 
 if __name__ == "__main__":
