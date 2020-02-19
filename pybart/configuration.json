@@ -1,8 +1,7 @@
 {
     "MYB_Multi.exe":
     {
-        "S  1":
-        { 
+        "S  1": { 
             "right_sweep": 0.6,
             "left_sweep": 0.0,
             "max_stock": 1

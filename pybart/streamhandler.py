@@ -1,25 +1,29 @@
-"""
-ISSUE : QOscilloscope don't work, need to inherit the MainWindow
-WARNING : Simulate mode ON (Marker : TEST offline)
-"""
-
 import numpy as np
 import pytest
 import scipy.signal
-from pyacq.dsp.sosfilter import SosFilter
-from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyqtgraph.Qt import QtCore
 
+from pyacq.dsp.sosfilter import SosFilter
+from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyacq_ext.brainampsocket import BrainAmpSocket
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.noisegenerator import NoiseGenerator
 from pyacq_ext.triggeremulator import TriggerEmulator
 
-class StreamHandler(QtCore.QObject):
 
-    _simulation_node = []
+class StreamHandler(QtCore.QObject):
+    """This object emit epoch in real time from a EEG device using BrainVision Recorder."""
+
+    nodes = {}
+    widget_nodes = []
 
     def __init__(self, brainamp_host='127.0.0.1', brainamp_port=51244, parent=None):
+        """Stream handler builder
+
+        :param brainamp_host: address where pyacq listen data from BrainVision Recorder, default in localhost(127.0.0.1)
+        :param brainamp_port: port where pyacq listen data from BrainVision Recorder, default in localhost(51244)
+
+        """
         QtCore.QObject.__init__(self, parent)
 
         self.sample_rate = 0
@@ -27,99 +31,120 @@ class StreamHandler(QtCore.QObject):
         self.brainamp_host = brainamp_host
         self.brainamp_port = brainamp_port
 
+    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate=False, sig_simulate=False):
+        """Create, configure and plug all pyacq node
 
-    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate = False, sig_simulate = False):
-        
+        :low_fequency: set low frequency of the pass band
+        :high_frequency: set high frequency of the pass band
+        :trig_params: triggers parameter on a dict format
+        :trig_simulate: is triggers are simulate, default in true
+        :sig_simulate: is signal are simulate, default in false
+
+        """
+
         self.trig_simulate = trig_simulate
         self.sig_simulate = sig_simulate
-        
+
         # Data Acquisition Node
-        self.dev = BrainAmpSocket()
-        self.dev.configure(brainamp_host=self.brainamp_host, brainamp_port=self.brainamp_port)
-        self.dev.outputs['signals'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-        self.dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-        self.dev.initialize() 
-    
+        dev = BrainAmpSocket()
+        dev.configure(brainamp_host=self.brainamp_host,
+                      brainamp_port=self.brainamp_port)
+        dev.outputs['signals'].configure(
+            protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
+        dev.outputs['triggers'].configure(
+            protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
+        dev.initialize()
+
+        self.nodes['brainampsocket'] = dev
+
+
         # Filter Node
         f1, f2 = low_fequency, high_frequency
-        sample_rate = self.dev.outputs['signals'].spec['sample_rate']
-        
-        coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
-                    btype = 'bandpass', ftype = 'butter', output = 'sos')
-        
-        self.filt = SosFilter()
-        self.filt.configure(coefficients = coefficients)
-        self.filt.input.connect(self.dev.outputs['signals'])
-        self.filt.output.configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-        self.filt.initialize()
-        
-        # Epocher Node
-        self.epocher = EpocherMultiLabel()
-        self.epocher.configure(parameters=trig_params)
-        self.epocher.inputs['signals'].connect(self.filt.output)
-        if trig_simulate: ## TEST offline
-            self.epocher.inputs['triggers'].connect(self.trigger_emulator_node())
-        else:
-            self.epocher.inputs['triggers'].connect(self.dev.outputs['triggers'])
-        self.epocher.initialize()
+        sample_rate = dev.outputs['signals'].spec['sample_rate']
 
-        # # Oscilloscope Node
-        # self.viewer = QOscilloscope(parent=self)
-        # self.viewer.configure()
-        # self.viewer.input.connect(self.filt.output)
-        # self.viewer.initialize()
+        coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
+                                              btype='bandpass', ftype='butter', output='sos')
+
+        filt = SosFilter()
+        filt.configure(coefficients=coefficients)
+        filt.input.connect(dev.outputs['signals'])
+        filt.output.configure(
+            protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
+        filt.initialize()
+
+        self.nodes['sosfilter'] = filt
+
+
+        # Epocher Node
+        epocher = EpocherMultiLabel()
+        epocher.configure(parameters=trig_params)
+        epocher.inputs['signals'].connect(filt.output)
+        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+
+        self.nodes['epochermultilabel'] = epocher
+
+
+        # Oscilloscope Node
+        viewer = QOscilloscope()
+        viewer.configure()
+        viewer.input.connect(filt.output)
+        viewer.initialize()
+
+        self.nodes['qoscilloscope'] = viewer
+        self.widget_nodes.append('qoscilloscope')
 
     def start_node(self):
-        self.dev.start()
-        self.filt.start()
-        self.epocher.start()
+        """Start all nodes"""
 
-        # self.viewer.show()
-        # self.viewer.start()
-
-        for node in self._simulation_node:
+        for node in self.nodes.values():
             node.start()
 
+        for wname in self.widget_nodes:
+            widget_node = self.nodes[wname]
+            
+            # flags has to be set if not pyacq crash
+            widget_node.setWindowFlags(QtCore.Qt.Window)
+            
+            # show all widget windows
+            widget_node.show()
+
     def stop_node(self):
-        self.dev.stop()
-        self.filt.stop()
-        self.epocher.stop()
-        
-        # self.viewer.stop()
-        
-        for node in self._simulation_node:
+        """Stop all nodes and close all widget nodes"""
+        for node in self.nodes.values():
             node.stop()
-        
-        # self.viewer.close()
+
+        for widget_node in self.widget_nodes:
+            self.nodes[widget_node].close()
 
     def set_slot_new_epochs(self, slot_on_new_chunk):
-        self.epocher.new_chunk.connect(slot_on_new_chunk)
+        """This function set the output slot for each epoch stack """
 
-    def noise_generator_node(self, nbr_channel=1):
-        """
-        Noise Generator Node
-        """
-        ng = NoiseGenerator()
-        ng.configure()
-        ng.output.configure(protocol='tcp', transfermode='plaindata')
-        ng.initialize()
+        self.nodes['epochermultilabel'].new_chunk.connect(slot_on_new_chunk)
 
-        self._simulation_node.append(ng)
+    # def noise_generator_node(self, nbr_channel=1):
+    #     """
+    #     Noise Generator Node
+    #     """
+    #     ng = NoiseGenerator()
+    #     ng.configure()
+    #     ng.output.configure(protocol='tcp', transfermode='plaindata')
+    #     ng.initialize()
 
-        return ng.output
+    #     self._simulation_node.append(ng)
 
-    def trigger_emulator_node(self):
-        """
-        Triggers Laucher Node
-        """
-        te = TriggerEmulator()
-        te.configure()
-        te.outputs['triggers'].configure(protocol='tcp', transfermode='plaindata',)
-        te.initialize()
-        te.show()
-        
-        self._simulation_node.append(te)
+    #     return ng.output
 
-        return te.output
+    # def trigger_emulator_node(self):
+    #     """
+    #     Triggers Laucher Node
+    #     """
+    #     te = TriggerEmulator()
+    #     te.configure()
+    #     te.outputs['triggers'].configure(
+    #         protocol='tcp', transfermode='plaindata',)
+    #     te.initialize()
+    #     te.show()
 
+    #     self._simulation_node.append(te)
 
+    #     return te.output

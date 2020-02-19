@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from ui_configpanel import Ui_ConfigPanel
 from streamhandler import StreamHandler
-from mybpypeline import MybPypeline
+from pypline.mybpypeline import MybPypeline
 
 
 class ProcessDetector(QtCore.QThread):

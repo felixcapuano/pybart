@@ -2,29 +2,45 @@
 
 Description empty
 
-## Installation
+## Pybart installation
 
-**Visual Studio 2017 must be installed with C++ CMake tools for Windows**
 
+To download source code make sure you have [git](https://git-scm.com/), then use the following command.
+```bash
+# clone pybart
+git clone https://gitlab.com/manu.maby/pybart.git
+```
+
+Pyabart use [pipenv](https://github.com/pypa/pipenv/) so all dependencies are very easy to install.
 ```bash
 # install pipenv
 pip install pipenv
+```
 
-# clone pybart
-git clone https://gitlab.com/manu.maby/pybart.git
+Now, we are ready to lauch dependencies installation.
+```bash
+# move into pybart folder
 cd .\pybart\
 
-# run pipenv shell
+# then install
 pipenv install
-pipenv shell
+```
 
+You need to install 2 more packages.
+```bash
+# move into the librairies folder
 cd .\libs\
+
 # clone pyacq and pyacq_ext
 git clone https://github.com/pyacq/pyacq.git
 git clone https://gitlab.com/manu.maby/pyacq_ext.git
+```
 
+You will just have to install our 2 new packages.
+```bash
 # install pyacq and pyacq_ext
 pip install .\pyacq_ex\
 pip install .\pyacq\
 ```
 
+Its done!
