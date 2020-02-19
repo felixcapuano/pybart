@@ -212,6 +212,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
                 row_count = +1
         
+        # select the pypline depending of the game running
         self.pypline = MybPypeline()
 
         if self.combo_program.count() > 0:
@@ -248,8 +249,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        # self.pypline.new_epochs_classifier(label, epochs)
-        print(epochs)
+        self.pypline.new_epochs_classifier(label, epochs)
 
 
 if __name__ == "__main__":

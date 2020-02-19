@@ -9,6 +9,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
     signal_new_likelihoodFunction_result = QtCore.pyqtSignal(np.ndarray)
 
     def __init__(self, parent=None):
+        QtCore.QObject.__init__(self, parent)
         # Default setting
         self.template_path = "TemplateRiemann/Template.h5"
         self.init_template()
@@ -19,11 +20,13 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
     def init_template(self):
         self._init_Template_Riemann(self.template_path)
 
-    def new_epochs_classifier(self, label, epoch):
+    def new_epochs_classifier(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
         and bayes priors for myb games with dynamic bayesian classification
 
         """
+
+        epoch = epochs.reshape((epochs.shape[1],epochs.shape[2]))
 
         ERP_template_target = self.TemplateRiemann['mu_Epoch_T'][...]
 
