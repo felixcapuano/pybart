@@ -4,20 +4,22 @@ import os
 import time
 
 vhdrPath = 'C:\\Users\\User\\Documents\\InterLabex\\CAPFE_0002.vhdr'
+vhdrPathBis = 'C:\\Users\\User\\Documents\\InterLabex\\regen-000002.ahdr'
 vmrkPath = 'C:\\Users\\User\\Documents\\InterLabex\\CAPFE_0002.vmrk'
 
 raw = mne.io.read_raw_brainvision(vhdrPath)
 
-start, stop = 0,400000
+start, stop = 166080,166086
 
 period = raw.get_data(start=start,stop=stop)
 
 for i in range(stop-start):
-    p =period[:,i]*10000000000
-    if int(-117937) in p.astype(int) and int(1672) in p.astype(int):
-        print(p.astype(int))
+    p = period[:,i]*1000000/0.0488281 # gain de tes morts
 
-    # time.sleep(0.10)
+    # if -126837 == p.astype(int)[0]:
+    #     print(i+start, p.astype(int))
+    
+    print(i+start, p.astype(int))
 
 # events_orig = mne.events_from_annotations(raw, event_id='auto')[0] 
 # events = np.copy(events_orig)    
