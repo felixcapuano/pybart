@@ -1,3 +1,4 @@
+import mne
 import numpy as np
 import pytest
 import scipy.signal
@@ -7,8 +8,7 @@ from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyacq_ext.brainampsocket import BrainAmpSocket
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
-from pyacq_ext.noisegenerator import NoiseGenerator
-from pyacq_ext.triggeremulator import TriggerEmulator
+from pyacq_ext.rawbufferdevice import RawDeviceBuffer
 
 
 class StreamHandler(QtCore.QObject):
@@ -17,7 +17,7 @@ class StreamHandler(QtCore.QObject):
     nodes = {}
     widget_nodes = []
 
-    def __init__(self, brainamp_host='127.0.0.1', brainamp_port=51244, parent=None):
+    def __init__(self, simulated=False, parent=None, **option):
         """Stream handler builder
 
         :param brainamp_host: address where pyacq listen data from BrainVision Recorder, default in localhost(127.0.0.1)
@@ -26,37 +26,66 @@ class StreamHandler(QtCore.QObject):
         """
         QtCore.QObject.__init__(self, parent)
 
-        self.sample_rate = 0
+        self.simulated = simulated
+        if self.simulated:
+            try:
+                    self.raw_file = option['raw_file']
+            except KeyError:
+                print('Error: raw_file is waited in argument')
+                return
+        else:
+            try:
+                self.brainamp_host = option['brainamp_host']
+                self.brainamp_port = option['brainamp_port']
+            except KeyError:
+                print('Error: brainamp_host, brainamp_port are waited in argument')
+                return
 
-        self.brainamp_host = brainamp_host
-        self.brainamp_port = brainamp_port
 
-    def configuration(self, low_fequency, high_frequency, trig_params, trig_simulate=False, sig_simulate=False):
+    def simulated_device(self):
+        # Simulator EEG data Acquisition Node
+        dev = RawDeviceBuffer()
+        dev.configure(raw_file=self.raw_file, chunksize=10)
+
+        return dev
+        
+
+    def brain_amp_device(self):
+        # EEG data Acquisition Node
+        dev = BrainAmpSocket()
+        dev.configure(brainamp_host=self.brainamp_host,
+                    brainamp_port=self.brainamp_port)
+        dev.outputs['triggers'].configure(protocol='tcp',
+                                            interface='127.0.0.1',
+                                            transfermode='plaindata',)
+        return dev
+            
+
+        
+
+
+    def configuration(self, low_fequency, high_frequency, trig_params):
         """Create, configure and plug all pyacq node
 
         :low_fequency: set low frequency of the pass band
         :high_frequency: set high frequency of the pass band
         :trig_params: triggers parameter on a dict format
-        :trig_simulate: is triggers are simulate, default in true
-        :sig_simulate: is signal are simulate, default in false
 
-        """
+        """ 
+        if self.simulated:
+            dev = self.simulated_device()
+        else:
+            dev = self.brain_amp_device()
 
-        self.trig_simulate = trig_simulate
-        self.sig_simulate = sig_simulate
+        dev = self.simulated_device()
+        dev_ev = self.brain_amp_device()
 
-        # Data Acquisition Node
-        dev = BrainAmpSocket()
-        dev.configure(brainamp_host=self.brainamp_host,
-                      brainamp_port=self.brainamp_port)
-        dev.outputs['signals'].configure(
-            protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
-        dev.outputs['triggers'].configure(
-            protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
+        dev.outputs['signals'].configure(protocol='tcp',
+                                            interface='127.0.0.1',
+                                            transfermode='plaindata',)
         dev.initialize()
 
-        self.nodes['brainampsocket'] = dev
-
+        self.nodes['device'] = dev
 
         # Filter Node
         f1, f2 = low_fequency, high_frequency
@@ -80,6 +109,9 @@ class StreamHandler(QtCore.QObject):
         epocher.configure(parameters=trig_params)
         epocher.inputs['signals'].connect(filt.output)
         epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+        # TODO Do trigger sid
+        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+        epocher.initialize()
 
         self.nodes['epochermultilabel'] = epocher
 

@@ -83,6 +83,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.button_option.clicked.connect(self.on_select_template)
 
+        self.button_file_simulated.clicked.connect(self.on_simulation_file)
+
+        self.radio_BVRec.toggled.connect(self.on_select_BVRec)
+        self.radio_simulate.toggled.connect(self.on_select_simulate)
+
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
 
@@ -116,6 +121,28 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         return params
 
+    def on_simulation_file(self):
+        self.dialog = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                       self.tr("Open Template"),
+                                                       "eeg_data_sample/",
+                                                       self.tr("Image Files (*.vhdr)"))
+
+        self.label_filename.setText(str(self.dialog[0]))
+
+    def on_select_BVRec(self):
+        if self.radio_BVRec.isChecked():
+            self.line_host.setEnabled(True)
+            self.line_port.setEnabled(True)
+        else:
+            self.line_host.setEnabled(False)
+            self.line_port.setEnabled(False)
+    
+    def on_select_simulate(self):
+        if self.radio_simulate.isChecked():
+            self.frame_select_file.setEnabled(True)
+        else:
+            self.frame_select_file.setEnabled(False)
+
     def on_start_running(self):
         """This function is a slot who collect parameter from the
         control panel and initialise the pyacq web(StreamHandler)
@@ -148,12 +175,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             return
 
         # setup parmeter in the stream handler
-        self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
+        # self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
+        vhdrPath = 'C:\\Users\\User\\Documents\\InterLabex\\CAPFE_0002.vhdr'
+        self.sh = StreamHandler(simulated=True, raw_file=vhdrPath)
+        
         self.sh.configuration(low_frequency,
                               high_frequency,
-                              trig_params=params,
-                              trig_simulate=self.checkBox_trigEmul.isChecked(),
-                              sig_simulate=False)
+                              trig_params=params)
 
         # set the emission slot for each new stack of epochs
         self.sh.set_slot_new_epochs(self.on_new_epochs)

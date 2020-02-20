@@ -8,18 +8,33 @@ vhdrPathBis = 'C:\\Users\\User\\Documents\\InterLabex\\regen-000002.ahdr'
 vmrkPath = 'C:\\Users\\User\\Documents\\InterLabex\\CAPFE_0002.vmrk'
 
 raw = mne.io.read_raw_brainvision(vhdrPath)
+try:
+    print(raw.info['lol'])
+except KeyError:
+    print('femjf')
+# b = np.transpose(raw.get_data()) * 1000000 / 0.0488281
+# print(b[:,0])
 
-start, stop = 166080,166086
+# buffer = np.transpose(raw.get_data())
+# chan = 0
+# for sensor in raw.info['chs']:
+#     buffer[:,chan] /= sensor['cal']*1000000
+#     chan +=1
 
-period = raw.get_data(start=start,stop=stop)
+# print(buffer[:,0])
+# print(raw.info['chs'][1]['cal'])
 
-for i in range(stop-start):
-    p = period[:,i]*1000000/0.0488281 # gain de tes morts
+# start, stop = 166080,166086
 
-    # if -126837 == p.astype(int)[0]:
-    #     print(i+start, p.astype(int))
+# period = raw.get_data(start=start,stop=stop)
+
+# for i in range(stop-start):
+#     p = period[:,i]*1000000/0.0488281 # gain de tes morts
+
+#     # if -126837 == p.astype(int)[0]:
+#     #     print(i+start, p.astype(int))
     
-    print(i+start, p.astype(int))
+#     print(i+start, p.astype(int))
 
 # events_orig = mne.events_from_annotations(raw, event_id='auto')[0] 
 # events = np.copy(events_orig)    
