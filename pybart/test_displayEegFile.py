@@ -7,11 +7,15 @@ vhdrPath = 'C:\\Users\\User\\Documents\\InterLabex\\CAPFE_0002.vhdr'
 vhdrPathBis = 'C:\\Users\\User\\Documents\\InterLabex\\regen-000002.ahdr'
 vmrkPath = 'C:\\Users\\User\\Documents\\InterLabex\\CAPFE_0002.vmrk'
 
-raw = mne.io.read_raw_brainvision(vhdrPath)
-try:
-    print(raw.info['lol'])
-except KeyError:
-    print('femjf')
+extension = os.path.splitext(vhdrPath)[1]
+if extension == '.vhdr':
+    print("egale")
+
+# raw = mne.io.read_raw_brainvision(vhdrPath)
+# try:
+#     print(raw.info['lol'])
+# except KeyError:
+#     print('femjf')
 # b = np.transpose(raw.get_data()) * 1000000 / 0.0488281
 # print(b[:,0])
 

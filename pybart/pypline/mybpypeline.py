@@ -25,6 +25,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         and bayes priors for myb games with dynamic bayesian classification
 
         """
+        print(label)
 
         epoch = epochs.reshape((epochs.shape[1],epochs.shape[2]))
 
@@ -47,7 +48,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
                                                 mu_rTNT_NT,
                                                 sigma_rTNT_T,
                                                 sigma_rTNT_NT)
-        print(likelihood)
+        # print(likelihood)
         self.signal_new_likelihoodFunction_result.emit(likelihood)
 
     def covariances_EP(self, X, P):

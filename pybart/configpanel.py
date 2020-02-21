@@ -1,12 +1,13 @@
 import json
+import os.path
 import time
 
 import psutil
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from ui_configpanel import Ui_ConfigPanel
-from streamhandler import StreamHandler
 from pypline.mybpypeline import MybPypeline
+from streamhandler import StreamHandler
+from ui_configpanel import Ui_ConfigPanel
 
 
 class ProcessDetector(QtCore.QThread):
@@ -53,6 +54,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.setupUi(self)
         self.init_thread()
         self.connect_ui()
+
+        self.simul_file = 'No File Selected'
 
     def init_thread(self):
         """This function initialise the process detector
@@ -107,12 +110,12 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                 left_sweep = float(t.item(row, 1).text())
                 right_sweep = float(t.item(row, 2).text())
             except ValueError:
-                return 'Left and right sweep has to be Float value.'
+                raise ValueError('Left and right sweep has to be Float value.')
 
             try:
                 max_stock = int(t.item(row, 3).text())
             except ValueError:
-                return 'Maximum stock has to be Integer value.'
+                raise ValueError('Left and right sweep has to be Float value.')
 
             params[label] = {}
             params[label]['left_sweep'] = float(left_sweep)
@@ -126,8 +129,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                                        self.tr("Open Template"),
                                                        "eeg_data_sample/",
                                                        self.tr("Image Files (*.vhdr)"))
-
-        self.label_filename.setText(str(self.dialog[0]))
+        if self.dialog[0] is not '':
+            self.simul_file = str(self.dialog[0])
+            
+        self.label_filename.setText(os.path.basename(self.simul_file))
 
     def on_select_BVRec(self):
         if self.radio_BVRec.isChecked():
@@ -169,19 +174,31 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             return
 
         # get parameter of the table
-        params = self.get_table_params()
-        if type(params) is str:
-            self.error_dialog.showMessage(params)
+        try:
+            params = self.get_table_params()
+        except ValueError as e:
+            self.error_dialog.showMessage("{}".format(e))
             return
+        
 
         # setup parmeter in the stream handler
-        # self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
-        vhdrPath = 'C:\\Users\\User\\Documents\\InterLabex\\CAPFE_0002.vhdr'
-        self.sh = StreamHandler(simulated=True, raw_file=vhdrPath)
-        
-        self.sh.configuration(low_frequency,
-                              high_frequency,
-                              trig_params=params)
+        if self.radio_BVRec.isChecked():
+            self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
+        else:
+            self.sh = StreamHandler(simulated=True, raw_file=self.simul_file)
+
+
+        try:
+            self.sh.configuration(low_frequency,
+                                high_frequency,
+                                trig_params=params)
+        except ConnectionRefusedError as e:
+            self.error_dialog.showMessage("BrainVision Recorder not recording: {}".format(e))
+            return
+        except ValueError as e:
+            self.error_dialog.showMessage("{}".format(e))
+            return
+            
 
         # set the emission slot for each new stack of epochs
         self.sh.set_slot_new_epochs(self.on_new_epochs)

@@ -31,39 +31,33 @@ class StreamHandler(QtCore.QObject):
             try:
                     self.raw_file = option['raw_file']
             except KeyError:
-                print('Error: raw_file is waited in argument')
-                return
+                raise KeyError('Error: raw_file is waited in argument')
+                
         else:
             try:
                 self.brainamp_host = option['brainamp_host']
                 self.brainamp_port = option['brainamp_port']
             except KeyError:
-                print('Error: brainamp_host, brainamp_port are waited in argument')
-                return
-
+                raise KeyError('Error: brainamp_host, brainamp_port are waited in argument')
 
     def simulated_device(self):
         # Simulator EEG data Acquisition Node
         dev = RawDeviceBuffer()
-        dev.configure(raw_file=self.raw_file, chunksize=10)
+        try:
+            dev.configure(raw_file=self.raw_file, chunksize=10)
+        except ValueError as e:
+            raise ValueError('{}'.format(e))
 
         return dev
         
-
     def brain_amp_device(self):
         # EEG data Acquisition Node
         dev = BrainAmpSocket()
         dev.configure(brainamp_host=self.brainamp_host,
                     brainamp_port=self.brainamp_port)
-        dev.outputs['triggers'].configure(protocol='tcp',
-                                            interface='127.0.0.1',
-                                            transfermode='plaindata',)
+                    
         return dev
             
-
-        
-
-
     def configuration(self, low_fequency, high_frequency, trig_params):
         """Create, configure and plug all pyacq node
 
@@ -77,9 +71,9 @@ class StreamHandler(QtCore.QObject):
         else:
             dev = self.brain_amp_device()
 
-        dev = self.simulated_device()
-        dev_ev = self.brain_amp_device()
-
+        dev.outputs['triggers'].configure(protocol='tcp',
+                                            interface='127.0.0.1',
+                                            transfermode='plaindata',)
         dev.outputs['signals'].configure(protocol='tcp',
                                             interface='127.0.0.1',
                                             transfermode='plaindata',)
@@ -109,7 +103,6 @@ class StreamHandler(QtCore.QObject):
         epocher.configure(parameters=trig_params)
         epocher.inputs['signals'].connect(filt.output)
         epocher.inputs['triggers'].connect(dev.outputs['triggers'])
-        # TODO Do trigger sid
         epocher.inputs['triggers'].connect(dev.outputs['triggers'])
         epocher.initialize()
 
