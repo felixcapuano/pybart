@@ -10,6 +10,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
 
     def __init__(self, parent=None):
         QtCore.QObject.__init__(self, parent)
+        
         # Default setting
         self.template_path = "TemplateRiemann/Template.h5"
         self.init_template()
@@ -25,9 +26,8 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         and bayes priors for myb games with dynamic bayesian classification
 
         """
-        print(label)
-
-        epoch = epochs.reshape((epochs.shape[1],epochs.shape[2]))
+        print("label"+label)
+        epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
         ERP_template_target = self.TemplateRiemann['mu_Epoch_T'][...]
 
@@ -37,7 +37,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         matCov_NT = self.TemplateRiemann['mu_MatCov_NT'][...]
 
         curr_r_TNT = self.predict_R_TNT(self.covmats, matCov_T, matCov_NT)
-
+        
         mu_rTNT_T = self.TemplateRiemann['mu_rTNT_T'][...]
         mu_rTNT_NT = self.TemplateRiemann['mu_rTNT_NT'][...]
         sigma_rTNT_T = self.TemplateRiemann['sigma_rTNT_T'][...]
@@ -48,7 +48,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
                                                 mu_rTNT_NT,
                                                 sigma_rTNT_T,
                                                 sigma_rTNT_NT)
-        # print(likelihood)
+        print(likelihood)
         self.signal_new_likelihoodFunction_result.emit(likelihood)
 
     def covariances_EP(self, X, P):
@@ -79,6 +79,7 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         :returns: Riemannian distance between A and B
 
         """
+        # TODO SHIT THERE!!!!!!!!!!
         l_logsquare = np.sum(np.log(eigvalsh(A, B))**2)
 
         return np.sqrt(l_logsquare)

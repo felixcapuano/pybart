@@ -187,7 +187,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         else:
             self.sh = StreamHandler(simulated=True, raw_file=self.simul_file)
 
-
         try:
             self.sh.configuration(low_frequency,
                                 high_frequency,
@@ -201,7 +200,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             
 
         # set the emission slot for each new stack of epochs
-        self.sh.set_slot_new_epochs(self.on_new_epochs)
+        # self.sh.set_slot_new_epochs(self.on_new_epochs)
+        self.sh.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
 
         # start the stream handler
         self.sh.start_node()
@@ -295,7 +295,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
         self.pypline.new_epochs_classifier(label, epochs)
-
+        # print(label)
 
 if __name__ == "__main__":
     import sys
