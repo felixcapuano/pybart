@@ -28,19 +28,17 @@ class StreamHandler(QtCore.QObject):
 
         self.brainamp_host = brainamp_host
         self.brainamp_port = brainamp_port
-        
+
         self.simulated = simulated
         if self.simulated:
             try:
-                    self.raw_file = option['raw_file']
+                self.raw_file = option['raw_file']
             except KeyError:
                 raise KeyError('Error: raw_file is waited in argument')
-                
-        
-            
 
     def simulated_device(self):
         # Simulator EEG data Acquisition Node
+
         dev = RawDeviceBuffer()
         try:
             dev.configure(raw_file=self.raw_file, chunksize=10)
@@ -48,31 +46,31 @@ class StreamHandler(QtCore.QObject):
             raise ValueError('{}'.format(e))
 
         dev.outputs['triggers'].configure(protocol='tcp',
-                                            interface='127.0.0.1',
-                                            transfermode='plaindata',)
+                                          interface='127.0.0.1',
+                                          transfermode='plaindata',)
         dev.outputs['signals'].configure(protocol='tcp',
-                                            interface='127.0.0.1',
-                                            transfermode='plaindata',)
+                                         interface='127.0.0.1',
+                                         transfermode='plaindata',)
         dev.initialize()
 
         return dev
-        
+
     def brain_amp_device(self):
         # EEG data Acquisition Node
         dev_amp = BrainAmpSocket()
         dev_amp.configure(brainamp_host=self.brainamp_host,
-                            brainamp_port=self.brainamp_port)
-        
+                          brainamp_port=self.brainamp_port)
+
         dev_amp.outputs['triggers'].configure(protocol='tcp',
-                                            interface='127.0.0.1',
-                                            transfermode='plaindata',)
+                                              interface='127.0.0.1',
+                                              transfermode='plaindata',)
         dev_amp.outputs['signals'].configure(protocol='tcp',
-                                            interface='127.0.0.1',
-                                            transfermode='plaindata',)
+                                             interface='127.0.0.1',
+                                             transfermode='plaindata',)
         dev_amp.initialize()
-                    
+
         return dev_amp
-            
+
     def configuration(self, low_fequency, high_frequency, trig_params):
         """Create, configure and plug all pyacq node
 
@@ -80,15 +78,12 @@ class StreamHandler(QtCore.QObject):
         :high_frequency: set high frequency of the pass band
         :trig_params: triggers parameter on a dict format
 
-        """ 
+        """
         if self.simulated:
             dev = self.simulated_device()
-            with_marker = dev.with_marker
         else:
             dev = self.brain_amp_device()
-            with_marker = True
 
-        
         self.nodes['device'] = dev
 
         # Filter Node
@@ -107,20 +102,14 @@ class StreamHandler(QtCore.QObject):
 
         self.nodes['sosfilter'] = filt
 
-
         # Epocher Node
         epocher = EpocherMultiLabel()
         epocher.configure(parameters=trig_params)
         epocher.inputs['signals'].connect(filt.output)
-        if with_marker:
-            epocher.inputs['triggers'].connect(dev.outputs['triggers'])
-        else:
-            dev_amp = self.brain_amp_device()
-            epocher.inputs['triggers'].connect(dev_amp.outputs['triggers'])
+        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
         epocher.initialize()
 
         self.nodes['epochermultilabel'] = epocher
-
 
         # Oscilloscope Node
         viewer = QOscilloscope()
@@ -139,10 +128,10 @@ class StreamHandler(QtCore.QObject):
 
         for wname in self.widget_nodes:
             widget_node = self.nodes[wname]
-            
+
             # flags has to be set if not pyacq crash
             widget_node.setWindowFlags(QtCore.Qt.Window)
-            
+
             # show all widget windows
             widget_node.show()
 
