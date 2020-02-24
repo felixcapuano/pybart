@@ -269,7 +269,7 @@ class Player_MYB_Pypeline(QtCore.QObject): #inherits QObject to send signals
         scipy.io.savemat('D:\Dycog\Dev_Python\MatCov_NT.mat', mdict={'MatCov_NT': MatCov_NT })        
       
         
-        self.Curr_r_TNT = self.predict_R_TNT(self.CurrCov, MatCov_T,MatCov_NT)
+        self.Curr_r_TNT = self.predict_R_TNT(self.CurrCov, MatCov_T, MatCov_NT)
         
         scipy.io.savemat('D:\Dycog\Dev_Python\Curr_r_TNT.mat', mdict={'Curr_r_TNT': self.Curr_r_TNT })        
        

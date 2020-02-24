@@ -17,7 +17,7 @@ class StreamHandler(QtCore.QObject):
     nodes = {}
     widget_nodes = []
 
-    def __init__(self, simulated=False, parent=None, **option):
+    def __init__(self, brainamp_host, brainamp_port, simulated=False, parent=None, **option):
         """Stream handler builder
 
         :param brainamp_host: address where pyacq listen data from BrainVision Recorder, default in localhost(127.0.0.1)
@@ -26,6 +26,9 @@ class StreamHandler(QtCore.QObject):
         """
         QtCore.QObject.__init__(self, parent)
 
+        self.brainamp_host = brainamp_host
+        self.brainamp_port = brainamp_port
+        
         self.simulated = simulated
         if self.simulated:
             try:
@@ -33,12 +36,8 @@ class StreamHandler(QtCore.QObject):
             except KeyError:
                 raise KeyError('Error: raw_file is waited in argument')
                 
-        else:
-            try:
-                self.brainamp_host = option['brainamp_host']
-                self.brainamp_port = option['brainamp_port']
-            except KeyError:
-                raise KeyError('Error: brainamp_host, brainamp_port are waited in argument')
+        
+            
 
     def simulated_device(self):
         # Simulator EEG data Acquisition Node
@@ -48,15 +47,31 @@ class StreamHandler(QtCore.QObject):
         except ValueError as e:
             raise ValueError('{}'.format(e))
 
+        dev.outputs['triggers'].configure(protocol='tcp',
+                                            interface='127.0.0.1',
+                                            transfermode='plaindata',)
+        dev.outputs['signals'].configure(protocol='tcp',
+                                            interface='127.0.0.1',
+                                            transfermode='plaindata',)
+        dev.initialize()
+
         return dev
         
     def brain_amp_device(self):
         # EEG data Acquisition Node
-        dev = BrainAmpSocket()
-        dev.configure(brainamp_host=self.brainamp_host,
-                    brainamp_port=self.brainamp_port)
+        dev_amp = BrainAmpSocket()
+        dev_amp.configure(brainamp_host=self.brainamp_host,
+                            brainamp_port=self.brainamp_port)
+        
+        dev_amp.outputs['triggers'].configure(protocol='tcp',
+                                            interface='127.0.0.1',
+                                            transfermode='plaindata',)
+        dev_amp.outputs['signals'].configure(protocol='tcp',
+                                            interface='127.0.0.1',
+                                            transfermode='plaindata',)
+        dev_amp.initialize()
                     
-        return dev
+        return dev_amp
             
     def configuration(self, low_fequency, high_frequency, trig_params):
         """Create, configure and plug all pyacq node
@@ -68,17 +83,12 @@ class StreamHandler(QtCore.QObject):
         """ 
         if self.simulated:
             dev = self.simulated_device()
+            with_marker = dev.with_marker
         else:
             dev = self.brain_amp_device()
+            with_marker = True
 
-        dev.outputs['triggers'].configure(protocol='tcp',
-                                            interface='127.0.0.1',
-                                            transfermode='plaindata',)
-        dev.outputs['signals'].configure(protocol='tcp',
-                                            interface='127.0.0.1',
-                                            transfermode='plaindata',)
-        dev.initialize()
-
+        
         self.nodes['device'] = dev
 
         # Filter Node
@@ -102,8 +112,11 @@ class StreamHandler(QtCore.QObject):
         epocher = EpocherMultiLabel()
         epocher.configure(parameters=trig_params)
         epocher.inputs['signals'].connect(filt.output)
-        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
-        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+        if with_marker:
+            epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+        else:
+            dev_amp = self.brain_amp_device()
+            epocher.inputs['triggers'].connect(dev_amp.outputs['triggers'])
         epocher.initialize()
 
         self.nodes['epochermultilabel'] = epocher

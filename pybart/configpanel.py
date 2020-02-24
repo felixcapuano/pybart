@@ -185,7 +185,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         if self.radio_BVRec.isChecked():
             self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
         else:
-            self.sh = StreamHandler(simulated=True, raw_file=self.simul_file)
+            self.sh = StreamHandler(brainamp_host=host, brainamp_port=port, simulated=True, raw_file=self.simul_file)
 
         try:
             self.sh.configuration(low_frequency,

@@ -1,19 +1,24 @@
+import h5py
+import numpy as np
+import zmq
 from pyqtgraph.Qt import QtCore
 from scipy.linalg import eigvalsh
-import numpy as np
-import h5py
 
 
 class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
 
-    signal_new_likelihoodFunction_result = QtCore.pyqtSignal(np.ndarray)
+    sig_new_likelihood = QtCore.pyqtSignal(np.ndarray)
 
     def __init__(self, parent=None):
         QtCore.QObject.__init__(self, parent)
-        
+
         # Default setting
         self.template_path = "TemplateRiemann/Template.h5"
         self.init_template()
+
+        self.sig_new_likelihood.connect(self.on_new_likelihood)
+
+        self._init_zmq_pub()
 
     def set_template_name(self, template_path):
         self.template_path = template_path
@@ -26,7 +31,6 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         and bayes priors for myb games with dynamic bayesian classification
 
         """
-        print("label"+label)
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
         ERP_template_target = self.TemplateRiemann['mu_Epoch_T'][...]
@@ -37,19 +41,19 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         matCov_NT = self.TemplateRiemann['mu_MatCov_NT'][...]
 
         curr_r_TNT = self.predict_R_TNT(self.covmats, matCov_T, matCov_NT)
-        
+
         mu_rTNT_T = self.TemplateRiemann['mu_rTNT_T'][...]
         mu_rTNT_NT = self.TemplateRiemann['mu_rTNT_NT'][...]
         sigma_rTNT_T = self.TemplateRiemann['sigma_rTNT_T'][...]
         sigma_rTNT_NT = self.TemplateRiemann['sigma_rTNT_NT'][...]
 
         likelihood = self.compute_likelihood(curr_r_TNT,
-                                                mu_rTNT_T,
-                                                mu_rTNT_NT,
-                                                sigma_rTNT_T,
-                                                sigma_rTNT_NT)
+                                             mu_rTNT_T,
+                                             mu_rTNT_NT,
+                                             sigma_rTNT_T,
+                                             sigma_rTNT_NT)
         print(likelihood)
-        self.signal_new_likelihoodFunction_result.emit(likelihood)
+        self.sig_new_likelihood.emit(likelihood)
 
     def covariances_EP(self, X, P):
         """
@@ -70,19 +74,13 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
     def distance_riemann(self, A, B):
         """Riemannian distance between two covariance matrices A and B.
         .. math::
-        d = {\left( \sum_i \log(\lambda_i)^2 \\right)}^{-1/2}
-
+                d = {\left( \sum_i \log(\lambda_i)^2 \\right)}^{-1/2}
         where :math:`\lambda_i` are the joint eigenvalues of A and B
-
         :param A: First covariance matrix
         :param B: Second covariance matrix
         :returns: Riemannian distance between A and B
-
         """
-        # TODO SHIT THERE!!!!!!!!!!
-        l_logsquare = np.sum(np.log(eigvalsh(A, B))**2)
-
-        return np.sqrt(l_logsquare)
+        return np.sqrt((np.log(eigvalsh(A, B))**2).sum())
 
     def compute_likelihood(self, l_r_TNT,  l_mu_TNT_T, l_mu_TNT_NT, l_sigma_TNT_T, l_sigma_TNT_NT):
 
@@ -102,71 +100,80 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
 
         return np.array([lf0, lf1])
 
-    def _init_Template_Riemann(self,Template_H5Filename):
-        
+    def _init_Template_Riemann(self, Template_H5Filename):
+
         self.f = h5py.File(Template_H5Filename, 'r')
-            
+
         print('## Lecture du fichier {}'.format(Template_H5Filename))
-        
+
         self.dict = {}
         for element in self.f:
             groupe = self.f[element]
-                        
+
             for element in groupe:
                 self.dict[element] = groupe[element]
-                
+
         self.TemplateRiemann = self.dict
 
+    def _init_zmq_pub(self):
+    
+        self.context_pub = zmq.Context()
+        self.zmq_pub = self.context_pub.socket(zmq.REP)    
+        self.zmq_pub.bind('tcp://127.0.0.1:5555')  
+        
+        self.TabLF = ""
+        self.NbFlashs = 0
+        self.CountEpoch = 0
+
     @QtCore.pyqtSlot(np.ndarray)
-    def pub_send_Likelihood(self,Likelihood):
+    def on_new_likelihood(self, Likelihood):
         """
         within a QtSlot function, use sender() method returns a ref on signal sender instance object (the object connected to this slot).
         this way, we can have a single slot function (callback function) for several objects. 
         (both player1 and player2's signal_new_classifier_result are connected to this slot)
-        
+
         """
-        
+
         sender = self.sender()
-        
+
         self.player0_Likelihood = Likelihood
 #        LikelihoodCurr =  "{0:.6f}".format(float(self.player0_Likelihood[0])) + "\t" +  "{0:.6f}".format(float(self.player0_Likelihood[1])) + "\n"
 
+        self.TabLF = self.TabLF + \
+            "{0:.6f}".format(float(self.player0_Likelihood[0])) + ";"
+        self.TabLF = self.TabLF + \
+            "{0:.6f}".format(float(self.player0_Likelihood[1])) + ";"
 
-        
-        
-        self.TabLF = self.TabLF + "{0:.6f}".format(float(self.player0_Likelihood[0])) + ";"
-        self.TabLF = self.TabLF + "{0:.6f}".format(float(self.player0_Likelihood[1])) + ";"
-        
         self.CountEpoch = self.CountEpoch + 1
-        
+
 #        print(".CountEpoch",self.CountEpoch)
-        
-        
-        
+
         try:
             self.message = self.zmq_pub.recv(flags=zmq.NOBLOCK)
             print("Message Received EEG Epoch  ", self.message)
             print("CountEpoch current  ", self.CountEpoch)
 
-            if (int(self.message)>0 and int(self.message)<120):
-                self.NbFlashs = int(self.message);
+            if (int(self.message) > 0 and int(self.message) < 120):
+                self.NbFlashs = int(self.message)
                 self.message = ""
-                
+
         except zmq.ZMQError:
             self.message = ""
-        
-        if ((self.NbFlashs>0) and (self.CountEpoch == self.NbFlashs)):
-            scipy.io.savemat('D:\Dycog\Dev_Python\LF.mat', mdict={'LF': self.TabLF[0:-1] })
-#            print('           ----------------               Send to unity (EEG Epoch)')
+
+        if ((self.NbFlashs > 0) and (self.CountEpoch == self.NbFlashs)):
+
+            #            print('           ----------------               Send to unity (EEG Epoch)')
             TabXY = np.ones(self.NbFlashs*24)*800
             self.TabGaze = ""
             for i in range(len(TabXY)):
-                self.TabGaze = self.TabGaze + "{0:.6f}".format(TabXY[i]) + ";" 
-        
+                self.TabGaze = self.TabGaze + "{0:.6f}".format(TabXY[i]) + ";"
+
             # MSGRES = self.zmq_pub.send('100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100' + '|' + self.TabLF[0:-1])
             MSGRES = self.zmq_pub.send(self.TabGaze[0:-1] + '|' + self.TabLF[0:-1])
-            print('           ----------------               Send to unity (EEG Epoch) :', MSGRES)
+            
+            print('Send to unity (EEG Epoch) :', MSGRES)
+            
             self.TabGaze = ""
             self.TabLF = ""
-            self.CountEpoch =0
-            self.NbFlashs =0    
+            self.CountEpoch = 0
+            self.NbFlashs = 0
