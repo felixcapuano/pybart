@@ -5,43 +5,9 @@ import time
 import psutil
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pypline.mybpypeline import MybPypeline
+from pipline.mybpypeline import MybPypeline
 from streamhandler import StreamHandler
 from ui_configpanel import Ui_ConfigPanel
-
-
-class ProcessDetector(QtCore.QThread):
-
-    _process_waited = []
-    _process_running = []
-    refresh_time = 2
-
-    _mutex = QtCore.QMutex()
-
-    process_detected = QtCore.pyqtSignal(list)
-
-    def set_process_waited(self, pw):
-        self._process_waited = pw
-
-    def run(self):
-        while True:
-            try:
-                self._mutex.lock()
-                last_process_running = self._process_running
-
-                self._process_running = []
-                for process in psutil.process_iter():
-                    if process.name() in self._process_waited:
-                        self._process_running.append(process.name())
-                self._mutex.unlock()
-                if last_process_running != self._process_running:
-                    self.process_detected.emit(self._process_running)
-                
-                time.sleep(self.refresh_time)
-            except: pass
-
-    def stop(self):
-        self.terminate()
 
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
@@ -52,24 +18,15 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.error_dialog = QtWidgets.QErrorMessage()
 
         self.setupUi(self)
-        self.init_thread()
         self.connect_ui()
+
+        self.load_configuration()
+        self.fill_combo_program()
 
         self.simul_file = 'No File Selected'
 
-    def init_thread(self):
-        """This function initialise the process detector
-
-        - load configuration.json file
-        - initialise ProcessDetector who checking if programm listed in configuration.json is running
-
-        """
-        self.load_configuration()
-
-        self.process_detector = ProcessDetector()
-        self.process_detector.set_process_waited(
-            self.triggers_parameters.keys())
-        self.process_detector.start()
+        # select the pipline depending of the game running
+        self.pipline = MybPypeline()
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -79,8 +36,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.add_trig.clicked.connect(self.on_adding_trigger)
         self.del_trig.clicked.connect(self.on_deleting_trigger)
-
-        self.process_detector.process_detected.connect(self.on_new_process)
 
         self.combo_program.currentIndexChanged.connect(self.on_program)
 
@@ -123,6 +78,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             params[label]['max_stock'] = int(max_stock)
 
         return params
+        
+    def fill_combo_program(self):
+        self.combo_program.clear()
+        for setup in self.triggers_parameters.keys():
+            self.combo_program.addItem(setup)
 
     def on_simulation_file(self):
         self.dialog = QtWidgets.QFileDialog.getOpenFileName(self,
@@ -153,8 +113,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         control panel and initialise the pyacq web(StreamHandler)
 
         """
-        self.process_detector.stop()
-        
+
         try:
             # get the low and high frequency in float
             low_frequency = float(self.line_low_freq.text())
@@ -185,7 +144,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         if self.radio_BVRec.isChecked():
             self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
         else:
-            self.sh = StreamHandler(brainamp_host=host, brainamp_port=port, simulated=True, raw_file=self.simul_file)
+            self.sh = StreamHandler(None, None, simulated=True, raw_file=self.simul_file)
 
         try:
             self.sh.configuration(low_frequency,
@@ -209,15 +168,16 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
 
+
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
-
-        self.process_detector.start()
         
         self.sh.stop_node()
 
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
+
+        self.pipline.reset()
 
     def on_program(self):
         """This function is a slot whaiting for an index change
@@ -256,23 +216,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                                 QtGui.QTableWidgetItem(str(params['max_stock'])))
 
                 row_count = +1
-        
-        # select the pypline depending of the game running
-        self.pypline = MybPypeline()
 
         if self.combo_program.count() > 0:
             self.button_option.setEnabled(True)
         else:
             self.button_option.setEnabled(False)
-
-    def on_new_process(self, process_running):
-        """This function is a slot who received process running
-        from the thead(ProcessDetector)
-
-        """
-
-        self.combo_program.clear()
-        self.combo_program.addItems(process_running)
 
     # TODO set icon add modify method
     def on_adding_trigger(self):
@@ -294,8 +242,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        self.pypline.new_epochs_classifier(label, epochs)
-        # print(label)
+        self.pipline.new_epochs_classifier(label, epochs)
+        print(label)
 
 if __name__ == "__main__":
     import sys

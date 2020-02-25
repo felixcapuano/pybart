@@ -26,6 +26,28 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
     def init_template(self):
         self._init_Template_Riemann(self.template_path)
 
+    def _init_zmq_pub(self):
+        self.context_pub = zmq.Context()
+        self.zmq_pub = self.context_pub.socket(zmq.REP)    
+        self.zmq_pub.bind('tcp://127.0.0.1:5555')  
+        
+        self.reset()
+
+    
+    def _init_Template_Riemann(self, Template_H5Filename):
+        self.f = h5py.File(Template_H5Filename, 'r')
+
+        print('## Lecture du fichier {}'.format(Template_H5Filename))
+
+        self.dict = {}
+        for element in self.f:
+            groupe = self.f[element]
+
+            for element in groupe:
+                self.dict[element] = groupe[element]
+
+        self.TemplateRiemann = self.dict
+
     def new_epochs_classifier(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
         and bayes priors for myb games with dynamic bayesian classification
@@ -56,15 +78,11 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         self.sig_new_likelihood.emit(likelihood)
 
     def covariances_EP(self, X, P):
-        """
-        Covariances between two matrix
-        """
+        """Covariances between two matrix"""
         return np.cov(np.concatenate((X, P), axis=0))
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
-        """
-        Predict the r_TNT for a new set of trials.
-        """
+        """Predict the r_TNT for a new set of trials."""
 
         dist_T = self.distance_riemann(X, mu_MatCov_T)
         dist_NT = self.distance_riemann(X, mu_MatCov_NT)
@@ -100,80 +118,51 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
 
         return np.array([lf0, lf1])
 
-    def _init_Template_Riemann(self, Template_H5Filename):
 
-        self.f = h5py.File(Template_H5Filename, 'r')
 
-        print('## Lecture du fichier {}'.format(Template_H5Filename))
-
-        self.dict = {}
-        for element in self.f:
-            groupe = self.f[element]
-
-            for element in groupe:
-                self.dict[element] = groupe[element]
-
-        self.TemplateRiemann = self.dict
-
-    def _init_zmq_pub(self):
-    
-        self.context_pub = zmq.Context()
-        self.zmq_pub = self.context_pub.socket(zmq.REP)    
-        self.zmq_pub.bind('tcp://127.0.0.1:5555')  
-        
-        self.TabLF = ""
-        self.NbFlashs = 0
-        self.CountEpoch = 0
 
     @QtCore.pyqtSlot(np.ndarray)
-    def on_new_likelihood(self, Likelihood):
-        """
-        within a QtSlot function, use sender() method returns a ref on signal sender instance object (the object connected to this slot).
+    def on_new_likelihood(self, likelihood):
+        """Within a QtSlot function, use sender() method returns a ref on signal sender instance object (the object connected to this slot).
         this way, we can have a single slot function (callback function) for several objects. 
         (both player1 and player2's signal_new_classifier_result are connected to this slot)
 
         """
 
-        sender = self.sender()
+        # sender = self.sender()
 
-        self.player0_Likelihood = Likelihood
-#        LikelihoodCurr =  "{0:.6f}".format(float(self.player0_Likelihood[0])) + "\t" +  "{0:.6f}".format(float(self.player0_Likelihood[1])) + "\n"
+        self.tab_lf = self.tab_lf + "{0:.6f}".format(float(likelihood[0])) + ";"
+        self.tab_lf = self.tab_lf + "{0:.6f}".format(float(likelihood[1])) + ";"
+        self.count_epoch = self.count_epoch + 1
 
-        self.TabLF = self.TabLF + \
-            "{0:.6f}".format(float(self.player0_Likelihood[0])) + ";"
-        self.TabLF = self.TabLF + \
-            "{0:.6f}".format(float(self.player0_Likelihood[1])) + ";"
-
-        self.CountEpoch = self.CountEpoch + 1
-
-#        print(".CountEpoch",self.CountEpoch)
 
         try:
             self.message = self.zmq_pub.recv(flags=zmq.NOBLOCK)
-            print("Message Received EEG Epoch  ", self.message)
-            print("CountEpoch current  ", self.CountEpoch)
 
             if (int(self.message) > 0 and int(self.message) < 120):
-                self.NbFlashs = int(self.message)
+                self.nb_flash = int(self.message)
                 self.message = ""
 
         except zmq.ZMQError:
             self.message = ""
 
-        if ((self.NbFlashs > 0) and (self.CountEpoch == self.NbFlashs)):
 
-            #            print('           ----------------               Send to unity (EEG Epoch)')
-            TabXY = np.ones(self.NbFlashs*24)*800
-            self.TabGaze = ""
+        print(".count_epoch {} :: .nb_flash {}".format( self.count_epoch, self.nb_flash))
+        if ((self.nb_flash > 0) and (self.count_epoch == self.nb_flash)):
+
+            TabXY = np.ones(self.nb_flash*24)*800
+            self.tab_gaze = ""
             for i in range(len(TabXY)):
-                self.TabGaze = self.TabGaze + "{0:.6f}".format(TabXY[i]) + ";"
+                self.tab_gaze = self.tab_gaze + "{0:.6f}".format(TabXY[i]) + ";"
 
-            # MSGRES = self.zmq_pub.send('100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100' + '|' + self.TabLF[0:-1])
-            MSGRES = self.zmq_pub.send(self.TabGaze[0:-1] + '|' + self.TabLF[0:-1])
+            MSGRES = self.zmq_pub.send_string(self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1])
             
             print('Send to unity (EEG Epoch) :', MSGRES)
             
-            self.TabGaze = ""
-            self.TabLF = ""
-            self.CountEpoch = 0
-            self.NbFlashs = 0
+            self.reset()
+
+    def reset(self):
+        self.tab_gaze = ""
+        self.tab_lf = ""
+        self.count_epoch = 0
+        self.nb_flash = 0

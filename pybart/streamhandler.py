@@ -39,35 +39,19 @@ class StreamHandler(QtCore.QObject):
     def simulated_device(self):
         # Simulator EEG data Acquisition Node
 
-        dev = RawDeviceBuffer()
+        dev_sim = RawDeviceBuffer()
         try:
-            dev.configure(raw_file=self.raw_file, chunksize=10)
+            dev_sim.configure(raw_file=self.raw_file, chunksize=10)
         except ValueError as e:
             raise ValueError('{}'.format(e))
 
-        dev.outputs['triggers'].configure(protocol='tcp',
-                                          interface='127.0.0.1',
-                                          transfermode='plaindata',)
-        dev.outputs['signals'].configure(protocol='tcp',
-                                         interface='127.0.0.1',
-                                         transfermode='plaindata',)
-        dev.initialize()
-
-        return dev
+        return dev_sim
 
     def brain_amp_device(self):
         # EEG data Acquisition Node
         dev_amp = BrainAmpSocket()
         dev_amp.configure(brainamp_host=self.brainamp_host,
                           brainamp_port=self.brainamp_port)
-
-        dev_amp.outputs['triggers'].configure(protocol='tcp',
-                                              interface='127.0.0.1',
-                                              transfermode='plaindata',)
-        dev_amp.outputs['signals'].configure(protocol='tcp',
-                                             interface='127.0.0.1',
-                                             transfermode='plaindata',)
-        dev_amp.initialize()
 
         return dev_amp
 
@@ -84,6 +68,13 @@ class StreamHandler(QtCore.QObject):
         else:
             dev = self.brain_amp_device()
 
+        dev.outputs['triggers'].configure(protocol='tcp',
+                                          interface='127.0.0.1',
+                                          transfermode='plaindata',)
+        dev.outputs['signals'].configure(protocol='tcp',
+                                         interface='127.0.0.1',
+                                         transfermode='plaindata',)
+        dev.initialize()
         self.nodes['device'] = dev
 
         # Filter Node
