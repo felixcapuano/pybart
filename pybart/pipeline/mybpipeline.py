@@ -4,8 +4,8 @@ import zmq
 from pyqtgraph.Qt import QtCore
 from scipy.linalg import eigvalsh
 
-from pipline.toolbox.riemann import distance_riemann
-from pipline.toolbox.covariance import covariances_EP
+from .toolbox.riemann import distance_riemann
+from .toolbox.covariance import covariances_EP
 
 class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 

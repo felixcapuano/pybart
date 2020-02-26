@@ -2,35 +2,39 @@ import mne
 import numpy as np
 import scipy
 
-from toolbox.covariance import matCov
-from toolbox.riemann import mean_riemann
-from toolbox.utils import compute_rTNT
+from .toolbox.covariance import matCov
+from .toolbox.riemann import mean_riemann
+from .toolbox.varioustools import compute_rTNT
 
 
 def riemann_template_learn(file_complete_path):
 
     # reading the raw brainvison file .vhdr
-    raw = mne.io.read_raw_brainvision(file_complete_path, preload=True)
+    raw = mne.io.read_raw_brainvision(file_complete_path, preload=True, verbose=False)
 
     # deleting the first market(unused)
     raw.annotations.delete(0)
 
     # converting annotations from the raw to events for epoching
-    raw_events, raw_events_id = mne.events_from_annotations(raw)
+    raw_events, raw_events_id = mne.events_from_annotations(raw, verbose=False)
 
     # applying a filter TODO  Need to be approved
     raw_filtered = raw.filter(.5, 20.)
 
-    # epoching TODO Weird value tmin tmax
-    epochs = mne.Epochs(raw_filtered, raw_events, raw_events_id, tmin=
-                        0.00, tmax=0.599, reject_by_annotation=False, preload=True)
+    # epoching
+    epochs = mne.Epochs(raw_filtered, raw_events, raw_events_id,
+                            tmin=-0.001, tmax=0.599,
+                            reject_by_annotation=False, 
+                            preload=True, verbose=False)
+                            
+    # crop negative time
+    epochs.crop(tmin=0)
 
     # setting of the calibration sequence
     calib_target_sequence = [7, 4, 2, 6, 3, 1, 5, 1, 4, 3, 7, 6, 2, 5, 2, 5, 7, 1, 6, 3, 4]
 
     # marking the targeted events
-    raw_events_targeted = marking_target_events(
-        raw_events, calib_target_sequence)
+    raw_events_targeted = marking_target_events(raw_events, calib_target_sequence)
 
     # get index of epochs above threshold
     epochs_to_remove = get_index_reject_epochs(epochs=epochs, rejection_rate=0.1)

@@ -4,7 +4,7 @@ import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pipline.mybpipeline import MybPipeline
+from pipeline.mybpipeline import MybPipeline
 from streamhandler import StreamHandler
 from ui_configpanel import Ui_ConfigPanel
 
@@ -24,8 +24,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.simul_file = 'No File Selected'
 
-        # select the pipline depending of the game running
-        self.pipline = MybPipeline()
+        # select the pipeline depending of the game running
+        self.pipeline = MybPipeline()
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -176,7 +176,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
 
-        self.pipline.reset()
+        self.pipeline.reset()
 
     def on_program(self):
         """This function is a slot whaiting for an index change
@@ -241,8 +241,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        self.pipline.new_epochs_classifier(label, epochs)
-        print(label)
+        self.pipeline.new_epochs_classifier(label, epochs)
+        print(label, epochs.shape)
 
 if __name__ == "__main__":
     import sys
