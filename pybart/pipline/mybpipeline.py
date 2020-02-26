@@ -4,8 +4,10 @@ import zmq
 from pyqtgraph.Qt import QtCore
 from scipy.linalg import eigvalsh
 
+from pipline.toolbox.riemann import distance_riemann
+from pipline.toolbox.covariance import covariances_EP
 
-class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
+class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
     sig_new_likelihood = QtCore.pyqtSignal(np.ndarray)
 
@@ -36,8 +38,6 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
     
     def _init_Template_Riemann(self, Template_H5Filename):
         self.f = h5py.File(Template_H5Filename, 'r')
-
-        print('## Lecture du fichier {}'.format(Template_H5Filename))
 
         self.dict = {}
         for element in self.f:
@@ -77,10 +77,6 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         print(likelihood)
         self.sig_new_likelihood.emit(likelihood)
 
-    def covariances_EP(self, X, P):
-        """Covariances between two matrix"""
-        return np.cov(np.concatenate((X, P), axis=0))
-
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""
 
@@ -88,17 +84,6 @@ class MybPypeline(QtCore.QObject):  # inherits QObject to send signals
         dist_NT = self.distance_riemann(X, mu_MatCov_NT)
 
         return np.log(dist_T / dist_NT)
-
-    def distance_riemann(self, A, B):
-        """Riemannian distance between two covariance matrices A and B.
-        .. math::
-                d = {\left( \sum_i \log(\lambda_i)^2 \\right)}^{-1/2}
-        where :math:`\lambda_i` are the joint eigenvalues of A and B
-        :param A: First covariance matrix
-        :param B: Second covariance matrix
-        :returns: Riemannian distance between A and B
-        """
-        return np.sqrt((np.log(eigvalsh(A, B))**2).sum())
 
     def compute_likelihood(self, l_r_TNT,  l_mu_TNT_T, l_mu_TNT_NT, l_sigma_TNT_T, l_sigma_TNT_NT):
 

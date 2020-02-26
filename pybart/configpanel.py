@@ -2,10 +2,9 @@ import json
 import os.path
 import time
 
-import psutil
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pipline.mybpypeline import MybPypeline
+from pipline.mybpipeline import MybPipeline
 from streamhandler import StreamHandler
 from ui_configpanel import Ui_ConfigPanel
 
@@ -26,7 +25,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.simul_file = 'No File Selected'
 
         # select the pipline depending of the game running
-        self.pipline = MybPypeline()
+        self.pipline = MybPipeline()
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
