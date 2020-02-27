@@ -57,7 +57,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
         ERP_template_target = self.TemplateRiemann['mu_Epoch_T'][...]
 
-        self.covmats = self.covariances_EP(epoch, ERP_template_target)
+        self.covmats = covariances_EP(epoch, ERP_template_target)
 
         matCov_T = self.TemplateRiemann['mu_MatCov_T'][...]
         matCov_NT = self.TemplateRiemann['mu_MatCov_NT'][...]
@@ -80,8 +80,8 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""
 
-        dist_T = self.distance_riemann(X, mu_MatCov_T)
-        dist_NT = self.distance_riemann(X, mu_MatCov_NT)
+        dist_T = distance_riemann(X, mu_MatCov_T)
+        dist_NT = distance_riemann(X, mu_MatCov_NT)
 
         return np.log(dist_T / dist_NT)
 

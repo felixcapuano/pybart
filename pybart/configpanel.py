@@ -238,6 +238,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                                        self.tr("Open Template"),
                                                        "TemplateRiemann/",
                                                        self.tr("Image Files (*.h5)"))
+        self.pipeline.set_template_name(self.dialog[0])
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""

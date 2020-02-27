@@ -8,6 +8,13 @@ from .toolbox.varioustools import compute_rTNT
 
 
 def riemann_template_learn(file_complete_path):
+    """This function is generating a riemann template.
+
+    It take one .vhdr path in argument and return
+    a dict containing all calibration data.
+
+    Riemann template is use to calibrate the MYB game.
+    """
 
     # reading the raw brainvison file .vhdr
     raw = mne.io.read_raw_brainvision(file_complete_path, preload=True, verbose=False)
@@ -19,16 +26,17 @@ def riemann_template_learn(file_complete_path):
     raw_events, raw_events_id = mne.events_from_annotations(raw, verbose=False)
 
     # applying a filter TODO  Need to be approved
+    iir_params = dict(order=2, ftype='butter', output='sos')  
+    iir_params = mne.filter.construct_iir_filter(iir_params, f_pass=[.5, .20], sfreq=raw.info['sfreq'], btype='band') 
+    return
     raw_filtered = raw.filter(.5, 20.)
 
     # epoching
     epochs = mne.Epochs(raw_filtered, raw_events, raw_events_id,
-                            tmin=-0.001, tmax=0.599,
+                            tmin=0, tmax=0.600,
+                            baseline=None,
                             reject_by_annotation=False, 
                             preload=True, verbose=False)
-                            
-    # crop negative time
-    epochs.crop(tmin=0)
 
     # setting of the calibration sequence
     calib_target_sequence = [7, 4, 2, 6, 3, 1, 5, 1, 4, 3, 7, 6, 2, 5, 2, 5, 7, 1, 6, 3, 4]
@@ -101,6 +109,7 @@ def riemann_template_learn(file_complete_path):
 
 
 def marking_target_events(raw_events, sequence_target):
+    """This function marks targeted events thanks to a list of index"""
 
     # calculate the number of flash per sequence
     flash_per_sequence = len(raw_events) / len(sequence_target)
@@ -126,6 +135,7 @@ def marking_target_events(raw_events, sequence_target):
 
 
 def get_index_reject_epochs(epochs, rejection_rate):
+    """This function removes Epochs from the Mne.Epochs object according a rate"""
 
     # get raw data from the epochs
     data = epochs.get_data()
