@@ -20,7 +20,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
         self.sig_new_likelihood.connect(self.on_new_likelihood)
 
-        self._init_zmq_pub()
+        # self._init_zmq_pub()
 
     def set_template_name(self, template_path):
         self.template_path = template_path
@@ -48,7 +48,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
         self.TemplateRiemann = self.dict
 
-    def new_epochs_classifier(self, label, epochs):
+    def new_epochs(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
         and bayes priors for myb games with dynamic bayesian classification
 

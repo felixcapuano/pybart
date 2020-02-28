@@ -11,6 +11,9 @@ from ui_configpanel import Ui_ConfigPanel
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
+    _pipeline = {'MYB': MybPipeline()}
+
+
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
 
@@ -20,11 +23,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.connect_ui()
 
         self.load_configuration()
-        self.fill_combo_program()
+        self.fill_combo_setup()
+        self.init_pipeline()
 
         self.simul_file = 'No File Selected'
 
-        # select the pipeline depending of the game running
         self.pipeline = MybPipeline()
 
     def connect_ui(self):
@@ -36,14 +39,18 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.add_trig.clicked.connect(self.on_adding_trigger)
         self.del_trig.clicked.connect(self.on_deleting_trigger)
 
-        self.combo_program.currentIndexChanged.connect(self.on_program)
+        self.combo_setup.currentIndexChanged.connect(self.on_new_setup)
 
-        self.button_option.clicked.connect(self.on_select_template)
+        self.button_settings.clicked.connect(self.on_settings)
+
+        self.combo_pipeline.currentIndexChanged.connect(self.on_select_pipeline)
 
         self.button_file_simulated.clicked.connect(self.on_simulation_file)
 
         self.radio_BVRec.toggled.connect(self.on_select_BVRec)
         self.radio_simulate.toggled.connect(self.on_select_simulate)
+
+        self.action_MYBcalibration.triggered.connect(self.on_myb_calibration)
 
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
@@ -78,18 +85,18 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         return params
         
-    def fill_combo_program(self):
-        self.combo_program.clear()
+    def fill_combo_setup(self):
+        self.combo_setup.clear()
         for setup in self.triggers_parameters.keys():
-            self.combo_program.addItem(setup)
+            self.combo_setup.addItem(setup)
 
     def on_simulation_file(self):
-        self.dialog = QtWidgets.QFileDialog.getOpenFileName(self,
+        self.dialog_simul = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "eeg_data_sample/",
                                                        self.tr("Image Files (*.vhdr)"))
-        if self.dialog[0] is not '':
-            self.simul_file = str(self.dialog[0])
+        if self.dialog_simul[0] is not '':
+            self.simul_file = str(self.dialog_simul[0])
             
         self.label_filename.setText(os.path.basename(self.simul_file))
 
@@ -106,6 +113,15 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.frame_select_file.setEnabled(True)
         else:
             self.frame_select_file.setEnabled(False)
+
+    def on_myb_calibration(self):
+        print('calibration')
+        self.dialog_simul = QtWidgets.QFileDialog.getOpenFileName(self,
+                                                       self.tr("Open Template"),
+                                                       "eeg_data_sample/",
+                                                       self.tr("Image Files (*.vhdr)"))
+        if self.dialog_simul[0] is not '':
+            self.pipeline.set_template_name(self.dialog_simul[0])
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
@@ -178,7 +194,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.pipeline.reset()
 
-    def on_program(self):
+    def on_new_setup(self):
         """This function is a slot whaiting for an index change
         from the comboBox.
         -delete all row
@@ -190,7 +206,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.table_trigs_params.setRowCount(0)
 
         # fill table with triggers parameters according to the current programm
-        program = self.combo_program.currentText()
+        program = self.combo_setup.currentText()
         if program != "":
             triggers = self.triggers_parameters[program]
 
@@ -216,10 +232,16 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
                 row_count = +1
 
-        if self.combo_program.count() > 0:
-            self.button_option.setEnabled(True)
+    def on_select_pipeline(self):
+        """This function is a slot modifying the pipeline"""
+
+        self.pipeline = self._pipeline[self.combo_pipeline.currentText()]
+        
+        if self.combo_pipeline.count() == 0:
+            self.button_settings.setEnabled(False)
         else:
-            self.button_option.setEnabled(False)
+            self.button_settings.setEnabled(True)
+        
 
     # TODO set icon add modify method
     def on_adding_trigger(self):
@@ -229,20 +251,24 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     def on_deleting_trigger(self):
         self.table_trigs_params.removeRow(0)
 
-    def on_select_template(self):
+    def on_settings(self):
         """This function is a slot who open a open file window
         and set the name of the file selected in the label
 
         """
-        self.dialog = QtWidgets.QFileDialog.getOpenFileName(self,
+        self.dialog_template = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "TemplateRiemann/",
                                                        self.tr("Image Files (*.h5)"))
-        self.pipeline.set_template_name(self.dialog[0])
+        if self.dialog_template[0] is not '':
+            self.pipeline.set_template_name(self.dialog_template[0])
+
+    def init_pipeline(self):
+        self.combo_pipeline.addItems(self._pipeline.keys())
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        self.pipeline.new_epochs_classifier(label, epochs)
+        self.pipeline.new_epochs(label, epochs)
         print(label, epochs.shape)
 
 if __name__ == "__main__":

@@ -27,13 +27,12 @@ def riemann_template_learn(file_complete_path):
 
     # applying a filter TODO  Need to be approved
     iir_params = dict(order=2, ftype='butter', output='sos')  
-    iir_params = mne.filter.construct_iir_filter(iir_params, f_pass=[.5, .20], sfreq=raw.info['sfreq'], btype='band') 
-    return
-    raw_filtered = raw.filter(.5, 20.)
+    iir_params = mne.filter.construct_iir_filter(iir_params, f_pass=[.5, 20], sfreq=raw.info['sfreq'], btype='bandpass', verbose=False) 
+    raw_filtered = raw.filter(None, None, iir_params=iir_params, method='iir')
 
     # epoching
     epochs = mne.Epochs(raw_filtered, raw_events, raw_events_id,
-                            tmin=0, tmax=0.600,
+                            tmin=0.001, tmax=0.600,
                             baseline=None,
                             reject_by_annotation=False, 
                             preload=True, verbose=False)
@@ -94,16 +93,33 @@ def riemann_template_learn(file_complete_path):
 
     riemann_template = {}
     riemann_template['mu_Epoch_T'] = ERP_Template_Target
+    print('ERP_Template_Target',ERP_Template_Target.shape)
     riemann_template['mu_Epoch_NT'] = ERP_Template_NoTarget
+    print('ERP_Template_NoTarget',ERP_Template_NoTarget.shape)
     riemann_template['var_Epoch_T'] = VarERP_Template_Target
+    print('VarERP_Template_Target',VarERP_Template_Target.shape)
     riemann_template['var_Epoch_NT'] = VarERP_Template_NoTarget
+    print('VarERP_Template_NoTarget',VarERP_Template_NoTarget.shape)
     riemann_template['mu_MatCov_T'] = mean_MatCov_Target
+    print('mean_MatCov_Target',mean_MatCov_Target.shape)
     riemann_template['mu_MatCov_NT'] = mean_MatCov_NoTarget
+    print('mean_MatCov_NoTarget',mean_MatCov_NoTarget.shape)
     riemann_template['mu_rTNT_T'] = Mu_rTNT_TrialTarget
+    print('Mu_rTNT_TrialTarget',Mu_rTNT_TrialTarget)
     riemann_template['mu_rTNT_NT'] = Mu_rTNT_TrialNoTarget
+    print('Mu_rTNT_TrialNoTarget',Mu_rTNT_TrialNoTarget)
     riemann_template['sigma_rTNT_T'] = Var_rTNT_TtrialTarget
+    print('Var_rTNT_TtrialTarget',Var_rTNT_TtrialTarget)
     riemann_template['sigma_rTNT_NT'] = Var_rTNT_TrialNoTarget
+    print('Var_rTNT_TrialNoTarget',Var_rTNT_TrialNoTarget)
     riemann_template['AccP300'] = AccP300
+    print('AccP300',AccP300)
+
+    # np.savetxt("dump/mean_MatCov_Target.txt", mean_MatCov_Target, fmt='%8.1e')
+    # np.savetxt("dump/mean_MatCov_NoTarget.txt", mean_MatCov_NoTarget, fmt='%8.1e')
+
+    np.savetxt("dump/ERP_Template_Target.txt", ERP_Template_Target, fmt='%8.1e')
+    np.savetxt("dump/ERP_Template_NoTarget.txt", ERP_Template_NoTarget, fmt='%8.1e')
 
     return riemann_template
 
@@ -157,7 +173,3 @@ def get_index_reject_epochs(epochs, rejection_rate):
     epochs_to_remove = np.where(epochs_maxvalue > threshold)[0]
 
     return epochs_to_remove
-
-
-path = "C:\\Users\\User\\Documents\\pybart\\eeg_data_sample\\CAPFE_0002.vhdr"
-riemann_template_learn(path)
