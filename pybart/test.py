@@ -1,6 +1,7 @@
 from pipeline.templatecalibration import riemann_template_learn
 import h5py
 import numpy as np
+import matplotlib.pyplot as plt
 
 def init_Template_Riemann( Template_H5Filename):
         f = h5py.File(Template_H5Filename, 'r')
@@ -31,8 +32,8 @@ for key, item in rt_h5.items():
     else:
         print(key, item.shape)
 
-np.savetxt("dump/mu_Epoch_T.txt", rt_h5['mu_Epoch_T'], fmt='%8.1e')
-np.savetxt("dump/mu_Epoch_NT.txt", rt_h5['mu_Epoch_NT'], fmt='%8.1e')
+# np.savetxt("dump/mu_Epoch_T.txt", rt_h5['mu_Epoch_T'], fmt='%8.1e')
+# np.savetxt("dump/mu_Epoch_NT.txt", rt_h5['mu_Epoch_NT'], fmt='%8.1e')
 
 # np.savetxt("dump/mu_MatCov_NT.txt", rt_h5['mu_MatCov_NT'], fmt='%8.1e')
 # np.savetxt("dump/mu_MatCov_T.txt", rt_h5['mu_MatCov_T'], fmt='%8.1e')

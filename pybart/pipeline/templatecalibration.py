@@ -1,6 +1,7 @@
 import mne
 import numpy as np
 import scipy
+import matplotlib.pyplot as plt
 
 from .toolbox.covariance import matCov
 from .toolbox.riemann import mean_riemann
@@ -65,8 +66,10 @@ def riemann_template_learn(file_complete_path):
 
     epochs_T = np.array(epochs_T)
     epochs_NT = np.array(epochs_NT)
-
+    
     ERP_Template_Target = np.mean(epochs_T, axis=0)
+    plt.plot(ERP_Template_Target[0,:])
+    return
     ERP_Template_NoTarget = np.mean(epochs_NT, axis=0)
 
     VarERP_Template_Target = np.var(epochs_T, axis=0)
@@ -118,8 +121,8 @@ def riemann_template_learn(file_complete_path):
     # np.savetxt("dump/mean_MatCov_Target.txt", mean_MatCov_Target, fmt='%8.1e')
     # np.savetxt("dump/mean_MatCov_NoTarget.txt", mean_MatCov_NoTarget, fmt='%8.1e')
 
-    np.savetxt("dump/ERP_Template_Target.txt", ERP_Template_Target, fmt='%8.1e')
-    np.savetxt("dump/ERP_Template_NoTarget.txt", ERP_Template_NoTarget, fmt='%8.1e')
+    # np.savetxt("dump/ERP_Template_Target.txt", ERP_Template_Target, fmt='%8.1e')
+    # np.savetxt("dump/ERP_Template_NoTarget.txt", ERP_Template_NoTarget, fmt='%8.1e')
 
     return riemann_template
 
