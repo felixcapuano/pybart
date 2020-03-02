@@ -24,13 +24,22 @@ print('')
 print('------------------------------------------')
 print('reading old file .h5')
 print('------------------------------------------')
-path_h5 = "C:\\Users\\User\\Documents\\pybart\\TemplateRiemann\\Template_CAPFE_0002.vhdr.h5"
+path_h5 = "C:\\Users\\User\\Documents\\pybart\\TemplateRiemann\\Template_CAPFE_0002_original.vhdr.h5"
+
 rt_h5 = init_Template_Riemann(path_h5)
-for key, item in rt_h5.items():
-    if item.shape == np.shape([0]):
-        print(key, item[0])
-    else:
-        print(key, item.shape)
+
+
+plt.plot(rt_vhdr[1,:], 'b')
+plt.plot(rt_h5['mu_Epoch_T'][1,:], 'r')
+plt.show()
+
+
+# for key, item in rt_h5.items():
+#     if item.shape == np.shape([0]):
+#         print(key, item[0])
+#     else:
+#         print(key, item.shape)
+
 
 # np.savetxt("dump/mu_Epoch_T.txt", rt_h5['mu_Epoch_T'], fmt='%8.1e')
 # np.savetxt("dump/mu_Epoch_NT.txt", rt_h5['mu_Epoch_NT'], fmt='%8.1e')

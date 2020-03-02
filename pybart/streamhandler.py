@@ -129,40 +129,14 @@ class StreamHandler(QtCore.QObject):
     def stop_node(self):
         """Stop all nodes and close all widget nodes"""
         for node in self.nodes.values():
-            node.stop()
+            if node.running():
+                node.stop()
 
         for widget_node in self.widget_nodes:
-            self.nodes[widget_node].close()
+            if not self.nodes[widget_node].closed():
+                self.nodes[widget_node].close()
 
     def set_slot_new_epochs(self, slot_on_new_chunk):
         """This function set the output slot for each epoch stack """
 
         self.nodes['epochermultilabel'].new_chunk.connect(slot_on_new_chunk)
-
-    # def noise_generator_node(self, nbr_channel=1):
-    #     """
-    #     Noise Generator Node
-    #     """
-    #     ng = NoiseGenerator()
-    #     ng.configure()
-    #     ng.output.configure(protocol='tcp', transfermode='plaindata')
-    #     ng.initialize()
-
-    #     self._simulation_node.append(ng)
-
-    #     return ng.output
-
-    # def trigger_emulator_node(self):
-    #     """
-    #     Triggers Laucher Node
-    #     """
-    #     te = TriggerEmulator()
-    #     te.configure()
-    #     te.outputs['triggers'].configure(
-    #         protocol='tcp', transfermode='plaindata',)
-    #     te.initialize()
-    #     te.show()
-
-    #     self._simulation_node.append(te)
-
-    #     return te.output

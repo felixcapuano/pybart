@@ -1,9 +1,11 @@
+import os.path
+
 import mne
 import numpy as np
 import scipy
-import matplotlib.pyplot as plt
 
 from .toolbox.covariance import matCov
+from .toolbox.h5file import writeH5FileTemplate
 from .toolbox.riemann import mean_riemann
 from .toolbox.varioustools import compute_rTNT
 
@@ -30,10 +32,11 @@ def riemann_template_learn(file_complete_path):
     iir_params = dict(order=2, ftype='butter', output='sos')  
     iir_params = mne.filter.construct_iir_filter(iir_params, f_pass=[.5, 20], sfreq=raw.info['sfreq'], btype='bandpass', verbose=False) 
     raw_filtered = raw.filter(None, None, iir_params=iir_params, method='iir')
+    # raw_filtered = raw.filter(.5,20)
 
     # epoching
     epochs = mne.Epochs(raw_filtered, raw_events, raw_events_id,
-                            tmin=0.001, tmax=0.600,
+                            tmin=0.000, tmax=0.599,
                             baseline=None,
                             reject_by_annotation=False, 
                             preload=True, verbose=False)
@@ -66,10 +69,11 @@ def riemann_template_learn(file_complete_path):
 
     epochs_T = np.array(epochs_T)
     epochs_NT = np.array(epochs_NT)
+
+    epochs_T *= 1e6
+    epochs_NT *= 1e6
     
     ERP_Template_Target = np.mean(epochs_T, axis=0)
-    plt.plot(ERP_Template_Target[0,:])
-    return
     ERP_Template_NoTarget = np.mean(epochs_NT, axis=0)
 
     VarERP_Template_Target = np.var(epochs_T, axis=0)
@@ -152,7 +156,6 @@ def marking_target_events(raw_events, sequence_target):
 
     return raw_events
 
-
 def get_index_reject_epochs(epochs, rejection_rate):
     """This function removes Epochs from the Mne.Epochs object according a rate"""
 
@@ -176,3 +179,18 @@ def get_index_reject_epochs(epochs, rejection_rate):
     epochs_to_remove = np.where(epochs_maxvalue > threshold)[0]
 
     return epochs_to_remove
+    
+def generate_template(raw_file):
+    
+    # TODO check if raw
+    extension = os.path.splitext(raw_file)[1]
+    if extension != '.vhdr':
+        raise ValueError("{} file not supported".format(raw_file))
+
+    # gen template
+    riemann_template = riemann_template_learn(raw_file)
+
+    # get file
+    raw_name = os.path.basename(raw_file)
+    h5_name = "TemplateRiemann\\Template_{}.h5".format(raw_name)
+    writeH5FileTemplate(riemann_template, h5_name)

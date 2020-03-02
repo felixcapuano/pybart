@@ -1,11 +1,14 @@
+import os
+
 import h5py
 import numpy as np
 import zmq
 from pyqtgraph.Qt import QtCore
 from scipy.linalg import eigvalsh
 
-from .toolbox.riemann import distance_riemann
 from .toolbox.covariance import covariances_EP
+from .toolbox.riemann import distance_riemann
+
 
 class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
@@ -23,10 +26,15 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         # self._init_zmq_pub()
 
     def set_template_name(self, template_path):
-        self.template_path = template_path
+        extension = os.path.splitext(template_path)[1]
+        if extension == '.vhdr':
+            self.template_path = template_path
+        else:
+            raise ValueError("{} file not supported".format(template_path))
 
     def init_template(self):
-        self._init_Template_Riemann(self.template_path)
+        self._load_Template_Riemann(self.template_path)
+        
 
     def _init_zmq_pub(self):
         self.context_pub = zmq.Context()
@@ -35,8 +43,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         
         self.reset()
 
-    
-    def _init_Template_Riemann(self, Template_H5Filename):
+    def _load_Template_Riemann(self, Template_H5Filename):
         self.f = h5py.File(Template_H5Filename, 'r')
 
         self.dict = {}
@@ -102,9 +109,6 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         lf1 = - 0.5 * (Vec1 + ld1)
 
         return np.array([lf0, lf1])
-
-
-
 
     @QtCore.pyqtSlot(np.ndarray)
     def on_new_likelihood(self, likelihood):

@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pipeline.mybpipeline import MybPipeline
 from streamhandler import StreamHandler
 from ui_configpanel import Ui_ConfigPanel
+from pipeline.templatecalibration import generate_template
 
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
@@ -115,13 +116,16 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.frame_select_file.setEnabled(False)
 
     def on_myb_calibration(self):
-        print('calibration')
+
         self.dialog_simul = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "eeg_data_sample/",
                                                        self.tr("Image Files (*.vhdr)"))
         if self.dialog_simul[0] is not '':
-            self.pipeline.set_template_name(self.dialog_simul[0])
+            try:
+                generate_template(self.dialog_simul[0])
+            except ValueError as e:
+                self.error_dialog.showMessage(e)
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
