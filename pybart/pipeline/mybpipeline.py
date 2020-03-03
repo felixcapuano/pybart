@@ -51,7 +51,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
             # save the port selectedby zmq
             self.port = self.myb_socket.bind_to_random_port("tcp://127.0.0.1", min_port=49152, max_port=65536, max_tries=100)
         else:
-            self.myb_socket.bind('tcp://127.0.0.1:{}'.format(port))
+            self.myb_socket.bind("tcp://127.0.0.1:{}".format(port))
             self.port = port
 
         print(self.port)
@@ -88,7 +88,6 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
                                              mu_rTNT_NT,
                                              sigma_rTNT_T,
                                              sigma_rTNT_NT)
-        print(likelihood)
         self.sig_new_likelihood.emit(likelihood)
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
@@ -124,7 +123,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         (both player1 and player2's signal_new_classifier_result are connected to this slot)
 
         """
-
+    
         # sender = self.sender()
 
         self.tab_lf = self.tab_lf + "{0:.6f}".format(float(likelihood[0])) + ";"
@@ -142,8 +141,6 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         except zmq.ZMQError:
             self.message = ""
 
-
-        print(".count_epoch {} :: .nb_flash {}".format( self.count_epoch, self.nb_flash))
         if ((self.nb_flash > 0) and (self.count_epoch == self.nb_flash)):
 
             TabXY = np.ones(self.nb_flash*24)*800
@@ -152,7 +149,5 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
                 self.tab_gaze = self.tab_gaze + "{0:.6f}".format(TabXY[i]) + ";"
 
             MSGRES = self.myb_socket.send_string(self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1])
-            
-            print('Send to unity (EEG Epoch) :', MSGRES)
-            
+                     
             self.reset()

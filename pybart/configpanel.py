@@ -12,12 +12,9 @@ from pipeline.mybtemplatecalibration import generate_template
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
-    _pipeline = {'MYB': MybPipeline()}
-
-
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
-
+        
         self.error_dialog = QtWidgets.QErrorMessage()
 
         self.setupUi(self)
@@ -25,11 +22,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.load_configuration()
         self.fill_combo_setup()
-        self.init_pipeline()
 
         self.simul_file = 'No File Selected'
 
         self.pipeline = MybPipeline()
+
+        # TODO Improve
+        self.line_zmq_address.setText("tcp://127.0.0.1:{}".format(self.pipeline.port))
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -44,7 +43,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.button_settings.clicked.connect(self.on_settings)
 
-        self.combo_pipeline.currentIndexChanged.connect(self.on_select_pipeline)
+        # # TODO Improve pipeline selection
+        # self.combo_pipeline.currentIndexChanged.connect(self.on_select_pipeline)
+        self.button_settings.setEnabled(True)
+        # # End TODO
 
         self.button_file_simulated.clicked.connect(self.on_simulation_file)
 
@@ -198,6 +200,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.pipeline.reset()
 
+        self.lcd_triggers_count.display(0)
+
     def on_new_setup(self):
         """This function is a slot whaiting for an index change
         from the comboBox.
@@ -236,15 +240,16 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
                 row_count = +1
 
-    def on_select_pipeline(self):
-        """This function is a slot modifying the pipeline"""
+    # # TODO add validate button
+    # def on_select_pipeline(self):
+    #     """This function is a slot modifying the pipeline"""
 
-        self.pipeline = self._pipeline[self.combo_pipeline.currentText()]
+    #     self.pipeline = self._pipeline[self.combo_pipeline.currentText()]
         
-        if self.combo_pipeline.count() == 0:
-            self.button_settings.setEnabled(False)
-        else:
-            self.button_settings.setEnabled(True)
+    #     if self.combo_pipeline.count() == 0:
+    #         self.button_settings.setEnabled(False)
+    #     else:
+    #         self.button_settings.setEnabled(True)
         
 
     # TODO set icon add modify method
@@ -265,15 +270,16 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                                        "TemplateRiemann/",
                                                        self.tr("Image Files (*.h5)"))
         if self.dialog_template[0] is not '':
-            self.pipeline.set_template_name(self.dialog_template[0])
-
-    def init_pipeline(self):
-        self.combo_pipeline.addItems(self._pipeline.keys())
+            self.pipeline.set_template_name(self.dialog_template[0])     
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
         self.pipeline.new_epochs(label, epochs)
-        print(label, epochs.shape)
+
+        # display count of triggers
+        nb_triggers = self.lcd_triggers_count.intValue()
+        self.lcd_triggers_count.display(nb_triggers+1)
+        
 
 if __name__ == "__main__":
     import sys
