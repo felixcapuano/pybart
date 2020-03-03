@@ -9,13 +9,6 @@ from .toolbox.h5file import writeH5FileTemplate
 from .toolbox.riemann import mean_riemann
 from .toolbox.varioustools import compute_rTNT
 
-# raworig_Data= raw._data
-# l_freq = 2
-# h_freq = 20
-# Wn = [l_freq/(raw.info['sfreq']/2.), h_freq/(raw.info['sfreq']/2.) ]
-# b, a = scipy.signal.iirfilter(N=2, Wn=Wn, btype='bandpass', analog=False, ftype='butter', output='ba')
-# raw._data[picks_eeg,:] = scipy.signal.lfilter(b, a, raworig_Data[picks_eeg,:], axis = 1, zi = None)
-
 
 def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h_freq=20):
     """This function is generating a riemann template.
@@ -58,10 +51,10 @@ def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h
     epochs.drop(epochs_to_remove)
     raw_events_thresholded = np.delete(raw_events_targeted, epochs_to_remove, axis=0)
 
-    epochs_T = []
-    epochs_NT = []
 
     # browse all epochs
+    epochs_T = []
+    epochs_NT = []
     for index_epoch, epoch in enumerate(epochs):
 
         # check if the epoch is targeted
@@ -70,9 +63,9 @@ def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h
             epochs_T.append(epoch)
         else:
             epochs_NT.append(epoch)
-
     epochs_T = np.array(epochs_T)
     epochs_NT = np.array(epochs_NT)
+
     
     ERP_Template_Target = np.mean(epochs_T, axis=0)
     ERP_Template_NoTarget = np.mean(epochs_NT, axis=0)
@@ -80,18 +73,18 @@ def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h
     varERP_Template_Target = np.var(epochs_T, axis=0)
     varERP_Template_NoTarget = np.var(epochs_NT, axis=0)
 
-    MatCov_TrialTarget = matCov(epochs_T, ERP_Template_Target)
-    MatCov_TrialNoTarget = matCov(epochs_NT, ERP_Template_Target)
+    matCov_TrialTarget = matCov(epochs_T, ERP_Template_Target)
+    matCov_TrialNoTarget = matCov(epochs_NT, ERP_Template_Target)
 
-    MatCov_TrialTarget = np.array(MatCov_TrialTarget)
-    MatCov_TrialNoTarget = np.array(MatCov_TrialNoTarget)
+    matCov_TrialTarget = np.array(matCov_TrialTarget)
+    matCov_TrialNoTarget = np.array(matCov_TrialNoTarget)
 
     # TODO check `logm` stability
-    mean_MatCov_Target = mean_riemann(MatCov_TrialTarget)
-    mean_MatCov_NoTarget = mean_riemann(MatCov_TrialNoTarget)
+    mean_MatCov_Target = mean_riemann(matCov_TrialTarget)
+    mean_MatCov_NoTarget = mean_riemann(matCov_TrialNoTarget)
 
-    mu_rTNT_TrialTarget,  var_rTNT_TtrialTarget, all_rTNT_TrialTarget = compute_rTNT(MatCov_TrialTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
-    mu_rTNT_TrialNoTarget, Var_rTNT_TrialNoTarget, all_rTNT_TrialNoTarget = compute_rTNT(MatCov_TrialNoTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
+    mu_rTNT_TrialTarget,  var_rTNT_TtrialTarget, all_rTNT_TrialTarget = compute_rTNT(matCov_TrialTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
+    mu_rTNT_TrialNoTarget, Var_rTNT_TrialNoTarget, all_rTNT_TrialNoTarget = compute_rTNT(matCov_TrialNoTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
 
     NbGoodTarget = float(np.sum(all_rTNT_TrialTarget < .0))
     NbGoodNoTarget = float(np.sum(all_rTNT_TrialNoTarget > .0))
@@ -111,18 +104,6 @@ def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h
     riemann_template['sigma_rTNT_T'] = var_rTNT_TtrialTarget
     riemann_template['sigma_rTNT_NT'] = Var_rTNT_TrialNoTarget
     riemann_template['accP300'] = accP300
-
-    # print('accP300',accP300)
-    # print('ERP_Template_NoTarget',ERP_Template_NoTarget.shape)
-    # print('ERP_Template_Target',ERP_Template_Target.shape)
-    # print('mean_MatCov_NoTarget',mean_MatCov_NoTarget.shape)
-    # print('mean_MatCov_Target',mean_MatCov_Target.shape)
-    # print('mu_rTNT_TrialNoTarget',mu_rTNT_TrialNoTarget)
-    # print('mu_rTNT_TrialTarget',mu_rTNT_TrialTarget)
-    # print('Var_rTNT_TrialNoTarget',Var_rTNT_TrialNoTarget)
-    # print('var_rTNT_TtrialTarget',var_rTNT_TtrialTarget)
-    # print('varERP_Template_NoTarget',varERP_Template_NoTarget.shape)
-    # print('varERP_Template_Target',varERP_Template_Target.shape)
 
     return riemann_template
 

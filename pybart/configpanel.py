@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pipeline.mybpipeline import MybPipeline
 from streamhandler import StreamHandler
 from ui_configpanel import Ui_ConfigPanel
-from pipeline.templatecalibration import generate_template
+from pipeline.mybtemplatecalibration import generate_template
 
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):

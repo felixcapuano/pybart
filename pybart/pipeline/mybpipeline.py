@@ -14,46 +14,53 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
     sig_new_likelihood = QtCore.pyqtSignal(np.ndarray)
 
-    def __init__(self, parent=None):
+    def __init__(self, port=None, parent=None):
         QtCore.QObject.__init__(self, parent)
 
         # Default setting
         self.template_path = "TemplateRiemann/Template.h5"
-        self.init_template()
-
+        
+        self._load_template_riemann(self.template_path)
+        self._init_myb_socket(port)
+        self.reset()
+        
         self.sig_new_likelihood.connect(self.on_new_likelihood)
-
-        # self._init_zmq_pub()
 
     def set_template_name(self, template_path):
         extension = os.path.splitext(template_path)[1]
-        if extension == '.vhdr':
+        if extension == '.h5':
             self.template_path = template_path
         else:
             raise ValueError("{} file not supported".format(template_path))
 
-    def init_template(self):
-        self._load_Template_Riemann(self.template_path)
-        
-
-    def _init_zmq_pub(self):
-        self.context_pub = zmq.Context()
-        self.zmq_pub = self.context_pub.socket(zmq.REP)    
-        self.zmq_pub.bind('tcp://127.0.0.1:5555')  
-        
-        self.reset()
-
-    def _load_Template_Riemann(self, Template_H5Filename):
+    def _load_template_riemann(self, Template_H5Filename):
         self.f = h5py.File(Template_H5Filename, 'r')
 
-        self.dict = {}
+        self.template_riemann = {}
         for element in self.f:
             groupe = self.f[element]
 
             for element in groupe:
-                self.dict[element] = groupe[element]
+                self.template_riemann[element] = groupe[element]
+                
+    def _init_myb_socket(self, port=None):
+        self.ctx = zmq.Context()
+        self.myb_socket = self.ctx.socket(zmq.REP)
+        
+        if port is None:
+            # save the port selectedby zmq
+            self.port = self.myb_socket.bind_to_random_port("tcp://127.0.0.1", min_port=49152, max_port=65536, max_tries=100)
+        else:
+            self.myb_socket.bind('tcp://127.0.0.1:{}'.format(port))
+            self.port = port
 
-        self.TemplateRiemann = self.dict
+        print(self.port)
+
+    def reset(self):
+        self.tab_gaze = ""
+        self.tab_lf = ""
+        self.count_epoch = 0
+        self.nb_flash = 0
 
     def new_epochs(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
@@ -62,19 +69,19 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         """
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
-        ERP_template_target = self.TemplateRiemann['mu_Epoch_T'][...]
+        ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
 
         self.covmats = covariances_EP(epoch, ERP_template_target)
 
-        matCov_T = self.TemplateRiemann['mu_MatCov_T'][...]
-        matCov_NT = self.TemplateRiemann['mu_MatCov_NT'][...]
+        matCov_T = self.template_riemann['mu_MatCov_T'][...]
+        matCov_NT = self.template_riemann['mu_MatCov_NT'][...]
 
         curr_r_TNT = self.predict_R_TNT(self.covmats, matCov_T, matCov_NT)
 
-        mu_rTNT_T = self.TemplateRiemann['mu_rTNT_T'][...]
-        mu_rTNT_NT = self.TemplateRiemann['mu_rTNT_NT'][...]
-        sigma_rTNT_T = self.TemplateRiemann['sigma_rTNT_T'][...]
-        sigma_rTNT_NT = self.TemplateRiemann['sigma_rTNT_NT'][...]
+        mu_rTNT_T = self.template_riemann['mu_rTNT_T'][...]
+        mu_rTNT_NT = self.template_riemann['mu_rTNT_NT'][...]
+        sigma_rTNT_T = self.template_riemann['sigma_rTNT_T'][...]
+        sigma_rTNT_NT = self.template_riemann['sigma_rTNT_NT'][...]
 
         likelihood = self.compute_likelihood(curr_r_TNT,
                                              mu_rTNT_T,
@@ -126,7 +133,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
 
         try:
-            self.message = self.zmq_pub.recv(flags=zmq.NOBLOCK)
+            self.message = self.myb_socket.recv(flags=zmq.NOBLOCK)
 
             if (int(self.message) > 0 and int(self.message) < 120):
                 self.nb_flash = int(self.message)
@@ -144,14 +151,8 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
             for i in range(len(TabXY)):
                 self.tab_gaze = self.tab_gaze + "{0:.6f}".format(TabXY[i]) + ";"
 
-            MSGRES = self.zmq_pub.send_string(self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1])
+            MSGRES = self.myb_socket.send_string(self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1])
             
             print('Send to unity (EEG Epoch) :', MSGRES)
             
             self.reset()
-
-    def reset(self):
-        self.tab_gaze = ""
-        self.tab_lf = ""
-        self.count_epoch = 0
-        self.nb_flash = 0

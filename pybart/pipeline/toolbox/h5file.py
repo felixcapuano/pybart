@@ -64,8 +64,8 @@ def writeH5FileTemplate(TemplateRiemann, H5filename):
 
     # AccP300
     ds_AccP300 = gr_Template.create_dataset(
-        "AccP300", (1,), dtype='float64')  # 1 est la dimension du dataset
-    ds_AccP300[...] = TemplateRiemann['AccP300'][...]
+        "accP300", (1,), dtype='float64')  # 1 est la dimension du dataset
+    ds_AccP300[...] = TemplateRiemann['accP300'][...]
 
     # On referme le fichier HDF5
     Template.close()
