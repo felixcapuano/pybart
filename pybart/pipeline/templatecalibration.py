@@ -2,15 +2,22 @@ import os.path
 
 import mne
 import numpy as np
-import scipy
+import scipy.signal
 
 from .toolbox.covariance import matCov
 from .toolbox.h5file import writeH5FileTemplate
 from .toolbox.riemann import mean_riemann
 from .toolbox.varioustools import compute_rTNT
 
+# raworig_Data= raw._data
+# l_freq = 2
+# h_freq = 20
+# Wn = [l_freq/(raw.info['sfreq']/2.), h_freq/(raw.info['sfreq']/2.) ]
+# b, a = scipy.signal.iirfilter(N=2, Wn=Wn, btype='bandpass', analog=False, ftype='butter', output='ba')
+# raw._data[picks_eeg,:] = scipy.signal.lfilter(b, a, raworig_Data[picks_eeg,:], axis = 1, zi = None)
 
-def riemann_template_learn(file_complete_path):
+
+def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h_freq=20):
     """This function is generating a riemann template.
 
     It take one .vhdr path in argument and return
@@ -20,7 +27,7 @@ def riemann_template_learn(file_complete_path):
     """
 
     # reading the raw brainvison file .vhdr
-    raw = mne.io.read_raw_brainvision(file_complete_path, preload=True, verbose=False)
+    raw = mne.io.read_raw_brainvision(file_complete_path, scale=1e6, preload=True, verbose=False)
 
     # deleting the first market(unused)
     raw.annotations.delete(0)
@@ -28,11 +35,8 @@ def riemann_template_learn(file_complete_path):
     # converting annotations from the raw to events for epoching
     raw_events, raw_events_id = mne.events_from_annotations(raw, verbose=False)
 
-    # applying a filter TODO  Need to be approved
-    iir_params = dict(order=2, ftype='butter', output='sos')  
-    iir_params = mne.filter.construct_iir_filter(iir_params, f_pass=[.5, 20], sfreq=raw.info['sfreq'], btype='bandpass', verbose=False) 
-    raw_filtered = raw.filter(None, None, iir_params=iir_params, method='iir')
-    # raw_filtered = raw.filter(.5,20)
+    # applying a filter
+    raw_filtered = filtering_raw(raw, l_freq, h_freq)
 
     # epoching
     epochs = mne.Epochs(raw_filtered, raw_events, raw_events_id,
@@ -48,7 +52,7 @@ def riemann_template_learn(file_complete_path):
     raw_events_targeted = marking_target_events(raw_events, calib_target_sequence)
 
     # get index of epochs above threshold
-    epochs_to_remove = get_index_reject_epochs(epochs=epochs, rejection_rate=0.1)
+    epochs_to_remove = get_index_reject_epochs(epochs=epochs, rejection_rate=rejection_rate)
 
     # removing epochs and events to get thresholded data
     epochs.drop(epochs_to_remove)
@@ -69,15 +73,12 @@ def riemann_template_learn(file_complete_path):
 
     epochs_T = np.array(epochs_T)
     epochs_NT = np.array(epochs_NT)
-
-    epochs_T *= 1e6
-    epochs_NT *= 1e6
     
     ERP_Template_Target = np.mean(epochs_T, axis=0)
     ERP_Template_NoTarget = np.mean(epochs_NT, axis=0)
 
-    VarERP_Template_Target = np.var(epochs_T, axis=0)
-    VarERP_Template_NoTarget = np.var(epochs_NT, axis=0)
+    varERP_Template_Target = np.var(epochs_T, axis=0)
+    varERP_Template_NoTarget = np.var(epochs_NT, axis=0)
 
     MatCov_TrialTarget = matCov(epochs_T, ERP_Template_Target)
     MatCov_TrialNoTarget = matCov(epochs_NT, ERP_Template_Target)
@@ -85,50 +86,61 @@ def riemann_template_learn(file_complete_path):
     MatCov_TrialTarget = np.array(MatCov_TrialTarget)
     MatCov_TrialNoTarget = np.array(MatCov_TrialNoTarget)
 
-    # mean logm
+    # TODO check `logm` stability
     mean_MatCov_Target = mean_riemann(MatCov_TrialTarget)
     mean_MatCov_NoTarget = mean_riemann(MatCov_TrialNoTarget)
 
-    Mu_rTNT_TrialTarget,  Var_rTNT_TtrialTarget, All_rTNT_TrialTarget = compute_rTNT(MatCov_TrialTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
-    Mu_rTNT_TrialNoTarget, Var_rTNT_TrialNoTarget, All_rTNT_TrialNoTarget = compute_rTNT(MatCov_TrialNoTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
+    mu_rTNT_TrialTarget,  var_rTNT_TtrialTarget, all_rTNT_TrialTarget = compute_rTNT(MatCov_TrialTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
+    mu_rTNT_TrialNoTarget, Var_rTNT_TrialNoTarget, all_rTNT_TrialNoTarget = compute_rTNT(MatCov_TrialNoTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
 
-    NbGoodTarget = float(np.sum(All_rTNT_TrialTarget < .0))
-    NbGoodNoTarget = float(np.sum(All_rTNT_TrialNoTarget > .0))
-    NbTotTrials = float(All_rTNT_TrialTarget.shape[0] + All_rTNT_TrialNoTarget.shape[0])
+    NbGoodTarget = float(np.sum(all_rTNT_TrialTarget < .0))
+    NbGoodNoTarget = float(np.sum(all_rTNT_TrialNoTarget > .0))
+    NbTotTrials = float(all_rTNT_TrialTarget.shape[0] + all_rTNT_TrialNoTarget.shape[0])
 
-    AccP300 = np.float64((NbGoodTarget+NbGoodNoTarget)*100 / NbTotTrials)
+    accP300 = np.float64((NbGoodTarget+NbGoodNoTarget)*100 / NbTotTrials)
 
     riemann_template = {}
     riemann_template['mu_Epoch_T'] = ERP_Template_Target
-    print('ERP_Template_Target',ERP_Template_Target.shape)
     riemann_template['mu_Epoch_NT'] = ERP_Template_NoTarget
-    print('ERP_Template_NoTarget',ERP_Template_NoTarget.shape)
-    riemann_template['var_Epoch_T'] = VarERP_Template_Target
-    print('VarERP_Template_Target',VarERP_Template_Target.shape)
-    riemann_template['var_Epoch_NT'] = VarERP_Template_NoTarget
-    print('VarERP_Template_NoTarget',VarERP_Template_NoTarget.shape)
+    riemann_template['var_Epoch_T'] = varERP_Template_Target
+    riemann_template['var_Epoch_NT'] = varERP_Template_NoTarget
     riemann_template['mu_MatCov_T'] = mean_MatCov_Target
-    print('mean_MatCov_Target',mean_MatCov_Target.shape)
     riemann_template['mu_MatCov_NT'] = mean_MatCov_NoTarget
-    print('mean_MatCov_NoTarget',mean_MatCov_NoTarget.shape)
-    riemann_template['mu_rTNT_T'] = Mu_rTNT_TrialTarget
-    print('Mu_rTNT_TrialTarget',Mu_rTNT_TrialTarget)
-    riemann_template['mu_rTNT_NT'] = Mu_rTNT_TrialNoTarget
-    print('Mu_rTNT_TrialNoTarget',Mu_rTNT_TrialNoTarget)
-    riemann_template['sigma_rTNT_T'] = Var_rTNT_TtrialTarget
-    print('Var_rTNT_TtrialTarget',Var_rTNT_TtrialTarget)
+    riemann_template['mu_rTNT_T'] = mu_rTNT_TrialTarget
+    riemann_template['mu_rTNT_NT'] = mu_rTNT_TrialNoTarget
+    riemann_template['sigma_rTNT_T'] = var_rTNT_TtrialTarget
     riemann_template['sigma_rTNT_NT'] = Var_rTNT_TrialNoTarget
-    print('Var_rTNT_TrialNoTarget',Var_rTNT_TrialNoTarget)
-    riemann_template['AccP300'] = AccP300
-    print('AccP300',AccP300)
+    riemann_template['accP300'] = accP300
 
-    # np.savetxt("dump/mean_MatCov_Target.txt", mean_MatCov_Target, fmt='%8.1e')
-    # np.savetxt("dump/mean_MatCov_NoTarget.txt", mean_MatCov_NoTarget, fmt='%8.1e')
-
-    # np.savetxt("dump/ERP_Template_Target.txt", ERP_Template_Target, fmt='%8.1e')
-    # np.savetxt("dump/ERP_Template_NoTarget.txt", ERP_Template_NoTarget, fmt='%8.1e')
+    # print('accP300',accP300)
+    # print('ERP_Template_NoTarget',ERP_Template_NoTarget.shape)
+    # print('ERP_Template_Target',ERP_Template_Target.shape)
+    # print('mean_MatCov_NoTarget',mean_MatCov_NoTarget.shape)
+    # print('mean_MatCov_Target',mean_MatCov_Target.shape)
+    # print('mu_rTNT_TrialNoTarget',mu_rTNT_TrialNoTarget)
+    # print('mu_rTNT_TrialTarget',mu_rTNT_TrialTarget)
+    # print('Var_rTNT_TrialNoTarget',Var_rTNT_TrialNoTarget)
+    # print('var_rTNT_TtrialTarget',var_rTNT_TtrialTarget)
+    # print('varERP_Template_NoTarget',varERP_Template_NoTarget.shape)
+    # print('varERP_Template_Target',varERP_Template_Target.shape)
 
     return riemann_template
+
+def filtering_raw(raw, l_freq, h_freq):
+    """This function filtering a raw format without using forward-backward method"""
+    raworig_Data = raw._data
+    
+    Wn = [l_freq/(raw.info['sfreq']/2.), h_freq/(raw.info['sfreq']/2.) ]
+    
+    b, a = scipy.signal.iirfilter(N=2,
+                                    Wn=Wn,
+                                    btype='bandpass',
+                                    analog=False,
+                                    ftype='butter', output='ba')
+
+    raw._data = scipy.signal.lfilter(b, a, raworig_Data, axis = 1, zi = None)
+
+    return raw
 
 
 def marking_target_events(raw_events, sequence_target):
@@ -166,8 +178,9 @@ def get_index_reject_epochs(epochs, rejection_rate):
     epochs_absvalue = np.fabs(data)
 
     # get maximum value per epochs
-    epochs_maxvalue = epochs_absvalue.max(2).max(1)
-
+    epochs_maxvalue = epochs_absvalue.max(2)
+    epochs_maxvalue = epochs_maxvalue.max(1)
+    
     # calculate the number of epochs that should be rejected
     nb_keeped_epochs_no_rounded = epochs_maxvalue.size*(1-rejection_rate)
     nb_keeped_epochs = np.fix(nb_keeped_epochs_no_rounded).astype(np.int)
