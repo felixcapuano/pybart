@@ -5,9 +5,11 @@ import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pipeline.mybpipeline import MybPipeline
+from pipeline.mybtemplatecalibration import generate_template
 from streamhandler import StreamHandler
 from ui_configpanel import Ui_ConfigPanel
-from pipeline.mybtemplatecalibration import generate_template
+
+from test_epoch import compare_epoch
 
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
@@ -29,6 +31,9 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         # TODO Improve
         self.line_zmq_address.setText("tcp://127.0.0.1:{}".format(self.pipeline.port))
+        
+        # TEST
+        self.counter_epoch = 0
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -54,6 +59,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.radio_simulate.toggled.connect(self.on_select_simulate)
 
         self.action_MYBcalibration.triggered.connect(self.on_myb_calibration)
+
+        self.button_reset_count.clicked.connect(self.on_reset_count)
+
+    def on_reset_count(self):
+        self.lcd_triggers_count.display(0)
 
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
@@ -180,7 +190,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             
 
         # set the emission slot for each new stack of epochs
-        # self.sh.set_slot_new_epochs(self.on_new_epochs)
         self.sh.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
 
         # start the stream handler
@@ -201,6 +210,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.pipeline.reset()
 
         self.lcd_triggers_count.display(0)
+
+        self.counter_epoch = 0
 
     def on_new_setup(self):
         """This function is a slot whaiting for an index change
@@ -274,11 +285,26 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        self.pipeline.new_epochs(label, epochs)
+        # self.pipeline.new_epochs(label, epochs)
+        
+
 
         # display count of triggers
-        nb_triggers = self.lcd_triggers_count.intValue()
-        self.lcd_triggers_count.display(nb_triggers+1)
+        self.lcd_triggers_count.display(self.counter_epoch)
+        
+        print(self.counter_epoch)
+        # TEST
+        if self.counter_epoch == 0:
+            self.sh.nodes['epochermultilabel'].new_chunk.disconnect()
+
+            epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
+            
+            print(epoch.shape)
+            compare_epoch(epoch, self.counter_epoch)
+            
+
+        self.counter_epoch += 1
+
         
 
 if __name__ == "__main__":

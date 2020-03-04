@@ -9,7 +9,7 @@ from .toolbox.h5file import writeH5FileTemplate
 from .toolbox.riemann import mean_riemann
 from .toolbox.varioustools import compute_rTNT
 
-
+# TODO rejection rate ui
 def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h_freq=20):
     """This function is generating a riemann template.
 
@@ -122,7 +122,6 @@ def filtering_raw(raw, l_freq, h_freq):
     raw._data = scipy.signal.lfilter(b, a, raworig_Data, axis = 1, zi = None)
 
     return raw
-
 
 def marking_target_events(raw_events, sequence_target):
     """This function marks targeted events thanks to a list of index"""

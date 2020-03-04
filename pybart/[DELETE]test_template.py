@@ -1,4 +1,4 @@
-from pipeline.templatecalibration import riemann_template_learn
+# from pipeline.templatecalibration import riemann_template_learn
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,12 +24,21 @@ def init_Template_Riemann( Template_H5Filename):
 print('------------------------------------------')
 print('reading old file .h5')
 print('------------------------------------------')
-path_h5 = "C:\\Users\\User\\Documents\\pybart\\TemplateRiemann\\Template_CAPFE_0002.vhdr.h5"
+path_old_h5 = "C:\\Users\\User\\Documents\\pybart\\DATA_TOOLS\\Template_SAVEM_0004.vhdr.h5"
+path_new_h5 = "C:\\Users\\User\\Documents\\pybart\\TemplateRiemann\\Template_SAVEM_0004.vhdr.h5"
 
-rt_h5 = init_Template_Riemann(path_h5)
+rt_old_h5 = init_Template_Riemann(path_old_h5)
+rt_new_h5 = init_Template_Riemann(path_new_h5)
 
 # print data
-for key, item in rt_h5.items():
+for key, item in rt_old_h5.items():
+    if item.shape == np.shape([0]):
+        print(key, item[0])
+    else:
+        print(key, item.shape)
+
+
+for key, item in rt_new_h5.items():
     if item.shape == np.shape([0]):
         print(key, item[0])
     else:

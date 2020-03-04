@@ -1,0 +1,78 @@
+Brain Vision Data Exchange Header File Version 1.0
+; Data created by the Vision Recorder
+
+[Common Infos]
+Codepage=UTF-8
+DataFile=SAVEMTEST.eeg
+MarkerFile=SAVEMTEST.vmrk
+DataFormat=BINARY
+; Data orientation: MULTIPLEXED=ch1,pt1, ch2,pt1 ...
+DataOrientation=MULTIPLEXED
+NumberOfChannels=16
+; Sampling interval in microseconds
+SamplingInterval=1000
+
+[Binary Infos]
+BinaryFormat=IEEE_FLOAT_32
+
+[Channel Infos]
+; Each entry: Ch<Channel number>=<Name>,<Reference channel name>,
+; <Resolution in "Unit">,<Unit>, Future extensions..
+; Fields are delimited by commas, some fields might be omitted (empty).
+; Commas in channel names are coded as "\1".
+Ch1=Ch1,,0.0488281,µV
+Ch2=Ch2,,0.0488281,µV
+Ch3=Ch3,,0.0488281,µV
+Ch4=Ch4,,0.0488281,µV
+Ch5=Ch5,,0.0488281,µV
+Ch6=Ch6,,0.0488281,µV
+Ch7=Ch7,,0.0488281,µV
+Ch8=Ch8,,0.0488281,µV
+Ch9=Ch9,,0.0488281,µV
+Ch10=Ch10,,0.0488281,µV
+Ch11=Ch11,,0.0488281,µV
+Ch12=Ch12,,0.0488281,µV
+Ch13=Ch13,,0.0488281,µV
+Ch14=Ch14,,0.0488281,µV
+Ch15=Ch15,,0.0488281,µV
+Ch16=Ch16,,0.0488281,µV
+
+[Comment]
+
+BrainVision Recorder Professional   -   V. 1.22.0001
+
+
+A m p l i f i e r  S e t u p
+============================
+Number of channels: 16
+Sampling Rate [Hz]: 1000
+Sampling Interval [µS]: 1000
+
+Channels
+--------
+#     Name      Phys. Chn.    Resolution / Unit   Low Cutoff [s]   High Cutoff [Hz]   Notch [Hz]    Gradient         Offset
+1     Ch1         1          0.0488281 µV             DC                0              Off
+2     Ch2         2          0.0488281 µV             DC                0              Off
+3     Ch3         3          0.0488281 µV             DC                0              Off
+4     Ch4         4          0.0488281 µV             DC                0              Off
+5     Ch5         5          0.0488281 µV             DC                0              Off
+6     Ch6         6          0.0488281 µV             DC                0              Off
+7     Ch7         7          0.0488281 µV             DC                0              Off
+8     Ch8         8          0.0488281 µV             DC                0              Off
+9     Ch9         9          0.0488281 µV             DC                0              Off
+10    Ch10        10         0.0488281 µV             DC                0              Off
+11    Ch11        11         0.0488281 µV             DC                0              Off
+12    Ch12        12         0.0488281 µV             DC                0              Off
+13    Ch13        13         0.0488281 µV             DC                0              Off
+14    Ch14        14         0.0488281 µV             DC                0              Off
+15    Ch15        15         0.0488281 µV             DC                0              Off
+16    Ch16        16         0.0488281 µV             DC                0              Off
+
+Invert AUX Channel Polarity = No
+
+S o f t w a r e  F i l t e r s
+==============================
+Disabled
+
+
+No impedance values available at 16:27:43!
