@@ -7,7 +7,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .pipeline.myb.mybpipeline import MybPipeline
 from .pipeline.myb.mybsettingdialog import MybSettingDialog
-from .pipeline.myb.mybtemplatecalibration import generate_template
 from .streamhandler import StreamHandler
 from .test_epoch import compare_epoch
 from .ui_configpanel import Ui_ConfigPanel
@@ -155,7 +154,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                 "High and low frequency has to be float type.")
             return
 
-        if not 0 < self.low_frequency or not self.low_frequency < self.high_frequency :
+        if not 0 < low_frequency or not low_frequency < high_frequency :
                 self.error_dialog.showMessage("Wrong frequency.")
                 return
 
