@@ -5,14 +5,15 @@ import numpy as np
 import zmq
 from pyqtgraph.Qt import QtCore
 from scipy.linalg import eigvalsh
+import logging
 
-from .toolbox.covariance import covariances_EP
-from .toolbox.riemann import distance_riemann
+from ..toolbox.covariance import covariances_EP
+from ..toolbox.riemann import distance_riemann
 
 
 class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
-    sig_new_likelihood = QtCore.pyqtSignal(np.ndarray)
+    sig_new_likelihood = QtCore.pyqtSignal(list)
 
     def __init__(self, port=None, parent=None):
         QtCore.QObject.__init__(self, parent)
@@ -33,6 +34,8 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         else:
             raise ValueError("{} file not supported".format(template_path))
 
+        self._load_template_riemann(template_path)
+
     def _load_template_riemann(self, Template_H5Filename):
         self.f = h5py.File(Template_H5Filename, 'r')
 
@@ -42,6 +45,7 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
             for element in groupe:
                 self.template_riemann[element] = groupe[element]
+        print("Template loaded : {}".format(Template_H5Filename))
                 
     def _init_myb_socket(self, port=None):
         self.ctx = zmq.Context()
@@ -83,11 +87,14 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         sigma_rTNT_T = self.template_riemann['sigma_rTNT_T'][...]
         sigma_rTNT_NT = self.template_riemann['sigma_rTNT_NT'][...]
 
+        # calculing likelihood
         likelihood = self.compute_likelihood(curr_r_TNT,
                                              mu_rTNT_T,
                                              mu_rTNT_NT,
                                              sigma_rTNT_T,
                                              sigma_rTNT_NT)
+
+        # emit likelihood
         self.sig_new_likelihood.emit(likelihood)
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
@@ -99,24 +106,24 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         return np.log(dist_T / dist_NT)
 
     def compute_likelihood(self, l_r_TNT,  l_mu_TNT_T, l_mu_TNT_NT, l_sigma_TNT_T, l_sigma_TNT_NT):
-
+        """Compute likelihood value for Target and NoTarget"""
+        
         # 0 is target, 1 is nontarget
+        Vec_T = (l_r_TNT - l_mu_TNT_T) ** 2
+        Vec_T = Vec_T / l_sigma_TNT_T
 
-        Vec0 = (l_r_TNT - l_mu_TNT_T) ** 2
-        Vec0 = Vec0 / l_sigma_TNT_T
+        Vec_NT = (l_r_TNT - l_mu_TNT_NT) ** 2
+        Vec_NT = Vec_NT / l_sigma_TNT_NT
 
-        Vec1 = (l_r_TNT - l_mu_TNT_NT) ** 2
-        Vec1 = Vec1 / l_sigma_TNT_NT
+        ld_T = np.log(2 * np. pi * l_sigma_TNT_T)
+        ld_NT = np.log(2 * np.pi * l_sigma_TNT_NT)
 
-        ld0 = np.log(2 * np. pi * l_sigma_TNT_T)
-        ld1 = np.log(2 * np.pi * l_sigma_TNT_NT)
+        lf_T = float(- 0.5 * (Vec_T + ld_T))
+        lf_NT = float(- 0.5 * (Vec_NT + ld_NT))
+        
+        return [lf_T, lf_NT]
 
-        lf0 = - 0.5 * (Vec0 + ld0)
-        lf1 = - 0.5 * (Vec1 + ld1)
-
-        return np.array([lf0, lf1])
-
-    @QtCore.pyqtSlot(np.ndarray)
+    @QtCore.pyqtSlot(list)
     def on_new_likelihood(self, likelihood):
         """Within a QtSlot function, use sender() method returns a ref on signal sender instance object (the object connected to this slot).
         this way, we can have a single slot function (callback function) for several objects. 
@@ -124,8 +131,6 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
         """
     
-        # sender = self.sender()
-
         self.tab_lf = self.tab_lf + "{0:.6f}".format(float(likelihood[0])) + ";"
         self.tab_lf = self.tab_lf + "{0:.6f}".format(float(likelihood[1])) + ";"
         self.count_epoch = self.count_epoch + 1
@@ -140,10 +145,10 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
 
         except zmq.ZMQError:
             self.message = ""
-
+        
         if ((self.nb_flash > 0) and (self.count_epoch == self.nb_flash)):
 
-            TabXY = np.ones(self.nb_flash*24)*800
+            TabXY = np.ones(self.nb_flash * 24) * 800
             self.tab_gaze = ""
             for i in range(len(TabXY)):
                 self.tab_gaze = self.tab_gaze + "{0:.6f}".format(TabXY[i]) + ";"

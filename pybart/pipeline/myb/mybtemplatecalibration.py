@@ -4,10 +4,10 @@ import mne
 import numpy as np
 import scipy.signal
 
-from .toolbox.covariance import matCov
-from .toolbox.h5file import writeH5FileTemplate
-from .toolbox.riemann import mean_riemann
-from .toolbox.varioustools import compute_rTNT
+from ..toolbox.covariance import matCov
+from ..toolbox.h5file import writeH5FileTemplate
+from ..toolbox.riemann import mean_riemann
+from ..toolbox.varioustools import compute_rTNT
 
 # TODO rejection rate ui
 def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h_freq=20):
@@ -173,7 +173,7 @@ def get_index_reject_epochs(epochs, rejection_rate):
 
     return epochs_to_remove
     
-def generate_template(raw_file):
+def generate_template(raw_file, rejection_rate, l_freq, h_freq):
     
     # TODO check if raw
     extension = os.path.splitext(raw_file)[1]
@@ -181,7 +181,7 @@ def generate_template(raw_file):
         raise ValueError("{} file not supported".format(raw_file))
 
     # gen template
-    riemann_template = riemann_template_learn(raw_file)
+    riemann_template = riemann_template_learn(raw_file, rejection_rate, l_freq, h_freq)
 
     # get file
     raw_name = os.path.basename(raw_file)

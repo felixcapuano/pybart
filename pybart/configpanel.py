@@ -1,39 +1,47 @@
 import json
+import logging
 import os.path
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pipeline.mybpipeline import MybPipeline
-from pipeline.mybtemplatecalibration import generate_template
-from streamhandler import StreamHandler
-from ui_configpanel import Ui_ConfigPanel
+from .pipeline.myb.mybpipeline import MybPipeline
+from .pipeline.myb.mybsettingdialog import MybSettingDialog
+from .pipeline.myb.mybtemplatecalibration import generate_template
+from .streamhandler import StreamHandler
+from .test_epoch import compare_epoch
+from .ui_configpanel import Ui_ConfigPanel
 
-from test_epoch import compare_epoch
-
+logging.basicConfig(filename='configpanel.log', filemode='w', level=logging.DEBUG)
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
+    
+    config_file = 'configuration.json'
+    logger = logging.getLogger('configpanel')
 
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
-        
+
+        # init error dialog        
         self.error_dialog = QtWidgets.QErrorMessage()
 
+        # setup UI
         self.setupUi(self)
         self.connect_ui()
 
+        # load UI
         self.load_configuration()
         self.fill_combo_setup()
-
         self.simul_file = 'No File Selected'
 
-        self.pipeline = MybPipeline()
+        # epoch counter
+        self.counter_epoch = 0
 
         # TODO Improve
+        # init pipeline
+        self.pipeline = MybPipeline()
+        self.dialog_template = MybSettingDialog(self)
         self.line_zmq_address.setText("tcp://127.0.0.1:{}".format(self.pipeline.port))
-        
-        # TEST
-        self.counter_epoch = 0
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -58,17 +66,17 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.radio_BVRec.toggled.connect(self.on_select_BVRec)
         self.radio_simulate.toggled.connect(self.on_select_simulate)
 
-        self.action_MYBcalibration.triggered.connect(self.on_myb_calibration)
-
         self.button_reset_count.clicked.connect(self.on_reset_count)
 
     def on_reset_count(self):
+        self.logger.info('Reset trigger counter')
         self.lcd_triggers_count.display(0)
 
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
 
-        with open('pybart\\configuration.json') as params:
+        self.logger.info('Read configuration file({})'.format(self.config_file))
+        with open(self.config_file) as params:
             self.triggers_parameters = json.load(params)
 
     def get_table_params(self):
@@ -78,6 +86,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         row = 0
         t = self.table_trigs_params
 
+        self.logger.info('Convert trigger table')
         for row in range(t.rowCount()):
             try:
                 label = str(t.item(row, 0).text())
@@ -99,11 +108,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         return params
         
     def fill_combo_setup(self):
+        self.logger.info('Update list of triggers')
         self.combo_setup.clear()
         for setup in self.triggers_parameters.keys():
             self.combo_setup.addItem(setup)
 
     def on_simulation_file(self):
+        self.logger.info('Select file used for simulation')
         self.dialog_simul = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "eeg_data_sample/",
@@ -127,25 +138,15 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         else:
             self.frame_select_file.setEnabled(False)
 
-    def on_myb_calibration(self):
-
-        self.dialog_simul = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                       self.tr("Open Template"),
-                                                       "eeg_data_sample/",
-                                                       self.tr("Image Files (*.vhdr)"))
-        if self.dialog_simul[0] is not '':
-            try:
-                generate_template(self.dialog_simul[0])
-            except ValueError as e:
-                self.error_dialog.showMessage(e)
-
     def on_start_running(self):
         """This function is a slot who collect parameter from the
         control panel and initialise the pyacq web(StreamHandler)
 
         """
-
+        self.logger.info('Run pipeline')
         try:
+            self.logger.info('Set high({}) and low({}) frequency'.format(self.line_high_freq.text(),self.line_low_freq.text()))
+
             # get the low and high frequency in float
             low_frequency = float(self.line_low_freq.text())
             high_frequency = float(self.line_high_freq.text())
@@ -154,8 +155,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                 "High and low frequency has to be float type.")
             return
 
+        if not 0 < self.low_frequency or not self.low_frequency < self.high_frequency :
+                self.error_dialog.showMessage("Wrong frequency.")
+                return
+
         host = str(self.line_host.text())
         try:
+            self.logger.info('Set BrainVision port({})'.format(self.line_port.text()))
             # get the port number in int
             port = int(self.line_port.text())
         except ValueError:
@@ -163,8 +169,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.error_dialog.showMessage("The port has to be int type.")
             return
 
-        # get parameter of the table
         try:
+            self.logger.info('Set trigger parameters')
+
+            # get parameter of the table
             params = self.get_table_params()
         except ValueError as e:
             self.error_dialog.showMessage("{}".format(e))
@@ -173,11 +181,14 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         # setup parmeter in the stream handler
         if self.radio_BVRec.isChecked():
+            self.logger.info('Init StreamHandler in BrainVision mode')
             self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
         else:
+            self.logger.info('Init StreamHandler in simulate mode')
             self.sh = StreamHandler(None, None, simulated=True, raw_file=self.simul_file)
 
         try:
+            self.logger.info('Configure Stream Handler')
             self.sh.configuration(low_frequency,
                                 high_frequency,
                                 trig_params=params)
@@ -187,11 +198,12 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         except ValueError as e:
             self.error_dialog.showMessage("{}".format(e))
             return
-            
+        
 
         # set the emission slot for each new stack of epochs
         self.sh.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
 
+        self.logger.info('Start the stream handler')
         # start the stream handler
         self.sh.start_node()
 
@@ -201,7 +213,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
-        
+        self.logger.info('Stop pipeline')
         self.sh.stop_node()
 
         self.button_stop.setEnabled(False)
@@ -214,13 +226,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.counter_epoch = 0
 
     def on_new_setup(self):
-        """This function is a slot whaiting for an index change
+        """This function is a slot waiting for an index change
         from the comboBox.
         -delete all row
         -adding parameter according to the json configuration file
 
         """
-
+        self.logger.info('Modify trigger setup')
         # clear table
         self.table_trigs_params.setRowCount(0)
 
@@ -249,19 +261,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                                 3,
                                                 QtGui.QTableWidgetItem(str(params['max_stock'])))
 
-                row_count = +1
-
-    # # TODO add validate button
-    # def on_select_pipeline(self):
-    #     """This function is a slot modifying the pipeline"""
-
-    #     self.pipeline = self._pipeline[self.combo_pipeline.currentText()]
-        
-    #     if self.combo_pipeline.count() == 0:
-    #         self.button_settings.setEnabled(False)
-    #     else:
-    #         self.button_settings.setEnabled(True)
-        
+                row_count = +1        
 
     # TODO set icon add modify method
     def on_adding_trigger(self):
@@ -276,39 +276,37 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         and set the name of the file selected in the label
 
         """
-        self.dialog_template = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                       self.tr("Open Template"),
-                                                       "TemplateRiemann/",
-                                                       self.tr("Image Files (*.h5)"))
-        if self.dialog_template[0] is not '':
-            self.pipeline.set_template_name(self.dialog_template[0])     
+        self.logger.info('Open pipeline Setting')
+        
+        self.dialog_template.show()
+
 
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs"""
-        # self.pipeline.new_epochs(label, epochs)
         
-
-
+        self.counter_epoch += 1
+        
+        self.pipeline.new_epochs(label, epochs)
+        
         # display count of triggers
         self.lcd_triggers_count.display(self.counter_epoch)
         
-        print(self.counter_epoch)
-        # TEST
-        if self.counter_epoch == 0:
-            self.sh.nodes['epochermultilabel'].new_chunk.disconnect()
-
-            epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
+        # # TEST Visualize epoch compare to mne
+        # print(self.counter_epoch)
+        # if self.counter_epoch == 0:
+        #     self.sh.nodes['epochermultilabel'].new_chunk.disconnect()
+        #     epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             
-            print(epoch.shape)
-            compare_epoch(epoch, self.counter_epoch)
+        #     print(epoch.shape)
+        #     compare_epoch(epoch, self.counter_epoch)
             
 
-        self.counter_epoch += 1
 
         
 
 if __name__ == "__main__":
     import sys
+    
     app = QtWidgets.QApplication(sys.argv)
     ui = ConfigPanel()
     ui.show()

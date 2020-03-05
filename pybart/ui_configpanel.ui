@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>525</width>
-    <height>773</height>
+    <height>752</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -38,7 +38,7 @@
       <x>10</x>
       <y>0</y>
       <width>501</width>
-      <height>181</height>
+      <height>151</height>
      </rect>
     </property>
     <property name="title">
@@ -50,7 +50,7 @@
        <x>10</x>
        <y>100</y>
        <width>481</width>
-       <height>71</height>
+       <height>41</height>
       </rect>
      </property>
      <property name="title">
@@ -78,9 +78,9 @@
       </property>
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>461</width>
+        <x>80</x>
+        <y>10</y>
+        <width>391</width>
         <height>21</height>
        </rect>
       </property>
@@ -108,7 +108,7 @@
         <rect>
          <x>80</x>
          <y>0</y>
-         <width>371</width>
+         <width>301</width>
          <height>21</height>
         </rect>
        </property>
@@ -216,7 +216,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>250</y>
+      <y>220</y>
       <width>501</width>
       <height>341</height>
      </rect>
@@ -316,7 +316,7 @@
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>660</y>
+      <y>630</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -332,7 +332,7 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>660</y>
+      <y>630</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -354,7 +354,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>190</y>
+      <y>160</y>
       <width>501</width>
       <height>51</height>
      </rect>
@@ -372,7 +372,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>1</string>
+      <string>0.5</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="line_high_freq">
@@ -419,7 +419,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>600</y>
+      <y>570</y>
       <width>501</width>
       <height>51</height>
      </rect>
@@ -471,7 +471,7 @@
     <property name="geometry">
      <rect>
       <x>93</x>
-      <y>660</y>
+      <y>630</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -493,7 +493,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>660</y>
+      <y>630</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -509,7 +509,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>710</y>
+      <y>680</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -525,7 +525,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>710</y>
+      <y>680</y>
       <width>231</width>
       <height>20</height>
      </rect>
@@ -538,7 +538,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>680</y>
+      <y>650</y>
       <width>41</width>
       <height>20</height>
      </rect>
@@ -548,6 +548,7 @@
     </property>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -557,15 +558,7 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuTools">
-    <property name="title">
-     <string>Tools</string>
-    </property>
-    <addaction name="action_MYBcalibration"/>
-   </widget>
-   <addaction name="menuTools"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="action_MYBcalibration">
    <property name="text">
     <string>MYB calibration</string>
