@@ -1,76 +1,40 @@
+import logging
 import os
 
 import h5py
 import numpy as np
-import zmq
-from pyqtgraph.Qt import QtCore
-from scipy.linalg import eigvalsh
-import logging
 
 from ..toolbox.covariance import covariances_EP
 from ..toolbox.riemann import distance_riemann
+from .mybsender import MybLikelihoodSender
+from .mybsetting import MybSettingDialog
 
 
-class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
+class MybPipeline(MybSettingDialog, MybLikelihoodSender):
+    """Pipe line use to compute epochs to determine the likelihood"""
 
-    sig_new_likelihood = QtCore.pyqtSignal(list)
+    def __init__(self, parent):
+        super(MybSettingDialog, self).__init__(parent)
 
-    def __init__(self, port=None, parent=None):
-        QtCore.QObject.__init__(self, parent)
+        MybSettingDialog.__init__(self, parent)
+        MybLikelihoodSender.__init__(self)
 
-        # Default setting
-        self.template_path = "TemplateRiemann/Template.h5"
-        
-        self._load_template_riemann(self.template_path)
-        self._init_myb_socket(port)
-        self.reset()
-        
-        self.sig_new_likelihood.connect(self.on_new_likelihood)
+        self.on_load_template(self.current_template)
 
-    def set_template_name(self, template_path):
-        extension = os.path.splitext(template_path)[1]
-        if extension == '.h5':
-            self.template_path = template_path
-        else:
-            raise ValueError("{} file not supported".format(template_path))
+        # connect template loader when template path changing
+        self.sig_current_template.connect(self.on_load_template)
 
-        self._load_template_riemann(template_path)
-
-    def _load_template_riemann(self, Template_H5Filename):
-        self.f = h5py.File(Template_H5Filename, 'r')
-
-        self.template_riemann = {}
-        for element in self.f:
-            groupe = self.f[element]
-
-            for element in groupe:
-                self.template_riemann[element] = groupe[element]
-        print("Template loaded : {}".format(Template_H5Filename))
-                
-    def _init_myb_socket(self, port=None):
-        self.ctx = zmq.Context()
-        self.myb_socket = self.ctx.socket(zmq.REP)
-        
-        if port is None:
-            # save the port selectedby zmq
-            self.port = self.myb_socket.bind_to_random_port("tcp://127.0.0.1", min_port=49152, max_port=65536, max_tries=100)
-        else:
-            self.myb_socket.bind("tcp://127.0.0.1:{}".format(port))
-            self.port = port
-
-        print(self.port)
-
-    def reset(self):
-        self.tab_gaze = ""
-        self.tab_lf = ""
-        self.count_epoch = 0
-        self.nb_flash = 0
-
+    def setting(self):
+        self.show()
+  
     def new_epochs(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
         and bayes priors for myb games with dynamic bayesian classification
 
         """
+        # reshaping epoch because epocher send epoch stack who have 
+        # 3D (time * channel * nb epoch) but this pipeline is build
+        # to receive epochs one by one, so `nb epoch` dimension isn't use.
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
         ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
@@ -87,15 +51,16 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         sigma_rTNT_T = self.template_riemann['sigma_rTNT_T'][...]
         sigma_rTNT_NT = self.template_riemann['sigma_rTNT_NT'][...]
 
-        # calculing likelihood
         likelihood = self.compute_likelihood(curr_r_TNT,
                                              mu_rTNT_T,
                                              mu_rTNT_NT,
                                              sigma_rTNT_T,
                                              sigma_rTNT_NT)
 
-        # emit likelihood
-        self.sig_new_likelihood.emit(likelihood)
+        # send likelihood to Myb game using the sender
+        # self.send_new_likelihood(likelihood)
+        print(likelihood)
+        
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""
@@ -123,36 +88,19 @@ class MybPipeline(QtCore.QObject):  # inherits QObject to send signals
         
         return [lf_T, lf_NT]
 
-    @QtCore.pyqtSlot(list)
-    def on_new_likelihood(self, likelihood):
-        """Within a QtSlot function, use sender() method returns a ref on signal sender instance object (the object connected to this slot).
-        this way, we can have a single slot function (callback function) for several objects. 
-        (both player1 and player2's signal_new_classifier_result are connected to this slot)
+    def on_load_template(self, h5_file):
+        """Load all template thanks to a .h5 file"""
 
-        """
-    
-        self.tab_lf = self.tab_lf + "{0:.6f}".format(float(likelihood[0])) + ";"
-        self.tab_lf = self.tab_lf + "{0:.6f}".format(float(likelihood[1])) + ";"
-        self.count_epoch = self.count_epoch + 1
+        extension = os.path.splitext(h5_file)[1]
+        if extension != '.h5':
+            raise ValueError("{} file not supported".format(h5_file))
 
+        self.f = h5py.File(h5_file, 'r')
 
-        try:
-            self.message = self.myb_socket.recv(flags=zmq.NOBLOCK)
+        self.template_riemann = {}
+        for element in self.f:
+            groupe = self.f[element]
 
-            if (int(self.message) > 0 and int(self.message) < 120):
-                self.nb_flash = int(self.message)
-                self.message = ""
-
-        except zmq.ZMQError:
-            self.message = ""
-        
-        if ((self.nb_flash > 0) and (self.count_epoch == self.nb_flash)):
-
-            TabXY = np.ones(self.nb_flash * 24) * 800
-            self.tab_gaze = ""
-            for i in range(len(TabXY)):
-                self.tab_gaze = self.tab_gaze + "{0:.6f}".format(TabXY[i]) + ";"
-
-            MSGRES = self.myb_socket.send_string(self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1])
-                     
-            self.reset()
+            for element in groupe:
+                self.template_riemann[element] = groupe[element]
+        print("Template loaded : {}".format(h5_file))

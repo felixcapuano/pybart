@@ -9,10 +9,9 @@ from .ui_mybsettingdialog import Ui_MybSettingDialog
 class TemplateGenerator(QtCore.QThread):
     """Tread running the calibration function
     
-    (estimate execution time : 13000ms)
+    The calibration estimation time execution is 13000ms, but it can be longer or shorter.
     
     """
-    
     def __init__(self, calib_path, reject_rate, low_freq, high_freq, parent=None):
         super(TemplateGenerator, self).__init__(parent)
         
@@ -20,7 +19,6 @@ class TemplateGenerator(QtCore.QThread):
         self.reject_rate = reject_rate
         self.low_freq = low_freq
         self.high_freq = high_freq
-        
 
     def run(self):
         generate_template(self.calib_path,
@@ -31,22 +29,24 @@ class TemplateGenerator(QtCore.QThread):
 class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
     """Dialog window to setup the myb pipeline"""
 
-    def __init__(self, parent):
-        super().__init__(parent)
+    sig_current_template = QtCore.pyqtSignal(str)
 
-        # use view from python file generated with Qt Designer
+    def __init__(self, parent):
+        super(QtWidgets.QDialog, self).__init__(self)
+
+        # init view from python file generated with Qt Designer
         self.setupUi(self)
         
         # connect all component
         self.connect_ui()
 
-        # display error in a dialog
+        # init dialog to display error
         self.error_dialog = QtWidgets.QErrorMessage()
 
         # set default low, high frequency of the calibration
         self.low_freq = 0.5
-        self.line_low_freq.setText(str(self.low_freq))
         self.high_freq = 20
+        self.line_low_freq.setText(str(self.low_freq))
         self.line_high_freq.setText(str(self.high_freq))
         
         # set default rejection rate of the calibration
@@ -55,9 +55,11 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
 
         # set default template file path
         self.current_template = "TemplateRiemann\\template.h5"
-        self.label_filename_template.setText(os.path.basename(os.path.basename(self.current_template)))
-        
+        self.label_filename_template.setText(os.path.basename(self.current_template))
+        self.sig_current_template.emit(self.current_template)
+
         # set default calibration file path
+        # empty to avoid calibration to start
         self.calib_path = ""
 
         # init timer to run the progress bar during the calibration
@@ -68,11 +70,11 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.timer_progress_bar.timeout.connect(self.on_step)
         
     def connect_ui(self):
-        # calibration
+        # connect calibration button
         self.button_file_calibration.clicked.connect(self.on_select_calibration)
         self.button_run_calibration.clicked.connect(self.on_run_calibration)
 
-        # template
+        # connect template button
         self.button_file_template.clicked.connect(self.on_select_template)
 
     def on_step(self):
@@ -94,7 +96,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             calibration_name = os.path.basename(self.calib_path)
             self.label_filename_calibration.setText(calibration_name)
             
-            # reset the progresse bar
+            # reset the progresse bar after the calibration
             self.progressBar_calibration.setValue(0)
         
             
@@ -106,10 +108,9 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
                                                        self.tr("H5 Files (*.h5)"))[0]
         if self.template_path is not "":
             template_name = os.path.basename(self.template_path)
-            self.current_template = self.template_path
             self.label_filename_template.setText(template_name)
-
-        #     self.pipeline.set_template_name(self.dialog_template[0])
+            self.current_template = self.template_path
+            self.sig_current_template.emit(self.current_template)
 
     def on_run_calibration(self):
         if self.calib_path is not "":

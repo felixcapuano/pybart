@@ -24,7 +24,7 @@ def filtering_raw(raw, l_freq, h_freq):
     return raw
 
 def compare_epoch(epoch_pyacq, number):
-    path = "C:\\Users\\User\\Documents\\pybart\\eeg_data_sample\\SAVEM_0004.vhdr"
+    path = "eeg_data_sample\\SAVEM_0004.vhdr"
 
     raw = mne.io.read_raw_brainvision(path, scale=1e6, preload=True, verbose=True)
 

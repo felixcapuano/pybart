@@ -6,16 +6,19 @@ import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .pipeline.myb.mybpipeline import MybPipeline
-from .pipeline.myb.mybsettingdialog import MybSettingDialog
 from .streamhandler import StreamHandler
 from .test_epoch import compare_epoch
 from .ui_configpanel import Ui_ConfigPanel
 
-logging.basicConfig(filename='configpanel.log', filemode='w', level=logging.DEBUG)
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     
     config_file = 'configuration.json'
+    pipelines = {
+        # 'test' : {'pipe': Pipeline},
+        'myb default': {'pipe': MybPipeline}
+    }
+
     logger = logging.getLogger('configpanel')
 
     def __init__(self, parent=None):
@@ -36,11 +39,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # epoch counter
         self.counter_epoch = 0
 
-        # TODO Improve
         # init pipeline
-        self.pipeline = MybPipeline()
-        self.dialog_template = MybSettingDialog(self)
-        self.line_zmq_address.setText("tcp://127.0.0.1:{}".format(self.pipeline.port))
+        self.combo_pipeline.addItems(self.pipelines.keys())
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -55,10 +55,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.button_settings.clicked.connect(self.on_settings)
 
-        # # TODO Improve pipeline selection
-        # self.combo_pipeline.currentIndexChanged.connect(self.on_select_pipeline)
+        self.combo_pipeline.currentIndexChanged.connect(self.on_pipeline_selected)
         self.button_settings.setEnabled(True)
-        # # End TODO
 
         self.button_file_simulated.clicked.connect(self.on_simulation_file)
 
@@ -66,10 +64,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.radio_simulate.toggled.connect(self.on_select_simulate)
 
         self.button_reset_count.clicked.connect(self.on_reset_count)
-
-    def on_reset_count(self):
-        self.logger.info('Reset trigger counter')
-        self.lcd_triggers_count.display(0)
 
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
@@ -130,12 +124,21 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         else:
             self.line_host.setEnabled(False)
             self.line_port.setEnabled(False)
+
+    def on_reset_count(self):
+        self.logger.info('Reset trigger counter')
+        self.lcd_triggers_count.display(0)
     
     def on_select_simulate(self):
         if self.radio_simulate.isChecked():
             self.frame_select_file.setEnabled(True)
         else:
             self.frame_select_file.setEnabled(False)
+
+    def on_pipeline_selected(self):
+        """this function is a slot who switch of pipeline"""
+        self.current_pipeline_name = self.combo_pipeline.currentText()
+        self.current_pipeline = self.pipelines[self.current_pipeline_name]['pipe'](self)
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
@@ -209,7 +212,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
 
-
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
         self.logger.info('Stop pipeline')
@@ -217,8 +219,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
-
-        self.pipeline.reset()
 
         self.lcd_triggers_count.display(0)
 
@@ -262,13 +262,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
                 row_count = +1        
 
-    # TODO set icon add modify method
-    def on_adding_trigger(self):
-        self.table_trigs_params.insertRow(0)
-
-    # TODO set icon add modify method
-    def on_deleting_trigger(self):
-        self.table_trigs_params.removeRow(0)
 
     def on_settings(self):
         """This function is a slot who open a open file window
@@ -276,32 +269,41 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         """
         self.logger.info('Open pipeline Setting')
+
+        self.current_pipeline.setting()
         
-        self.dialog_template.show()
-
-
     def on_new_epochs(self, label, epochs):
-        """This function is a slot who receive a stack of epochs"""
+        """This function is a slot who receive a stack of epochs
         
-        self.counter_epoch += 1
-        
-        self.pipeline.new_epochs(label, epochs)
-        
-        # display count of triggers
-        self.lcd_triggers_count.display(self.counter_epoch)
-        
-        # # TEST Visualize epoch compare to mne
+        This is the most important part of the class.
+        Each stack of epoch build by the StreamHandler 
+        arrives here with his label.
+
+        """
+        # TEST Visualize epoch compare to mne
         # print(self.counter_epoch)
         # if self.counter_epoch == 0:
         #     self.sh.nodes['epochermultilabel'].new_chunk.disconnect()
         #     epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             
         #     print(epoch.shape)
-        #     compare_epoch(epoch, self.counter_epoch)
-            
-
-
+        #     compare_epoch(epoch, self.counter_epoch)    
         
+        # send epoch(s) and is label to the current pipeline
+        self.current_pipeline.new_epochs(label, epochs)
+        
+        # display count of triggers
+        self.counter_epoch += 1
+        self.lcd_triggers_count.display(self.counter_epoch)
+        
+
+    # TODO set icon add modify method
+    def on_adding_trigger(self):
+        self.table_trigs_params.insertRow(0)
+
+    # TODO set icon add modify method
+    def on_deleting_trigger(self):
+        self.table_trigs_params.removeRow(0)
 
 if __name__ == "__main__":
     import sys
