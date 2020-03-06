@@ -1,7 +1,6 @@
 import logging
 import os
 
-import h5py
 import numpy as np
 
 from ..toolbox.covariance import covariances_EP
@@ -9,6 +8,16 @@ from ..toolbox.riemann import distance_riemann
 from .mybsender import MybLikelihoodSender
 from .mybsetting import MybSettingDialog
 
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
+
+file_handler = logging.FileHandler('log\\pipeline.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 class MybPipeline(MybSettingDialog, MybLikelihoodSender):
     """Pipe line use to compute epochs to determine the likelihood"""
@@ -19,10 +28,7 @@ class MybPipeline(MybSettingDialog, MybLikelihoodSender):
         MybSettingDialog.__init__(self, parent)
         MybLikelihoodSender.__init__(self)
 
-        self.on_load_template(self.current_template)
-
-        # connect template loader when template path changing
-        self.sig_current_template.connect(self.on_load_template)
+        self.load_template(self.current_template)
 
     def setting(self):
         self.show()
@@ -32,6 +38,8 @@ class MybPipeline(MybSettingDialog, MybLikelihoodSender):
         and bayes priors for myb games with dynamic bayesian classification
 
         """
+        logger.info("Epoch received : {}".format(label))
+
         # reshaping epoch because epocher send epoch stack who have 
         # 3D (time * channel * nb epoch) but this pipeline is build
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
@@ -86,21 +94,8 @@ class MybPipeline(MybSettingDialog, MybLikelihoodSender):
         lf_T = float(- 0.5 * (Vec_T + ld_T))
         lf_NT = float(- 0.5 * (Vec_NT + ld_NT))
         
+        logger.info('Likelihood computed (Target : {}, No target : {})'.format(lf_T, lf_NT))
+
         return [lf_T, lf_NT]
 
-    def on_load_template(self, h5_file):
-        """Load all template thanks to a .h5 file"""
-
-        extension = os.path.splitext(h5_file)[1]
-        if extension != '.h5':
-            raise ValueError("{} file not supported".format(h5_file))
-
-        self.f = h5py.File(h5_file, 'r')
-
-        self.template_riemann = {}
-        for element in self.f:
-            groupe = self.f[element]
-
-            for element in groupe:
-                self.template_riemann[element] = groupe[element]
-        print("Template loaded : {}".format(h5_file))
+    

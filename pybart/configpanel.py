@@ -11,6 +11,16 @@ from .test_epoch import compare_epoch
 from .ui_configpanel import Ui_ConfigPanel
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('	%(levelname)s (%(name)s) -> %(message)s')
+
+file_handler = logging.FileHandler('log\\configpanel.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     
     config_file = 'configuration.json'
@@ -18,8 +28,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # 'test' : {'pipe': Pipeline},
         'myb default': {'pipe': MybPipeline}
     }
-
-    logger = logging.getLogger('configpanel')
 
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -68,7 +76,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
 
-        self.logger.info('Read configuration file({})'.format(self.config_file))
+        logger.info('Read configuration file({})'.format(self.config_file))
         with open(self.config_file) as params:
             self.triggers_parameters = json.load(params)
 
@@ -79,7 +87,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         row = 0
         t = self.table_trigs_params
 
-        self.logger.info('Convert trigger table')
+        logger.info('Convert trigger table')
         for row in range(t.rowCount()):
             try:
                 label = str(t.item(row, 0).text())
@@ -101,13 +109,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         return params
         
     def fill_combo_setup(self):
-        self.logger.info('Update list of triggers')
+        logger.info('Update list of triggers')
         self.combo_setup.clear()
         for setup in self.triggers_parameters.keys():
             self.combo_setup.addItem(setup)
 
     def on_simulation_file(self):
-        self.logger.info('Select file used for simulation')
+        logger.info('Select file used for simulation')
         self.dialog_simul = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "eeg_data_sample/",
@@ -126,7 +134,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.line_port.setEnabled(False)
 
     def on_reset_count(self):
-        self.logger.info('Reset trigger counter')
+        logger.info('Reset trigger counter')
         self.lcd_triggers_count.display(0)
     
     def on_select_simulate(self):
@@ -145,67 +153,73 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         control panel and initialise the pyacq web(StreamHandler)
 
         """
-        self.logger.info('Run pipeline')
+        logger.info('Run pipeline')
         try:
-            self.logger.info('Set high({}) and low({}) frequency'.format(self.line_high_freq.text(),self.line_low_freq.text()))
+            logger.info('Set high({}) and low({}) frequency'.format(self.line_high_freq.text(),self.line_low_freq.text()))
 
             # get the low and high frequency in float
             low_frequency = float(self.line_low_freq.text())
             high_frequency = float(self.line_high_freq.text())
         except ValueError:
-            self.error_dialog.showMessage(
-                "High and low frequency has to be float type.")
+            error = "High and low frequency has to be float type."
+            self.error_dialog.showMessage(error)
+            logger.warning(error)
             return
 
         if not 0 < low_frequency or not low_frequency < high_frequency :
-                self.error_dialog.showMessage("Wrong frequency.")
-                return
+            error = "Wrong frequency."
+            self.error_dialog.showMessage(error)
+            logger.warning(error)
+            return
 
         host = str(self.line_host.text())
         try:
-            self.logger.info('Set BrainVision port({})'.format(self.line_port.text()))
+            logger.info('Set BrainVision port({})'.format(self.line_port.text()))
             # get the port number in int
             port = int(self.line_port.text())
         except ValueError:
-            # TODO popup message
-            self.error_dialog.showMessage("The port has to be int type.")
+            error = "The port has to be int type."
+            self.error_dialog.showMessage(error)
+            logger.warning(error)
             return
 
         try:
-            self.logger.info('Set trigger parameters')
-
+            logger.info('Set trigger parameters')
             # get parameter of the table
             params = self.get_table_params()
         except ValueError as e:
             self.error_dialog.showMessage("{}".format(e))
+            logger.warning(e)
             return
         
 
         # setup parmeter in the stream handler
         if self.radio_BVRec.isChecked():
-            self.logger.info('Init StreamHandler in BrainVision mode')
+            logger.info('Init StreamHandler in BrainVision mode')
             self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
         else:
-            self.logger.info('Init StreamHandler in simulate mode')
+            logger.info('Init StreamHandler in simulate mode')
             self.sh = StreamHandler(None, None, simulated=True, raw_file=self.simul_file)
 
         try:
-            self.logger.info('Configure Stream Handler')
+            logger.info('Configure Stream Handler')
             self.sh.configuration(low_frequency,
                                 high_frequency,
                                 trig_params=params)
         except ConnectionRefusedError as e:
             self.error_dialog.showMessage("BrainVision Recorder not recording: {}".format(e))
+            logger.warning(e)
             return
         except ValueError as e:
             self.error_dialog.showMessage("{}".format(e))
+            logger.warning(e)
             return
         
 
         # set the emission slot for each new stack of epochs
         self.sh.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
 
-        self.logger.info('Start the stream handler')
+        logger.info('Start the stream handler')
         # start the stream handler
         self.sh.start_node()
 
@@ -214,7 +228,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
-        self.logger.info('Stop pipeline')
+        logger.info('Stop pipeline')
         self.sh.stop_node()
 
         self.button_stop.setEnabled(False)
@@ -231,7 +245,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         -adding parameter according to the json configuration file
 
         """
-        self.logger.info('Modify trigger setup')
+        logger.info('Modify trigger setup')
         # clear table
         self.table_trigs_params.setRowCount(0)
 
@@ -260,15 +274,14 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                                 3,
                                                 QtGui.QTableWidgetItem(str(params['max_stock'])))
 
-                row_count = +1        
-
+                row_count = +1
 
     def on_settings(self):
         """This function is a slot who open a open file window
         and set the name of the file selected in the label
 
         """
-        self.logger.info('Open pipeline Setting')
+        logger.info('Open pipeline Setting')
 
         self.current_pipeline.setting()
         
@@ -307,8 +320,9 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
 if __name__ == "__main__":
     import sys
-    
+    logger.info('Started')
     app = QtWidgets.QApplication(sys.argv)
     ui = ConfigPanel()
     ui.show()
     sys.exit(app.exec_())
+    logger.info('Finished')

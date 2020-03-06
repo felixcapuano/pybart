@@ -1,3 +1,5 @@
+import logging
+
 import mne
 import numpy as np
 import pytest
@@ -10,6 +12,15 @@ from pyacq_ext.brainampsocket import BrainAmpSocket
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.rawbufferdevice import RawDeviceBuffer
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
+
+file_handler = logging.FileHandler('log\\streamhandler.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 class StreamHandler(QtCore.QObject):
     """This object emit epoch in real time from a EEG device using BrainVision Recorder."""
@@ -63,6 +74,8 @@ class StreamHandler(QtCore.QObject):
         :trig_params: triggers parameter on a dict format
 
         """
+
+        logger.info('Start configuration stream (simulate mode : {}), setup => low freq : {}Hz, high freq : {}Hz)'.format(self.simulated, low_fequency, high_frequency))
         if self.simulated:
             dev = self.simulated_device()
         else:
@@ -113,7 +126,7 @@ class StreamHandler(QtCore.QObject):
 
     def start_node(self):
         """Start all nodes"""
-
+        logger.info('Start stream')
         for node in self.nodes.values():
             node.start()
 
@@ -128,6 +141,7 @@ class StreamHandler(QtCore.QObject):
 
     def stop_node(self):
         """Stop all nodes and close all widget nodes"""
+        logger.info('Stop stream')
         for node in self.nodes.values():
             if node.running():
                 node.stop()

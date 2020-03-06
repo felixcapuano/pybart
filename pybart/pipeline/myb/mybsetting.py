@@ -1,10 +1,22 @@
+import logging
 import os
 import time
 
-from PyQt5 import QtCore, QtWidgets 
+import h5py
+from PyQt5 import QtCore, QtWidgets
 
 from .mybtemplatecalibration import generate_template
 from .ui_mybsettingdialog import Ui_MybSettingDialog
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
+
+file_handler = logging.FileHandler('log\\pipelinesetting.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 class TemplateGenerator(QtCore.QThread):
     """Tread running the calibration function
@@ -15,21 +27,19 @@ class TemplateGenerator(QtCore.QThread):
     def __init__(self, calib_path, reject_rate, low_freq, high_freq, parent=None):
         super(TemplateGenerator, self).__init__(parent)
         
-        self.calib_path = calib_path
+        self.current_calib_file = calib_path
         self.reject_rate = reject_rate
         self.low_freq = low_freq
         self.high_freq = high_freq
 
     def run(self):
-        generate_template(self.calib_path,
+        generate_template(self.current_calib_file,
                                 rejection_rate=self.reject_rate,
                                 l_freq=self.low_freq,
                                 h_freq=self.high_freq)
 
 class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
     """Dialog window to setup the myb pipeline"""
-
-    sig_current_template = QtCore.pyqtSignal(str)
 
     def __init__(self, parent):
         super(QtWidgets.QDialog, self).__init__(self)
@@ -53,14 +63,16 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.reject_rate = 0.1
         self.line_rejection_rate.setText(str(self.reject_rate))
 
+
         # set default template file path
+        self.template_riemann = {}
         self.current_template = "TemplateRiemann\\template.h5"
         self.label_filename_template.setText(os.path.basename(self.current_template))
-        self.sig_current_template.emit(self.current_template)
+        self.load_template(self.current_template)
 
         # set default calibration file path
         # empty to avoid calibration to start
-        self.calib_path = ""
+        self.current_calib_file = ""
 
         # init timer to run the progress bar during the calibration
         # using a approximate time of the process
@@ -77,6 +89,23 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         # connect template button
         self.button_file_template.clicked.connect(self.on_select_template)
 
+    def load_template(self, h5_file):
+        """Load all template thanks to a .h5 file"""
+
+        extension = os.path.splitext(h5_file)[1]
+        if extension != '.h5':
+            raise ValueError("{} file not supported".format(h5_file))
+
+        self.f = h5py.File(h5_file, 'r')
+
+        for element in self.f:
+            groupe = self.f[element]
+
+            for element in groupe:
+                self.template_riemann[element] = groupe[element]
+
+        logger.info("Template loaded : {}".format(h5_file))
+
     def on_step(self):
         """Update the calibration progress bar"""
         
@@ -87,56 +116,64 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.progressBar_calibration.setValue(old_value + 1)
 
     def on_select_calibration(self):
-        self.calib_path = QtWidgets.QFileDialog.getOpenFileName(self,
+        calib_path = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "eeg_data_sample/",
                                                        self.tr("VHDR Files (*.vhdr)"))[0]
 
-        if self.calib_path is not "":
-            calibration_name = os.path.basename(self.calib_path)
+        if calib_path is not "":
+            self.current_calib_file = calib_path
+
+            calibration_name = os.path.basename(self.current_calib_file)
             self.label_filename_calibration.setText(calibration_name)
             
-            # reset the progresse bar after the calibration
+            # reset the progress bar before starting calibration
             self.progressBar_calibration.setValue(0)
         
             
 
     def on_select_template(self):
-        self.template_path = QtWidgets.QFileDialog.getOpenFileName(self,
+        template_path = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "TemplateRiemann/",
                                                        self.tr("H5 Files (*.h5)"))[0]
-        if self.template_path is not "":
-            template_name = os.path.basename(self.template_path)
+        if template_path is not "":
+            self.current_template = template_path
+
+            template_name = os.path.basename(self.current_template)
             self.label_filename_template.setText(template_name)
-            self.current_template = self.template_path
-            self.sig_current_template.emit(self.current_template)
+
+
+            self.load_template(self.current_template)
 
     def on_run_calibration(self):
-        if self.calib_path is not "":
-
+        if self.current_calib_file is not "":
             try:
                 # get the low and high frequency in float
                 self.low_freq = float(self.line_low_freq.text())
                 self.high_freq = float(self.line_high_freq.text())
                 self.reject_rate = float(self.line_rejection_rate.text())
             except ValueError:
-                self.error_dialog.showMessage(
-                    "High,low frequency and rejection rate has to be float type.")
+                error = "High,low frequency and rejection rate has to be float type."
+                self.error_dialog.showMessage(error)
+                logger.warning(error)
                 return
 
             if not 0 <= self.reject_rate <= 1:
-                self.error_dialog.showMessage(
-                    "Rejection rate has to be between 0 and 1.")
+                error = "Rejection rate has to be between 0 and 1."
+                self.error_dialog.showMessage(error)
+                logger.warning(error)
                 return
 
             if not 0 < self.low_freq or not self.low_freq < self.high_freq :
-                self.error_dialog.showMessage("Wrong frequency.")
+                error = "Wrong frequency."
+                self.error_dialog.showMessage(error)
+                logger.warning(error)
                 return
             
-            # TODO use threading
+            logger.info('Started template generation ({})'.format(self.current_calib_file))
             self.timer_progress_bar.start()
-            self.thread_template = TemplateGenerator(self.calib_path,
+            self.thread_template = TemplateGenerator(self.current_calib_file,
                                                     self.reject_rate,
                                                     self.low_freq,
                                                     self.high_freq)
@@ -146,12 +183,15 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             self.setEnabled_groupCalib(False)
             
         else:
-            self.error_dialog.showMessage( "You have to select a file.")
+            error = "You have to select a file."
+            self.error_dialog.showMessage(error)
+            logger.warning(error)
+            return
     
     def on_template_generated(self):
-        print('template generated')
+        logger.info('Finished template generated ({})'.format(self.current_calib_file))
         
-        # stop timer
+        # stop timer and fill the progress bar 
         self.timer_progress_bar.stop()
         self.progressBar_calibration.setValue(100)
         
@@ -163,5 +203,3 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.line_rejection_rate.setEnabled(boolean)
         self.button_file_calibration.setEnabled(boolean)
         self.button_run_calibration.setEnabled(boolean)
-
-    
