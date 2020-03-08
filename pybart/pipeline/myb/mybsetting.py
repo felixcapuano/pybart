@@ -68,7 +68,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.template_riemann = {}
         self.current_template = "TemplateRiemann\\template.h5"
         self.label_filename_template.setText(os.path.basename(self.current_template))
-        self.load_template(self.current_template)
+        self.load_template()
 
         # set default calibration file path
         # empty to avoid calibration to start
@@ -89,14 +89,14 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         # connect template button
         self.button_file_template.clicked.connect(self.on_select_template)
 
-    def load_template(self, h5_file):
+    def load_template(self):
         """Load all template thanks to a .h5 file"""
 
-        extension = os.path.splitext(h5_file)[1]
+        extension = os.path.splitext(self.current_template)[1]
         if extension != '.h5':
-            raise ValueError("{} file not supported".format(h5_file))
+            raise ValueError("{} file not supported".format(self.current_template))
 
-        self.f = h5py.File(h5_file, 'r')
+        self.f = h5py.File(self.current_template, 'r')
 
         for element in self.f:
             groupe = self.f[element]
@@ -104,7 +104,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             for element in groupe:
                 self.template_riemann[element] = groupe[element]
 
-        logger.info("Template loaded : {}".format(h5_file))
+        logger.info("Template loaded : {}".format(self.current_template))
 
     def on_step(self):
         """Update the calibration progress bar"""
@@ -144,7 +144,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             self.label_filename_template.setText(template_name)
 
 
-            self.load_template(self.current_template)
+            self.load_template()
 
     def on_run_calibration(self):
         if self.current_calib_file is not "":

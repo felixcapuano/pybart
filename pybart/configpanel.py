@@ -6,8 +6,9 @@ import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .pipeline.myb.mybpipeline import MybPipeline
-from .streamhandler import StreamHandler
 from .test_epoch import compare_epoch
+from .pipeline.pipeline import Pipeline
+from .streamhandler import StreamHandler
 from .ui_configpanel import Ui_ConfigPanel
 
 
@@ -25,7 +26,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     
     config_file = 'configuration.json'
     pipelines = {
-        # 'test' : {'pipe': Pipeline},
+        'test' : {'pipe': Pipeline},
         'myb default': {'pipe': MybPipeline}
     }
 
@@ -196,14 +197,14 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # setup parmeter in the stream handler
         if self.radio_BVRec.isChecked():
             logger.info('Init StreamHandler in BrainVision mode')
-            self.sh = StreamHandler(brainamp_host=host, brainamp_port=port)
+            self.stream_handler = StreamHandler(brainamp_host=host, brainamp_port=port)
         else:
             logger.info('Init StreamHandler in simulate mode')
-            self.sh = StreamHandler(None, None, simulated=True, raw_file=self.simul_file)
+            self.stream_handler = StreamHandler(None, None, simulated=True, raw_file=self.simul_file)
 
         try:
             logger.info('Configure Stream Handler')
-            self.sh.configuration(low_frequency,
+            self.stream_handler.configuration(low_frequency,
                                 high_frequency,
                                 trig_params=params)
         except ConnectionRefusedError as e:
@@ -214,23 +215,27 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.error_dialog.showMessage("{}".format(e))
             logger.warning(e)
             return
-        
 
         # set the emission slot for each new stack of epochs
-        self.sh.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
+        self.stream_handler.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
 
         logger.info('Start the stream handler')
         # start the stream handler
-        self.sh.start_node()
+        self.stream_handler.start_node()
 
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
+        
+        # TODO disable groupbox selection pipeline
 
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
         logger.info('Stop pipeline')
-        self.sh.stop_node()
-
+        
+        self.stream_handler.stop_node()
+        
+        self.current_pipeline.reset()
+        
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
 
@@ -296,11 +301,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # TEST Visualize epoch compare to mne
         # print(self.counter_epoch)
         # if self.counter_epoch == 0:
-        #     self.sh.nodes['epochermultilabel'].new_chunk.disconnect()
+        #     self.stream_handler.nodes['epochermultilabel'].new_chunk.disconnect()
         #     epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             
         #     print(epoch.shape)
-        #     compare_epoch(epoch, self.counter_epoch)    
+        #     compare_epoch(epoch, self.counter_epoch)
         
         # send epoch(s) and is label to the current pipeline
         self.current_pipeline.new_epochs(label, epochs)

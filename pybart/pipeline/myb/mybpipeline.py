@@ -28,10 +28,6 @@ class MybPipeline(MybSettingDialog, MybLikelihoodSender):
         MybSettingDialog.__init__(self, parent)
         MybLikelihoodSender.__init__(self)
 
-        self.load_template(self.current_template)
-
-    def setting(self):
-        self.show()
   
     def new_epochs(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
@@ -66,9 +62,22 @@ class MybPipeline(MybSettingDialog, MybLikelihoodSender):
                                              sigma_rTNT_NT)
 
         # send likelihood to Myb game using the sender
-        # self.send_new_likelihood(likelihood)
-        print(likelihood)
+        self.send_new_likelihood(likelihood)        
+
+    def setting(self):
+        """This function is use to configure the pipeline.
         
+        Here it just show the the UI setting interface.
+        Every needed tools and parameters to configure
+        the pipeline are in.
+        
+        This function is call by the configuration panel,
+        when setting button is clicked.
+        """
+        self.show()
+        
+    def reset(self):
+        self.reset_sender()
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""

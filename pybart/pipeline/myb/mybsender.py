@@ -20,7 +20,7 @@ class MybLikelihoodSender:
         self.myb_socket = self.ctx.socket(zmq.REP)
         self.myb_socket.bind("tcp://127.0.0.1:5555")
 
-        self.reset()
+        self.reset_sender()
 
     def send_new_likelihood(self, likelihood):
         """Send likelihood to the Myb game"""
@@ -51,9 +51,9 @@ class MybLikelihoodSender:
             MSGRES = self.myb_socket.send_string(
                 self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1])
 
-            self.reset()
+            self.reset_sender()
 
-    def reset(self):
+    def reset_sender(self):
         self.tab_gaze = ""
         self.tab_lf = ""
         self.count_epoch = 0
