@@ -201,14 +201,14 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # setup parmeter in the stream handler
         if self.radio_BVRec.isChecked():
             logger.info('Init StreamEngine in BrainVision mode')
-            self.stream_handler = StreamEngine(brainamp_host=host, brainamp_port=port)
+            self.stream_engine = StreamEngine(brainamp_host=host, brainamp_port=port)
         else:
             logger.info('Init StreamEngine in simulate mode')
-            self.stream_handler = StreamEngine(None, None, simulated=True, raw_file=self.simul_file)
+            self.stream_engine = StreamEngine(None, None, simulated=True, raw_file=self.simul_file)
 
         try:
             logger.info('Configure Stream Handler')
-            self.stream_handler.configuration(low_frequency,
+            self.stream_engine.configuration(low_frequency,
                                 high_frequency,
                                 trig_params=params)
         except ConnectionRefusedError as e:
@@ -221,11 +221,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             return
 
         # set the emission slot for each new stack of epochs
-        self.stream_handler.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
+        self.stream_engine.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
 
         logger.info('Start the stream handler')
         # start the stream handler
-        self.stream_handler.start_node()
+        self.stream_engine.start_nodes()
 
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
@@ -236,7 +236,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         """This function is a slot who stop pyacq all pyacq node"""
         logger.info('Stop pipeline')
         
-        self.stream_handler.stop_node()
+        self.stream_engine.stop_nodes()
         
         self.current_pipeline.reset()
         
@@ -246,7 +246,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.lcd_triggers_count.display(0)
 
         self.counter_epoch = 0
-
+        
     def on_new_setup(self):
         """This function is a slot waiting for an index change
         from the comboBox.
@@ -305,7 +305,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # TEST Visualize epoch compare to mne
         # print(self.counter_epoch)
         # if self.counter_epoch == 30:
-        #     self.stream_handler.nodes['epochermultilabel'].new_chunk.disconnect()
+        #     self.stream_engine.nodes['epochermultilabel'].new_chunk.disconnect()
         #     epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             
         #     print(epoch.shape)

@@ -108,7 +108,7 @@ class StreamEngine(QtCore.QObject):
         filt.configure(coefficients=coefficients)
         filt.input.connect(dev.outputs['signals'])
         filt.output.configure(
-            protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
+                    protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
         filt.initialize()
 
         self.nodes['sosfilter'] = filt
@@ -117,7 +117,7 @@ class StreamEngine(QtCore.QObject):
         epocher = EpocherMultiLabel()
         epocher.configure(parameters=trig_params)
         epocher.inputs['signals'].connect(filt.output)
-        epocher.inputs['triggers'].connect(trig.outputs['triggers'])
+        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
         epocher.initialize()
 
         self.nodes['epochermultilabel'] = epocher
@@ -131,7 +131,7 @@ class StreamEngine(QtCore.QObject):
         self.nodes['qoscilloscope'] = viewer
         self.widget_nodes.append('qoscilloscope')
 
-    def start_node(self):
+    def start_nodes(self):
         """Start all nodes"""
         logger.info('Start stream')
         for node in self.nodes.values():
@@ -146,7 +146,7 @@ class StreamEngine(QtCore.QObject):
             # show all widget windows
             widget_node.show()
 
-    def stop_node(self):
+    def stop_nodes(self):
         """Stop all nodes and close all widget nodes"""
         logger.info('Stop stream')
         for node in self.nodes.values():
