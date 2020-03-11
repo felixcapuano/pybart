@@ -17,12 +17,12 @@ logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
 
-file_handler = logging.FileHandler('log\\streamhandler.log')
+file_handler = logging.FileHandler('log\\.log')
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
-class StreamHandler(QtCore.QObject):
+class StreamEngine(QtCore.QObject):
     """This object emit epoch in real time from a EEG device using BrainVision Recorder."""
 
     nodes = {}

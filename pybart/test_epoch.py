@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import mne
-from .streamhandler import StreamHandler
+from .streamengine import StreamEngine
 import scipy
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys

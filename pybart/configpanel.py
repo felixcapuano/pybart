@@ -1,6 +1,6 @@
 import json
 import logging
-import os.path
+import os
 import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -8,9 +8,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from .pipeline.myb.mybpipeline import MybPipeline
 from .test_epoch import compare_epoch
 from .pipeline.pipeline import Pipeline
-from .streamhandler import StreamHandler
+from .streamengine import StreamEngine
 from .ui_configpanel import Ui_ConfigPanel
 
+try:
+    os.mkdir("log")
+except FileExistsError:
+    pass
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -151,7 +155,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
-        control panel and initialise the pyacq web(StreamHandler)
+        control panel and initialise the pyacq web(StreamEngine)
 
         """
         logger.info('Run pipeline')
@@ -196,11 +200,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         # setup parmeter in the stream handler
         if self.radio_BVRec.isChecked():
-            logger.info('Init StreamHandler in BrainVision mode')
-            self.stream_handler = StreamHandler(brainamp_host=host, brainamp_port=port)
+            logger.info('Init StreamEngine in BrainVision mode')
+            self.stream_handler = StreamEngine(brainamp_host=host, brainamp_port=port)
         else:
-            logger.info('Init StreamHandler in simulate mode')
-            self.stream_handler = StreamHandler(None, None, simulated=True, raw_file=self.simul_file)
+            logger.info('Init StreamEngine in simulate mode')
+            self.stream_handler = StreamEngine(None, None, simulated=True, raw_file=self.simul_file)
 
         try:
             logger.info('Configure Stream Handler')
@@ -294,21 +298,21 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         """This function is a slot who receive a stack of epochs
         
         This is the most important part of the class.
-        Each stack of epoch build by the StreamHandler 
+        Each stack of epoch build by the StreamEngine 
         arrives here with his label.
 
         """
         # TEST Visualize epoch compare to mne
-        # print(self.counter_epoch)
-        # if self.counter_epoch == 0:
-        #     self.stream_handler.nodes['epochermultilabel'].new_chunk.disconnect()
-        #     epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
+        print(self.counter_epoch)
+        if self.counter_epoch == 30:
+            self.stream_handler.nodes['epochermultilabel'].new_chunk.disconnect()
+            epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             
-        #     print(epoch.shape)
-        #     compare_epoch(epoch, self.counter_epoch)
+            print(epoch.shape)
+            compare_epoch(epoch, self.counter_epoch)
         
         # send epoch(s) and is label to the current pipeline
-        self.current_pipeline.new_epochs(label, epochs)
+        # self.current_pipeline.new_epochs(label, epochs)
         
         # display count of triggers
         self.counter_epoch += 1

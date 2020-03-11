@@ -37,10 +37,10 @@ class Player_MYB_Pypeline(QtCore.QObject): #inherits QObject to send signals
                 displayDevice,
                 parent=None):
         """
-        begin any pyacq protocol by instanciating an pyacq.StreamHandler
+        begin any pyacq protocol by instanciating an pyacq.StreamEngine
         """
         QtCore.QObject.__init__(self, parent)
-        self._streamhandler = pyacq.StreamHandler()
+        self._streamhandler = pyacq.StreamEngine()
 
         self._trial_counter = 0
 
@@ -178,7 +178,7 @@ class Player_MYB_Pypeline(QtCore.QObject): #inherits QObject to send signals
 
 #_______________________________________________________________________________
     def _init_data_acquisition_device_brainvision(self,brainVision_host):
-        brainvision_device = pyacq.BrainvisionSocket(streamhandler=self._streamhandler)
+        brainvision_device = pyacq.BrainvisionSocket(=self._streamhandler)
         brainvision_device.configure(
                     buffer_length=64,
                     brain_host=brainVision_host,
@@ -197,19 +197,19 @@ class Player_MYB_Pypeline(QtCore.QObject): #inherits QObject to send signals
     def _init_protocol_objects(self):
         """
         init pyacq objects needed for the protocol
-        function gotta be called after pyacq.StreamHandler() and data driver instanciation
+        function gotta be called after pyacq.StreamEngine() and data driver instanciation
         """
 
         self._data_acquisition_device = self._init_data_acquisition_device_brainvision(self.Brainvision_IP_Hostname)
 
         self._bandpass_filter = pyacq.BandPassFilter(
                                                 stream=self._data_acquisition_device.streams[0],
-                                                streamhandler=self._streamhandler)
+                                                =self._streamhandler)
         self._bandpass_filter.set_params(
                                     f_start=.5,
                                     f_stop=20.)
                                     
-        self.RenameTriggerStream = pyacq.RenameTriggerStream(streamhandler=self._streamhandler,
+        self.RenameTriggerStream = pyacq.RenameTriggerStream(=self._streamhandler,
                                                               sig_stream=self._data_acquisition_device.streams[0], 
                                                                 trig_stream=self._data_acquisition_device.streams[1]
                                                                 )                            
