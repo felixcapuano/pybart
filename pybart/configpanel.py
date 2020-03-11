@@ -30,8 +30,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     
     config_file = 'configuration.json'
     pipelines = {
-        'test' : {'pipe': Pipeline},
-        'myb default': {'pipe': MybPipeline}
+        'myb default': {'pipe': MybPipeline},
+        'test' : {'pipe': Pipeline}
     }
 
     def __init__(self, parent=None):
@@ -303,16 +303,16 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         """
         # TEST Visualize epoch compare to mne
-        print(self.counter_epoch)
-        if self.counter_epoch == 30:
-            self.stream_handler.nodes['epochermultilabel'].new_chunk.disconnect()
-            epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
+        # print(self.counter_epoch)
+        # if self.counter_epoch == 30:
+        #     self.stream_handler.nodes['epochermultilabel'].new_chunk.disconnect()
+        #     epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             
-            print(epoch.shape)
-            compare_epoch(epoch, self.counter_epoch)
+        #     print(epoch.shape)
+        #     compare_epoch(epoch, self.counter_epoch)
         
-        # send epoch(s) and is label to the current pipeline
-        # self.current_pipeline.new_epochs(label, epochs)
+        # send epochs stack and is label to the current pipeline
+        self.current_pipeline.new_epochs(label, epochs)
         
         # display count of triggers
         self.counter_epoch += 1

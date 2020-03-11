@@ -8,9 +8,10 @@ from pyqtgraph.Qt import QtCore
 
 from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
-from pyacq_ext.brainampsocket import BrainAmpSocket
+from pyacq_ext.brainvisionlistener import BrainVisionListener
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.rawbufferdevice import RawDeviceBuffer
+from pyacq_ext.triggerhunter import TriggerHunter
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -60,7 +61,7 @@ class StreamEngine(QtCore.QObject):
 
     def brain_amp_device(self):
         # EEG data Acquisition Node
-        dev_amp = BrainAmpSocket()
+        dev_amp = BrainVisionListener()
         dev_amp.configure(brainamp_host=self.brainamp_host,
                           brainamp_port=self.brainamp_port)
 
@@ -80,7 +81,6 @@ class StreamEngine(QtCore.QObject):
             dev = self.simulated_device()
         else:
             dev = self.brain_amp_device()
-
         dev.outputs['triggers'].configure(protocol='tcp',
                                           interface='127.0.0.1',
                                           transfermode='plaindata',)
@@ -90,10 +90,17 @@ class StreamEngine(QtCore.QObject):
         dev.initialize()
         self.nodes['device'] = dev
 
+        # Trigger Hunter
+        trig = TriggerHunter()
+        trig.configure()
+        trig.inputs['signals'].connect(dev.outputs['signals'])
+        trig.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+        trig.initialize()
+        self.nodes['triggers'] = trig
+
         # Filter Node
         f1, f2 = low_fequency, high_frequency
         sample_rate = dev.outputs['signals'].spec['sample_rate']
-
         coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
                                               btype='bandpass', ftype='butter', output='sos')
 
@@ -110,7 +117,7 @@ class StreamEngine(QtCore.QObject):
         epocher = EpocherMultiLabel()
         epocher.configure(parameters=trig_params)
         epocher.inputs['signals'].connect(filt.output)
-        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+        epocher.inputs['triggers'].connect(trig.outputs['triggers'])
         epocher.initialize()
 
         self.nodes['epochermultilabel'] = epocher
