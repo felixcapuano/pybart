@@ -16,14 +16,14 @@ try:
 except FileExistsError:
     pass
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter('	%(levelname)s (%(name)s) -> %(message)s')
 
 file_handler = logging.FileHandler('log\\configpanel.log')
 file_handler.setFormatter(formatter)
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 logger.addHandler(file_handler)
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
@@ -201,10 +201,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # setup parmeter in the stream handler
         if self.radio_BVRec.isChecked():
             logger.info('Init StreamEngine in BrainVision mode')
-            self.stream_engine = StreamEngine(brainamp_host=host, brainamp_port=port)
+            self.stream_engine = StreamEngine(self.check_zmq_enable.isChecked(), brainamp_host=host, brainamp_port=port)
         else:
             logger.info('Init StreamEngine in simulate mode')
-            self.stream_engine = StreamEngine(None, None, simulated=True, raw_file=self.simul_file)
+            self.stream_engine = StreamEngine(self.check_zmq_enable.isChecked(), simulated=True, raw_file=self.simul_file)
 
         try:
             logger.info('Configure Stream Handler')
@@ -237,6 +237,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         logger.info('Stop pipeline')
         
         self.stream_engine.stop_nodes()
+        self.stream_engine = None
         
         self.current_pipeline.reset()
         
@@ -330,8 +331,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 if __name__ == "__main__":
     import sys
     logger.info('Started')
+
     app = QtWidgets.QApplication(sys.argv)
     ui = ConfigPanel()
     ui.show()
+    
     sys.exit(app.exec_())
     logger.info('Finished')

@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>525</width>
-    <height>752</height>
+    <height>722</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -208,6 +208,22 @@
       </property>
       <property name="text">
        <string>Host</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="check_zmq_enable">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>40</y>
+        <width>101</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Trig ZMQ</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
@@ -503,35 +519,6 @@
     </property>
     <property name="textFormat">
      <enum>Qt::AutoText</enum>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>680</y>
-      <width>81</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>ZMQ address :</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="line_zmq_address">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>680</y>
-      <width>231</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="button_reset_count">

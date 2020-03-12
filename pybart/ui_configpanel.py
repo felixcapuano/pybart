@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'pybart/ui_configpanel.ui'
+# Form implementation generated from reading ui file 'pybart\ui_configpanel.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.1
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -14,7 +14,7 @@ class Ui_ConfigPanel(object):
     def setupUi(self, ConfigPanel):
         ConfigPanel.setObjectName("ConfigPanel")
         ConfigPanel.setEnabled(True)
-        ConfigPanel.resize(525, 752)
+        ConfigPanel.resize(525, 722)
         ConfigPanel.setMinimumSize(QtCore.QSize(525, 0))
         ConfigPanel.setMaximumSize(QtCore.QSize(525, 16777215))
         ConfigPanel.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -69,6 +69,10 @@ class Ui_ConfigPanel(object):
         self.label_host = QtWidgets.QLabel(self.groupBox_5)
         self.label_host.setGeometry(QtCore.QRect(150, 10, 61, 21))
         self.label_host.setObjectName("label_host")
+        self.check_zmq_enable = QtWidgets.QCheckBox(self.groupBox_5)
+        self.check_zmq_enable.setGeometry(QtCore.QRect(20, 40, 101, 17))
+        self.check_zmq_enable.setChecked(True)
+        self.check_zmq_enable.setObjectName("check_zmq_enable")
         self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox_2.setGeometry(QtCore.QRect(10, 220, 501, 341))
         self.groupBox_2.setObjectName("groupBox_2")
@@ -89,14 +93,14 @@ class Ui_ConfigPanel(object):
         self.add_trig.setGeometry(QtCore.QRect(470, 20, 21, 23))
         self.add_trig.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("pybart\\../resources/iconfinder_Create_132699.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("../resources/iconfinder_Create_132699.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.add_trig.setIcon(icon)
         self.add_trig.setObjectName("add_trig")
         self.del_trig = QtWidgets.QPushButton(self.groupBox_2)
         self.del_trig.setGeometry(QtCore.QRect(440, 20, 21, 23))
         self.del_trig.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("pybart\\../resources/iconfinder_Cancel_132620.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("../resources/iconfinder_Cancel_132620.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.del_trig.setIcon(icon1)
         self.del_trig.setObjectName("del_trig")
         self.combo_setup = QtWidgets.QComboBox(self.groupBox_2)
@@ -154,31 +158,19 @@ class Ui_ConfigPanel(object):
         self.label_3.setGeometry(QtCore.QRect(10, 630, 81, 20))
         self.label_3.setTextFormat(QtCore.Qt.AutoText)
         self.label_3.setObjectName("label_3")
-        self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(10, 680, 81, 16))
-        self.label_4.setObjectName("label_4")
-        self.line_zmq_address = QtWidgets.QLineEdit(self.centralwidget)
-        self.line_zmq_address.setEnabled(True)
-        self.line_zmq_address.setGeometry(QtCore.QRect(90, 680, 231, 20))
-        self.line_zmq_address.setReadOnly(True)
-        self.line_zmq_address.setObjectName("line_zmq_address")
         self.button_reset_count = QtWidgets.QPushButton(self.centralwidget)
         self.button_reset_count.setGeometry(QtCore.QRect(10, 650, 41, 20))
         self.button_reset_count.setObjectName("button_reset_count")
         ConfigPanel.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(ConfigPanel)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 525, 21))
-        self.menubar.setObjectName("menubar")
-        self.menuTools = QtWidgets.QMenu(self.menubar)
-        self.menuTools.setObjectName("menuTools")
-        ConfigPanel.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(ConfigPanel)
         self.statusbar.setObjectName("statusbar")
         ConfigPanel.setStatusBar(self.statusbar)
+        self.menubar = QtWidgets.QMenuBar(ConfigPanel)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 525, 21))
+        self.menubar.setObjectName("menubar")
+        ConfigPanel.setMenuBar(self.menubar)
         self.action_MYBcalibration = QtWidgets.QAction(ConfigPanel)
         self.action_MYBcalibration.setObjectName("action_MYBcalibration")
-        self.menuTools.addAction(self.action_MYBcalibration)
-        self.menubar.addAction(self.menuTools.menuAction())
 
         self.retranslateUi(ConfigPanel)
         QtCore.QMetaObject.connectSlotsByName(ConfigPanel)
@@ -195,6 +187,7 @@ class Ui_ConfigPanel(object):
         self.line_host.setText(_translate("ConfigPanel", "127.0.0.1"))
         self.label_port.setText(_translate("ConfigPanel", "Port"))
         self.label_host.setText(_translate("ConfigPanel", "Host"))
+        self.check_zmq_enable.setText(_translate("ConfigPanel", "Trig ZMQ"))
         self.groupBox_2.setTitle(_translate("ConfigPanel", "Trigger configuration"))
         item = self.table_trigs_params.horizontalHeaderItem(0)
         item.setText(_translate("ConfigPanel", "label"))
@@ -216,9 +209,7 @@ class Ui_ConfigPanel(object):
         self.label.setText(_translate("ConfigPanel", "Select pipeline"))
         self.button_settings.setText(_translate("ConfigPanel", "Settings"))
         self.label_3.setText(_translate("ConfigPanel", "Triggers count :"))
-        self.label_4.setText(_translate("ConfigPanel", "ZMQ address :"))
         self.button_reset_count.setText(_translate("ConfigPanel", "reset"))
-        self.menuTools.setTitle(_translate("ConfigPanel", "Tools"))
         self.action_MYBcalibration.setText(_translate("ConfigPanel", "MYB calibration"))
 
 

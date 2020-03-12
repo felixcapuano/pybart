@@ -26,10 +26,9 @@ logger.addHandler(file_handler)
 class StreamEngine(QtCore.QObject):
     """This object emit epoch in real time from a EEG device using BrainVision Recorder."""
 
-    nodes = {}
-    widget_nodes = []
+    
 
-    def __init__(self, brainamp_host, brainamp_port, simulated=False, parent=None, **option):
+    def __init__(self, zmq_trig_enable, simulated=False, parent=None, **option):
         """Stream handler builder
 
         :param brainamp_host: address where pyacq listen data from BrainVision Recorder, default in localhost(127.0.0.1)
@@ -38,13 +37,22 @@ class StreamEngine(QtCore.QObject):
         """
         QtCore.QObject.__init__(self, parent)
 
-        self.brainamp_host = brainamp_host
-        self.brainamp_port = brainamp_port
+        self.nodes = {}
+        self.widget_nodes = []
 
         self.simulated = simulated
+        self.zmq_trig_enable = zmq_trig_enable
+        print(zmq_trig_enable)
+
         if self.simulated:
             try:
                 self.raw_file = option['raw_file']
+            except KeyError:
+                raise KeyError('Error: raw_file is waited in argument')
+        else:
+            try:
+                self.brainamp_host = option['brainamp_host']
+                self.brainamp_port = option['brainamp_port']
             except KeyError:
                 raise KeyError('Error: raw_file is waited in argument')
 
@@ -90,13 +98,14 @@ class StreamEngine(QtCore.QObject):
         dev.initialize()
         self.nodes['device'] = dev
 
-        # Trigger Hunter
-        trig = TriggerHunter()
-        trig.configure()
-        trig.inputs['signals'].connect(dev.outputs['signals'])
-        trig.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
-        trig.initialize()
-        self.nodes['triggers'] = trig
+        if self.zmq_trig_enable:
+            # Trigger Hunter
+            trig = TriggerHunter()
+            trig.configure()
+            trig.inputs['signals'].connect(dev.outputs['signals'])
+            trig.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
+            trig.initialize()
+            self.nodes['triggers'] = trig
 
         # Filter Node
         f1, f2 = low_fequency, high_frequency
@@ -117,7 +126,10 @@ class StreamEngine(QtCore.QObject):
         epocher = EpocherMultiLabel()
         epocher.configure(parameters=trig_params)
         epocher.inputs['signals'].connect(filt.output)
-        epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+        if self.zmq_trig_enable:
+            epocher.inputs['triggers'].connect(trig.outputs['triggers'])
+        else:
+            epocher.inputs['triggers'].connect(dev.outputs['triggers'])
         epocher.initialize()
 
         self.nodes['epochermultilabel'] = epocher
