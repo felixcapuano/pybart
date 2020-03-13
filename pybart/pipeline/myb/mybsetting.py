@@ -128,9 +128,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             self.label_filename_calibration.setText(calibration_name)
             
             # reset the progress bar before starting calibration
-            self.progressBar_calibration.setValue(0)
-        
-            
+            self.progressBar_calibration.setValue(0) 
 
     def on_select_template(self):
         template_path = QtWidgets.QFileDialog.getOpenFileName(self,

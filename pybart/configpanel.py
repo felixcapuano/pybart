@@ -11,10 +11,7 @@ from .pipeline.pipeline import Pipeline
 from .streamengine import StreamEngine
 from .ui_configpanel import Ui_ConfigPanel
 
-try:
-    os.mkdir("log")
-except FileExistsError:
-    pass
+
 
 
 formatter = logging.Formatter('	%(levelname)s (%(name)s) -> %(message)s')
@@ -327,14 +324,3 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     # TODO set icon add modify method
     def on_deleting_trigger(self):
         self.table_trigs_params.removeRow(0)
-
-if __name__ == "__main__":
-    import sys
-    logger.info('Started')
-
-    app = QtWidgets.QApplication(sys.argv)
-    ui = ConfigPanel()
-    ui.show()
-    
-    sys.exit(app.exec_())
-    logger.info('Finished')

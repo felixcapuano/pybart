@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 pylint = "*"
 autopep8 = "*"
+sphinx = "*"
 
 [packages]
 numpy = "==1.18.1"

@@ -59,3 +59,15 @@ class MybLikelihoodSender:
         self.tab_lf = ""
         self.count_epoch = 0
         self.nb_flash = 0
+
+
+if __name__ == "__main__":
+    import sys
+    # logger.info('Started')
+
+    app = QtWidgets.QApplication(sys.argv)
+    ui = ConfigPanel()
+    ui.show()
+    
+    sys.exit(app.exec_())
+    # logger.info('Finished')
