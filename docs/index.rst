@@ -1,25 +1,15 @@
-Welcome to pybart's documentation!
+welcome to pybart's documentation!
 ==================================
 
-.. autoclass:: pybart.configpanel.ConfigPanel
-   :members: 
-
-.. autoclass:: pybart.streamengine.StreamEngine
-   :members:
-
-.. autoclass:: pybart.pipeline.myb.mybpipeline
-   :members:
-
-.. autoclass:: pybart.pipeline.myb.mybsender
-   :members:
-
-.. autoclass:: pybart.pipeline.myb.mybsetting
-   :members:
+Contents :
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: contents:
 
+   streamengine
+   mybpipeline
+   configpanel
 
 
 Indices and tables
