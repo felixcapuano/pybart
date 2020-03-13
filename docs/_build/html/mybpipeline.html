@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>MYB Pipeline &mdash; pybart  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Config Panel" href="configpanel.html" />
+    <link rel="prev" title="Stream Engine" href="streamengine.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pybart
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MYB Pipeline</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybart</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>MYB Pipeline</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/mybpipeline.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="myb-pipeline">
+<h1>MYB Pipeline<a class="headerlink" href="#myb-pipeline" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<dl class="class">
+<dt id="pybart.pipeline.myb.mybpipeline.MybPipeline">
+<em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybpipeline.</code><code class="sig-name descname">MybPipeline</code><span class="sig-paren">(</span><em class="sig-param">parent</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pipe line use to compute epochs to determine the likelihood</p>
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybpipeline.MybPipeline.compute_likelihood">
+<code class="sig-name descname">compute_likelihood</code><span class="sig-paren">(</span><em class="sig-param">l_r_TNT</em>, <em class="sig-param">l_mu_TNT_T</em>, <em class="sig-param">l_mu_TNT_NT</em>, <em class="sig-param">l_sigma_TNT_T</em>, <em class="sig-param">l_sigma_TNT_NT</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline.compute_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute likelihood value for Target and NoTarget</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybpipeline.MybPipeline.new_epochs">
+<code class="sig-name descname">new_epochs</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">epochs</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline.new_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a slot who classifies epoch according to learning parameters
+and bayes priors for myb games with dynamic bayesian classification</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybpipeline.MybPipeline.predict_R_TNT">
+<code class="sig-name descname">predict_R_TNT</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">mu_MatCov_T</em>, <em class="sig-param">mu_MatCov_NT</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline.predict_R_TNT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the r_TNT for a new set of trials.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybpipeline.MybPipeline.setting">
+<code class="sig-name descname">setting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline.setting" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is use to configure the pipeline.</p>
+<p>Here it just show the the UI setting interface.
+Every needed tools and parameters to configure
+the pipeline are in.</p>
+<p>This function is call by the configuration panel,
+when setting button is clicked.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pybart.pipeline.myb.mybsender.MybLikelihoodSender">
+<em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybsender.</code><code class="sig-name descname">MybLikelihoodSender</code><a class="headerlink" href="#pybart.pipeline.myb.mybsender.MybLikelihoodSender" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pybart.pipeline.myb.mybsender.MybLikelihoodSender.send_new_likelihood">
+<code class="sig-name descname">send_new_likelihood</code><span class="sig-paren">(</span><em class="sig-param">likelihood</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsender.MybLikelihoodSender.send_new_likelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send likelihood to the Myb game</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog">
+<em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybsetting.</code><code class="sig-name descname">MybSettingDialog</code><span class="sig-paren">(</span><em class="sig-param">parent</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dialog window to setup the myb pipeline</p>
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.load_template">
+<code class="sig-name descname">load_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.load_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load all template thanks to a .h5 file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.on_step">
+<code class="sig-name descname">on_step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.on_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the calibration progress bar</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pybart.pipeline.myb.mybtemplatecalibration"></span><dl class="function">
+<dt id="pybart.pipeline.myb.mybtemplatecalibration.filtering_raw">
+<code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">filtering_raw</code><span class="sig-paren">(</span><em class="sig-param">raw</em>, <em class="sig-param">l_freq</em>, <em class="sig-param">h_freq</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.filtering_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function filtering a raw format without using forward-backward method</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybart.pipeline.myb.mybtemplatecalibration.get_index_reject_epochs">
+<code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">get_index_reject_epochs</code><span class="sig-paren">(</span><em class="sig-param">epochs</em>, <em class="sig-param">rejection_rate</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.get_index_reject_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function removes Epochs from the Mne.Epochs object according a rate</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybart.pipeline.myb.mybtemplatecalibration.marking_target_events">
+<code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">marking_target_events</code><span class="sig-paren">(</span><em class="sig-param">raw_events</em>, <em class="sig-param">sequence_target</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.marking_target_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function marks targeted events thanks to a list of index</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybart.pipeline.myb.mybtemplatecalibration.riemann_template_learn">
+<code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">riemann_template_learn</code><span class="sig-paren">(</span><em class="sig-param">file_complete_path</em>, <em class="sig-param">rejection_rate=0.15</em>, <em class="sig-param">l_freq=0.5</em>, <em class="sig-param">h_freq=20</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.riemann_template_learn" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is generating a riemann template.</p>
+<p>It take one .vhdr path in argument and return
+a dict containing all calibration data.</p>
+<p>Riemann template is use to calibrate the MYB game.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="configpanel.html" class="btn btn-neutral float-right" title="Config Panel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="streamengine.html" class="btn btn-neutral float-left" title="Stream Engine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Felix Capuano
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

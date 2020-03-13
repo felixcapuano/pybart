@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Config Panel &mdash; pybart  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="MYB Pipeline" href="mybpipeline.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pybart
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Config Panel</a><ul class="simple">
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pybart</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Config Panel</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/configpanel.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="config-panel">
+<h1>Config Panel<a class="headerlink" href="#config-panel" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<dl class="class">
+<dt id="pybart.configpanel.ConfigPanel">
+<em class="property">class </em><code class="sig-prename descclassname">pybart.configpanel.</code><code class="sig-name descname">ConfigPanel</code><span class="sig-paren">(</span><em class="sig-param">parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.connect_ui">
+<code class="sig-name descname">connect_ui</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.connect_ui" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function connect UI elements to all respective slot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.get_table_params">
+<code class="sig-name descname">get_table_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.get_table_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function return current parameter from de table</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.load_configuration">
+<code class="sig-name descname">load_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.load_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function read all setup parameter from json configuration file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.on_new_epochs">
+<code class="sig-name descname">on_new_epochs</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">epochs</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_new_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a slot who receive a stack of epochs</p>
+<p>This is the most important part of the class.
+Each stack of epoch build by the StreamEngine
+arrives here with his label.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.on_new_setup">
+<code class="sig-name descname">on_new_setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_new_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a slot waiting for an index change
+from the comboBox.
+-delete all row
+-adding parameter according to the json configuration file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.on_pipeline_selected">
+<code class="sig-name descname">on_pipeline_selected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_pipeline_selected" title="Permalink to this definition">¶</a></dt>
+<dd><p>this function is a slot who switch of pipeline</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.on_settings">
+<code class="sig-name descname">on_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a slot who open a open file window
+and set the name of the file selected in the label</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.on_start_running">
+<code class="sig-name descname">on_start_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_start_running" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a slot who collect parameter from the
+control panel and initialise the pyacq web(StreamEngine)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.on_stop_running">
+<code class="sig-name descname">on_stop_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_stop_running" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a slot who stop pyacq all pyacq node</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="mybpipeline.html" class="btn btn-neutral float-left" title="MYB Pipeline" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Felix Capuano
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
