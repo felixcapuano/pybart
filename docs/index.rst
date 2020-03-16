@@ -1,18 +1,19 @@
-welcome to pybart's documentation!
-==================================
+Pybart's documentation!
+=======================
+
+Pybart is 
 
 .. toctree::
    :maxdepth: 2
-   :caption: contents:
+   :caption: Introduction:
 
-   introduction
+   presentation
    installation
-
-Contents :
+   tutorial
 
 .. toctree::
-   :maxdepth: 2
-   :caption: contents:
+   :maxdepth: 50
+   :caption: Architecture:
 
    streamengine
    mybpipeline

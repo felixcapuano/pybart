@@ -13,6 +13,7 @@ from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.rawbufferdevice import RawDeviceBuffer
 from pyacq_ext.triggerhunter import TriggerHunter
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

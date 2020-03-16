@@ -34,7 +34,9 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Introduction" href="presentation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -78,7 +80,17 @@
               
             
             
-              <p class="caption"><span class="caption-text">contents:</span></p>
+              <p class="caption"><span class="caption-text">Introduction:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="presentation.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#user-instalation">User instalation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developer-instalation">Developer instalation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Architecture:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
@@ -149,7 +161,87 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>Pybart installation …</p>
+<div class="section" id="user-instalation">
+<h2>User instalation<a class="headerlink" href="#user-instalation" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Pybart requires Python 3.</p>
+</div>
+<p>To download source code make sure you have [git](<a class="reference external" href="https://git-scm.com/">https://git-scm.com/</a>), then use the
+following command.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> clone pybart
+<span class="go">git clone https://gitlab.com/manu.maby/pybart.git</span>
+</pre></div>
+</div>
+<p>Pybart use [pipenv](<a class="reference external" href="https://github.com/pypa/pipenv/">https://github.com/pypa/pipenv/</a>) so all dependencies are
+very easy to install.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> install pipenv
+<span class="go">pip install pipenp</span>
+</pre></div>
+</div>
+<p>Now, we are ready to lauch dependencies installation.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> move into pybart folder
+<span class="go">cd .\pybart\</span>
+
+<span class="gp">#</span> <span class="k">then</span> install
+<span class="go">pipenv install</span>
+</pre></div>
+</div>
+<p>You need to install 2 more packages.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> move into the librairies folder
+<span class="go">cd .\libs\</span>
+
+<span class="gp">#</span> clone pyacq and pyacq_ext
+<span class="go">git clone https://gitlab.com/manu.maby/pyacq_ext.git</span>
+</pre></div>
+</div>
+<p>You will just have to install our 2 new packages.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> install pyacq and pyacq_ext
+<span class="go">pip install .\pyacq_ex\</span>
+<span class="go">pip install .\pyacq\</span>
+</pre></div>
+</div>
+<p>Its done!</p>
+</div>
+<div class="section" id="developer-instalation">
+<h2>Developer instalation<a class="headerlink" href="#developer-instalation" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Pybart requires Python 3.</p>
+</div>
+<p>Your a not confortable to create your workspace this instalation tutorial is for you.
+First make sur [git](<a class="reference external" href="https://git-scm.com/">https://git-scm.com/</a>) is installed on your machine.</p>
+<p>The first step is to create the project folder.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir pybart_project</span>
+</pre></div>
+</div>
+<p>The next step is to get all the necessary code.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> first move into the project folder
+<span class="go">cd .\pybart_project\</span>
+
+<span class="gp">#</span> <span class="k">then</span> clone each packages needed
+<span class="go">git clone https://github.com/pyacq/pyacq.git</span>
+<span class="go">git clone https://gitlab.com/manu.maby/pyacq_ext.git</span>
+<span class="go">git clone https://gitlab.com/manu.maby/pybart.git</span>
+</pre></div>
+</div>
+<p>Now we need to install [pipenv](<a class="reference external" href="https://github.com/pypa/pipenv">https://github.com/pypa/pipenv</a>). This is a tool as pip but he will install everything
+for you. To install it use the following command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pipenv</span>
+</pre></div>
+</div>
+<p>The final step is simply to move inside all packages and install is dependencies.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd .\pyacq_ext\</span>
+<span class="go">pipenv install</span>
+<span class="go">pipenv run pip install -e .\pyacq_ext\pyacq\</span>
+
+<span class="go">cd ..\pybart</span>
+<span class="go">pipenv install</span>
+<span class="go">pipenv run pip install -e ..\pyacq\</span>
+<span class="go">pipenv run pip install -e ..\pyacq_ext\</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -157,6 +249,15 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial.html" class="btn btn-neutral float-right" title="Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="presentation.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

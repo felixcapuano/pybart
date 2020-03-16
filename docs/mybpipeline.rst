@@ -1,9 +1,5 @@
 MYB Pipeline
-==================================
-
-.. toctree::
-   :maxdepth: 2
-   :caption: contents:
+============
 
 .. autoclass:: pybart.pipeline.myb.mybpipeline.MybPipeline
    :members:
