@@ -84,8 +84,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="presentation.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#user-instalation">User instalation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#developer-instalation">Developer instalation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#user-installation">User installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#developer-installation">Developer installation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
@@ -161,19 +161,19 @@
             
   <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="user-instalation">
-<h2>User instalation<a class="headerlink" href="#user-instalation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="user-installation">
+<h2>User installation<a class="headerlink" href="#user-installation" title="Permalink to this headline">¶</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Pybart requires Python 3.</p>
 </div>
-<p>To download source code make sure you have [git](<a class="reference external" href="https://git-scm.com/">https://git-scm.com/</a>), then use the
+<p>To download source code make sure you have <a class="reference external" href="https://git-scm.com/">git</a>, then use the
 following command.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> clone pybart
 <span class="go">git clone https://gitlab.com/manu.maby/pybart.git</span>
 </pre></div>
 </div>
-<p>Pybart use [pipenv](<a class="reference external" href="https://github.com/pypa/pipenv/">https://github.com/pypa/pipenv/</a>) so all dependencies are
+<p>Pybart use <a class="reference external" href="https://github.com/pypa/pipenv/">pipenv</a> so all dependencies are
 very easy to install.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> install pipenv
 <span class="go">pip install pipenp</span>
@@ -203,14 +203,14 @@ very easy to install.</p>
 </div>
 <p>Its done!</p>
 </div>
-<div class="section" id="developer-instalation">
-<h2>Developer instalation<a class="headerlink" href="#developer-instalation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="developer-installation">
+<h2>Developer installation<a class="headerlink" href="#developer-installation" title="Permalink to this headline">¶</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Pybart requires Python 3.</p>
 </div>
 <p>Your a not confortable to create your workspace this instalation tutorial is for you.
-First make sur [git](<a class="reference external" href="https://git-scm.com/">https://git-scm.com/</a>) is installed on your machine.</p>
+First make sur <a class="reference external" href="https://git-scm.com/">git</a> is installed on your machine.</p>
 <p>The first step is to create the project folder.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir pybart_project</span>
 </pre></div>
@@ -225,12 +225,12 @@ First make sur [git](<a class="reference external" href="https://git-scm.com/">h
 <span class="go">git clone https://gitlab.com/manu.maby/pybart.git</span>
 </pre></div>
 </div>
-<p>Now we need to install [pipenv](<a class="reference external" href="https://github.com/pypa/pipenv">https://github.com/pypa/pipenv</a>). This is a tool as pip but he will install everything
+<p>Now we need to install <a class="reference external" href="https://github.com/pypa/pipenv/">pipenv</a>. This is a tool as pip but he will install everything
 for you. To install it use the following command.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pipenv</span>
 </pre></div>
 </div>
-<p>The final step is simply to move inside all packages and install is dependencies.</p>
+<p>The final step is simply to move inside all packages and install is dependencies using pipenv.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd .\pyacq_ext\</span>
 <span class="go">pipenv install</span>
 <span class="go">pipenv run pip install -e .\pyacq_ext\pyacq\</span>

@@ -1,5 +1,5 @@
 MYB Pipeline
-==================================
+============
 
 .. autoclass:: pybart.pipeline.myb.mybpipeline.MybPipeline
    :members:

@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Stream Engine" href="streamengine.html" />
+    <link rel="next" title="Architecture" href="architecture.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -80,17 +80,17 @@
               
             
             
-              <p class="caption"><span class="caption-text">Introduction:</span></p>
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="presentation.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#source">Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#filter">Filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#triger">Triger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline">Pipeline</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Architecture:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
 </ul>
 
             
@@ -157,6 +157,70 @@
             
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The configuration panel is divided in differents section.</p>
+<img alt="img/configpanel.png" src="img/configpanel.png" />
+<div class="section" id="source">
+<h2>Source<a class="headerlink" href="#source" title="Permalink to this headline">¶</a></h2>
+<p>The source configure give 2 choice:</p>
+<ul class="simple">
+<li><p>BrainVision Recorder mode is use to real-time EEG signal acquisition.
+This mode need an address and a port. If you running BrainVision on the same
+machine address has to be (127.0.0.1). The port is determine by BrainVision
+Recorder and differs on each machine.</p></li>
+<li><p>Simulate mode allow you to use a “.vhdr” file (BrainVision record file format)
+to simulate the streaming from a previously recorded session.</p></li>
+</ul>
+</div>
+<div class="section" id="filter">
+<h2>Filter<a class="headerlink" href="#filter" title="Permalink to this headline">¶</a></h2>
+<p>EEG signal is filtered by a passband filter.
+You can set the high and low frequency.</p>
+</div>
+<div class="section" id="triger">
+<h2>Triger<a class="headerlink" href="#triger" title="Permalink to this headline">¶</a></h2>
+<p>To understand this part I have to explain how the program work.
+So when pybart is running BrainVision Recorder send a continuous stream.
+Pybart receive the signal and wait trigger from the game.
+This part configure this triggers.</p>
+<p>The white table set some important parameter:</p>
+<ul class="simple">
+<li><p><strong>label :</strong> To be detected by pybart the triggers label has to be registered in
+this configuration part.</p></li>
+<li><p><strong>right/left sweep :</strong> This 2 values are the time of the EEG signal keeped before and
+after one trigger is captured by pybart. The 2 values are in seconds. This
+2 values added give the period of the epoch.</p></li>
+<li><p><strong>stack :</strong> This value is often unnecessary. If this value is “1” pybart will
+drop epochs one by one. is you want stacked epoch you can modify this
+value. This will give to you epoch matrix size (time x channel x stack).</p></li>
+</ul>
+<p>The triggers scrolling menu on the top is use to select a saved configuration.
+The “configuration.json file allow you to add you own configuration setup.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;Config example&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;right_sweep&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;left_sweep&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;max_stock&quot;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">},</span>
+        <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Permalink to this headline">¶</a></h2>
+<p>The pipeline scrolling menu allow you two select the <a class="reference internal" href="#pipeline">pipeline</a> used.
+Currently there is only one pipeline developed working with Myb game</p>
+<p>In this section you can setup the current pipeline thanks to the settings button.
+This will open the pipeline setting.</p>
+<p>Let take the Myb pipeline as example.</p>
+<ul class="simple">
+<li><p>The first part is a tool generating calibration file.</p></li>
+<li><p>The seconds is to select the calibration file you want to use.</p></li>
+</ul>
+<img alt="img/myb_setting.png" src="img/myb_setting.png" />
+</div>
 </div>
 
 
@@ -167,7 +231,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="streamengine.html" class="btn btn-neutral float-right" title="Stream Engine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="architecture.html" class="btn btn-neutral float-right" title="Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

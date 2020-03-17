@@ -1,23 +1,27 @@
 Installation
 ============
 
-User instalation
+User installation
 -----------------
 
 .. warning::
 
   Pybart requires Python 3.
 
-To download source code make sure you have [git](https://git-scm.com/), then use the
+To download source code make sure you have `git`_, then use the
 following command.
+
+.. _git: https://git-scm.com/
 
 .. code-block:: console
 
   # clone pybart
   git clone https://gitlab.com/manu.maby/pybart.git
 
-Pybart use [pipenv](https://github.com/pypa/pipenv/) so all dependencies are
+Pybart use `pipenv`_ so all dependencies are
 very easy to install.
+
+.. _pipenv: https://github.com/pypa/pipenv/
 
 .. code-block:: console
 
@@ -56,15 +60,16 @@ You will just have to install our 2 new packages.
 Its done!
 
 
-Developer instalation
----------------------
+Developer installation
+----------------------
 
 .. warning::
 
   Pybart requires Python 3.
 
 Your a not confortable to create your workspace this instalation tutorial is for you.
-First make sur [git](https://git-scm.com/) is installed on your machine.
+First make sur `git`_ is installed on your machine.
+
 
 The first step is to create the project folder.
 
@@ -84,14 +89,14 @@ The next step is to get all the necessary code.
   git clone https://gitlab.com/manu.maby/pyacq_ext.git
   git clone https://gitlab.com/manu.maby/pybart.git
 
-Now we need to install [pipenv](https://github.com/pypa/pipenv). This is a tool as pip but he will install everything 
+Now we need to install `pipenv`_. This is a tool as pip but he will install everything 
 for you. To install it use the following command.
 
 .. code-block::
 
   pip install pipenv
 
-The final step is simply to move inside all packages and install is dependencies.
+The final step is simply to move inside all packages and install is dependencies using pipenv.
 
 .. code-block:: console
   
