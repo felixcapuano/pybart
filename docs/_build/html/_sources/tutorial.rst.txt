@@ -5,11 +5,11 @@ The configuration panel is divided in differents section.
 
 .. image:: img/configpanel.png
 
--------
+------
 Source
--------
+------
 
-The source configure give 2 choice:
+The source configure offers two choices:
 
 - BrainVision Recorder mode is use to real-time EEG signal acquisition.
   This mode need an address and a port. If you running BrainVision on the same
@@ -19,16 +19,16 @@ The source configure give 2 choice:
 - Simulate mode allow you to use a ".vhdr" file (BrainVision record file format)
   to simulate the streaming from a previously recorded session.
 
--------
+------
 Filter
--------
+------
 
 EEG signal is filtered by a passband filter.
 You can set the high and low frequency.
 
--------
+------
 Triger
--------
+------
 
 To understand this part I have to explain how the program work.
 So when pybart is running BrainVision Recorder send a continuous stream.

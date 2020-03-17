@@ -24,8 +24,12 @@ logger.setLevel(logging.INFO)
 logger.addHandler(file_handler)
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
+    """The configuration panel configure the stream engine"""
     
+    # default path to the file use to configurate triggers
     config_file = 'configuration.json'
+
+    # this dict list all pipeline
     pipelines = {
         'myb default': {'pipe': MybPipeline},
         'test' : {'pipe': Pipeline}
@@ -37,20 +41,18 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # init error dialog        
         self.error_dialog = QtWidgets.QErrorMessage()
 
-        # setup UI
+        # setupUi is generated with QT Designer tools
         self.setupUi(self)
+
         self.connect_ui()
 
-        # load UI
+        # load component with different default setup
         self.load_configuration()
         self.fill_combo_setup()
+        self.combo_pipeline.addItems(self.pipelines.keys())
         self.simul_file = 'No File Selected'
 
-        # epoch counter
         self.counter_epoch = 0
-
-        # init pipeline
-        self.combo_pipeline.addItems(self.pipelines.keys())
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -111,12 +113,15 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         return params
         
     def fill_combo_setup(self):
+        """This function fill combobox with available triggers configurations"""
+
         logger.info('Update list of triggers')
         self.combo_setup.clear()
         for setup in self.triggers_parameters.keys():
             self.combo_setup.addItem(setup)
 
     def on_simulation_file(self):
+        """This function set file path for simulate session."""
         logger.info('Select file used for simulation')
         self.dialog_simul = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
@@ -146,13 +151,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.frame_select_file.setEnabled(False)
 
     def on_pipeline_selected(self):
-        """this function is a slot who switch of pipeline"""
+        """This function is a slot who change the pipeline"""
         self.current_pipeline_name = self.combo_pipeline.currentText()
         self.current_pipeline = self.pipelines[self.current_pipeline_name]['pipe'](self)
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
-        control panel and initialise the pyacq web(StreamEngine)
+        control panel and initialise the stream (StreamEngine)
 
         """
         logger.info('Run pipeline')

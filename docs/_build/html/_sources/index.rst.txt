@@ -4,9 +4,7 @@ Pybart's documentation!
 Introduction
 ------------
 
-Pybart is an application that links the game and the ElectoEncephaloGram in a Brain-Computer Interface (BCI) system.
-
-Currently pybart is only compatible with BrainVision Recorder and The BCI game MYB.
+Pybart is Brain-Computer Interface (BCI) system. Currently pybart is only compatible with BrainVision Recorder and The BCI game MYB.
 
 
 .. toctree::
