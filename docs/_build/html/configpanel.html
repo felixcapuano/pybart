@@ -163,10 +163,32 @@
 <dl class="class">
 <dt id="pybart.configpanel.ConfigPanel">
 <em class="property">class </em><code class="sig-prename descclassname">pybart.configpanel.</code><code class="sig-name descname">ConfigPanel</code><span class="sig-paren">(</span><em class="sig-param">parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>The configuration panel setup and run the data streaming and processing.</p>
+<p>The main function of this class is on_new_epoch. Indeed, each epoch
+are send to this Qt slot as a matrix(np.ndarray) of dimension :
+(number of stacks * number of channels * stack of epochs)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span>          <span class="o">+---------------------+</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="n">channels</span><span class="o">/</span>                     <span class="o">/|</span>
+<span class="gp">&gt;&gt;&gt; </span>        <span class="o">/</span>                     <span class="o">//|</span>
+<span class="gp">&gt;&gt;&gt; </span>       <span class="o">+---------------------+//|</span>
+<span class="gp">&gt;&gt;&gt; </span>       <span class="o">|---------------------|//|</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epochs</span> <span class="o">|---------------------|//+</span>
+<span class="gp">&gt;&gt;&gt; </span>       <span class="o">|---------------------|//</span>
+<span class="gp">&gt;&gt;&gt; </span>       <span class="o">|---------------------|/</span>
+<span class="gp">&gt;&gt;&gt; </span>       <span class="o">+---------------------+</span>
+<span class="gp">&gt;&gt;&gt; </span>               <span class="n">times</span>
+</pre></div>
+</div>
+<dl class="method">
 <dt id="pybart.configpanel.ConfigPanel.connect_ui">
 <code class="sig-name descname">connect_ui</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.connect_ui" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function connect UI elements to all respective slot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.fill_combo_setup">
+<code class="sig-name descname">fill_combo_setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.fill_combo_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function fill combobox with available triggers configurations</p>
 </dd></dl>
 
 <dl class="method">
@@ -185,6 +207,14 @@
 <dt id="pybart.configpanel.ConfigPanel.on_new_epochs">
 <code class="sig-name descname">on_new_epochs</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">epochs</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_new_epochs" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is a slot who receive a stack of epochs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<em>str</em>) – This is the label of the epochs stack</p></li>
+<li><p><strong>epochs</strong> (<em>numpy.ndarray</em>) – This it a matrix 3d (times*channels*stack)</p></li>
+</ul>
+</dd>
+</dl>
 <p>This is the most important part of the class.
 Each stack of epoch build by the StreamEngine
 arrives here with his label.</p>
@@ -202,7 +232,7 @@ from the comboBox.
 <dl class="method">
 <dt id="pybart.configpanel.ConfigPanel.on_pipeline_selected">
 <code class="sig-name descname">on_pipeline_selected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_pipeline_selected" title="Permalink to this definition">¶</a></dt>
-<dd><p>this function is a slot who switch of pipeline</p>
+<dd><p>This function is a slot who change the pipeline</p>
 </dd></dl>
 
 <dl class="method">
@@ -213,10 +243,16 @@ and set the name of the file selected in the label</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.on_simulation_file">
+<code class="sig-name descname">on_simulation_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_simulation_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function set file path for simulate session.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pybart.configpanel.ConfigPanel.on_start_running">
 <code class="sig-name descname">on_start_running</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_start_running" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is a slot who collect parameter from the
-control panel and initialise the pyacq web(StreamEngine)</p>
+control panel and initialise the stream (StreamEngine)</p>
 </dd></dl>
 
 <dl class="method">

@@ -164,34 +164,58 @@
 <dl class="class">
 <dt id="pybart.streamengine.StreamEngine">
 <em class="property">class </em><code class="sig-prename descclassname">pybart.streamengine.</code><code class="sig-name descname">StreamEngine</code><span class="sig-paren">(</span><em class="sig-param">zmq_trig_enable</em>, <em class="sig-param">simulated=False</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">**option</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine" title="Permalink to this definition">¶</a></dt>
-<dd><p>This object emit epoch in real time from a EEG device using BrainVision Recorder.</p>
+<dd><p>This
+hold the pyacq node web(<a class="reference external" href="https://github.com/pyacq/pyacq">https://github.com/pyacq/pyacq</a>).</p>
+<dl class="method">
+<dt id="pybart.streamengine.StreamEngine.brain_amp_device">
+<code class="sig-name descname">brain_amp_device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.brain_amp_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function initialize EEG data Acquisition Node</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pybart.streamengine.StreamEngine.configuration">
-<code class="sig-name descname">configuration</code><span class="sig-paren">(</span><em class="sig-param">low_fequency</em>, <em class="sig-param">high_frequency</em>, <em class="sig-param">trig_params</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.configuration" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">configuration</code><span class="sig-paren">(</span><em class="sig-param">low_frequency</em>, <em class="sig-param">high_frequency</em>, <em class="sig-param">trig_params</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.configuration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create, configure and plug all pyacq node</p>
 <dl class="field-list simple">
-<dt class="field-odd">Low_fequency</dt>
-<dd class="field-odd"><p>set low frequency of the pass band</p>
-</dd>
-<dt class="field-even">High_frequency</dt>
-<dd class="field-even"><p>set high frequency of the pass band</p>
-</dd>
-<dt class="field-odd">Trig_params</dt>
-<dd class="field-odd"><p>triggers parameter on a dict format</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>low_frequency</strong> (<em>float</em>) – set low frequency of the pass band</p></li>
+<li><p><strong>high_frequency</strong> (<em>float</em>) – set high frequency of the pass band</p></li>
+<li><p><strong>trig_params</strong> (<em>dict</em>) – triggers parameter on a dict format</p></li>
+</ul>
 </dd>
 </dl>
+<p>This function initialize all node depending on the mode selected.
+It storing all node in a dictionary to start them easily.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pybart.streamengine.StreamEngine.set_slot_new_epochs">
-<code class="sig-name descname">set_slot_new_epochs</code><span class="sig-paren">(</span><em class="sig-param">slot_on_new_chunk</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.set_slot_new_epochs" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function set the output slot for each epoch stack</p>
+<code class="sig-name descname">set_slot_new_epochs</code><span class="sig-paren">(</span><em class="sig-param">slot_on_new_epochs</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.set_slot_new_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function set the output slot for each epoch stack.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>slot_on_new_epochs</strong> (<em>function</em>) – set the output slot for each stack of epochs</p>
+</dd>
+</dl>
+<p>The output slot has to be of format:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">on_new_epoch</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">epochs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="c1"># epochs processing here</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">pass</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.streamengine.StreamEngine.simulated_device">
+<code class="sig-name descname">simulated_device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.simulated_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function initialize Simulator EEG data Acquisition Node</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pybart.streamengine.StreamEngine.start_nodes">
 <code class="sig-name descname">start_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.start_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start all nodes</p>
+<dd><p>Start all nodes and show them</p>
 </dd></dl>
 
 <dl class="method">

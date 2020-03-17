@@ -24,7 +24,24 @@ logger.setLevel(logging.INFO)
 logger.addHandler(file_handler)
 
 class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
-    """The configuration panel configure the stream engine"""
+    """The configuration panel setup and run the data streaming and processing.
+    
+    The main function of this class is on_new_epoch. Indeed, each epoch
+    are send to this Qt slot as a matrix(np.ndarray) of dimension :
+    (number of stacks * number of channels * stack of epochs)
+
+
+    >>>           +---------------------+
+    >>>  channels/                     /|
+    >>>         /                     //|
+    >>>        +---------------------+//|
+    >>>        |---------------------|//|
+    >>> epochs |---------------------|//+
+    >>>        |---------------------|//
+    >>>        |---------------------|/
+    >>>        +---------------------+
+    >>>                times
+    """
     
     # default path to the file use to configurate triggers
     config_file = 'configuration.json'
@@ -236,6 +253,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
+
         logger.info('Stop pipeline')
         
         self.stream_engine.stop_nodes()
@@ -300,6 +318,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     def on_new_epochs(self, label, epochs):
         """This function is a slot who receive a stack of epochs
         
+        :param label: This is the label of the epochs stack
+        :type label: str
+        :param epochs: This it a matrix 3d (times*channels*stack)
+        :type epochs: numpy.ndarray
+
         This is the most important part of the class.
         Each stack of epoch build by the StreamEngine 
         arrives here with his label.

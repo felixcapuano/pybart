@@ -25,15 +25,23 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 class StreamEngine(QtCore.QObject):
-    """This object emit epoch in real time from a EEG device using BrainVision Recorder."""
-
-    
+    """This  
+     hold the pyacq node web(https://github.com/pyacq/pyacq). """
 
     def __init__(self, zmq_trig_enable, simulated=False, parent=None, **option):
-        """Stream handler builder
+        """Stream engine initializer
+        :param zmq_trig_enable: is triggers send by zmq?
+        :type zmq_trig_enable: bool
+        :param simulated: is simulated mode enable , default in False
+        :type simulated: bool
+        
+        :param raw_file: path pointing to the ".vhdr" file
+        :type raw_file: str
 
         :param brainamp_host: address where pyacq listen data from BrainVision Recorder, default in localhost(127.0.0.1)
+        :type brainamp_host: str
         :param brainamp_port: port where pyacq listen data from BrainVision Recorder, default in localhost(51244)
+        :type brainamp_port: int
 
         """
         QtCore.QObject.__init__(self, parent)
@@ -58,7 +66,7 @@ class StreamEngine(QtCore.QObject):
                 raise KeyError('Error: raw_file is waited in argument')
 
     def simulated_device(self):
-        # Simulator EEG data Acquisition Node
+        """This function initialize Simulator EEG data Acquisition Node"""
 
         dev_sim = RawDeviceBuffer()
         try:
@@ -69,23 +77,29 @@ class StreamEngine(QtCore.QObject):
         return dev_sim
 
     def brain_amp_device(self):
-        # EEG data Acquisition Node
+        """This function initialize EEG data Acquisition Node"""
         dev_amp = BrainVisionListener()
         dev_amp.configure(brainamp_host=self.brainamp_host,
                           brainamp_port=self.brainamp_port)
 
         return dev_amp
 
-    def configuration(self, low_fequency, high_frequency, trig_params):
+    def configuration(self, low_frequency, high_frequency, trig_params):
         """Create, configure and plug all pyacq node
 
-        :low_fequency: set low frequency of the pass band
-        :high_frequency: set high frequency of the pass band
-        :trig_params: triggers parameter on a dict format
+        :param low_frequency: set low frequency of the pass band
+        :type low_frequency: float
+        :param high_frequency: set high frequency of the pass band
+        :type high_frequency: float
+        :param trig_params: triggers parameter on a dict format
+        :type trig_params: dict
+
+        This function initialize all node depending on the mode selected.
+        It storing all node in a dictionary to start them easily.
 
         """
 
-        logger.info('Start configuration stream (simulate mode : {}), setup => low freq : {}Hz, high freq : {}Hz)'.format(self.simulated, low_fequency, high_frequency))
+        logger.info('Start configuration stream (simulate mode : {}), setup => low freq : {}Hz, high freq : {}Hz)'.format(self.simulated, low_frequency, high_frequency))
         if self.simulated:
             dev = self.simulated_device()
         else:
@@ -109,7 +123,7 @@ class StreamEngine(QtCore.QObject):
             self.nodes['triggers'] = trig
 
         # Filter Node
-        f1, f2 = low_fequency, high_frequency
+        f1, f2 = low_frequency, high_frequency
         sample_rate = dev.outputs['signals'].spec['sample_rate']
         coefficients = scipy.signal.iirfilter(2, [f1/sample_rate*2, f2/sample_rate*2],
                                               btype='bandpass', ftype='butter', output='sos')
@@ -145,7 +159,7 @@ class StreamEngine(QtCore.QObject):
         self.widget_nodes.append('qoscilloscope')
 
     def start_nodes(self):
-        """Start all nodes"""
+        """Start all nodes and show them"""
         logger.info('Start stream')
         for node in self.nodes.values():
             node.start()
@@ -170,7 +184,18 @@ class StreamEngine(QtCore.QObject):
             if not self.nodes[widget_node].closed():
                 self.nodes[widget_node].close()
 
-    def set_slot_new_epochs(self, slot_on_new_chunk):
-        """This function set the output slot for each epoch stack """
+    def set_slot_new_epochs(self, slot_on_new_epochs):
+        """This function set the output slot for each epoch stack.
+        
+        :param slot_on_new_epochs: set the output slot for each stack of epochs
+        :type slot_on_new_epochs: function
 
-        self.nodes['epochermultilabel'].new_chunk.connect(slot_on_new_chunk)
+        The output slot has to be of format:
+
+        >>> def on_new_epoch(label, epochs)
+        >>>     # epochs processing here
+        >>>     pass
+
+        """
+        
+        self.nodes['epochermultilabel'].new_chunk.connect(slot_on_new_epochs)
