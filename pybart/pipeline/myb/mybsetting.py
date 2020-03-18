@@ -19,7 +19,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 class TemplateGenerator(QtCore.QThread):
-    """Tread running the calibration function
+    """Use to delegate the template processing whitch is a heavy operation.
     
     The calibration estimation time execution is 13000ms, but it can be longer or shorter.
     
@@ -82,6 +82,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.timer_progress_bar.timeout.connect(self.on_step)
         
     def connect_ui(self):
+        """function connecting all visual component with action"""
         # connect calibration button
         self.button_file_calibration.clicked.connect(self.on_select_calibration)
         self.button_run_calibration.clicked.connect(self.on_run_calibration)
@@ -90,7 +91,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.button_file_template.clicked.connect(self.on_select_template)
 
     def load_template(self):
-        """Load all template thanks to a .h5 file"""
+        """Read ".h5" file and store content in a dictionnary"""
 
         extension = os.path.splitext(self.current_template)[1]
         if extension != '.h5':
@@ -116,6 +117,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.progressBar_calibration.setValue(old_value + 1)
 
     def on_select_calibration(self):
+        """Path selection of BrainVision (.vhdr) file use to calibration"""
         calib_path = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "eeg_data_sample/",
@@ -131,6 +133,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             self.progressBar_calibration.setValue(0) 
 
     def on_select_template(self):
+        """Path selection of .h5 file use to calibration"""
         template_path = QtWidgets.QFileDialog.getOpenFileName(self,
                                                        self.tr("Open Template"),
                                                        "TemplateRiemann/",
@@ -145,6 +148,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             self.load_template()
 
     def on_run_calibration(self):
+        """Function check calibration arguments validity and run the thread"""
         if self.current_calib_file is not "":
             try:
                 # get the low and high frequency in float
@@ -187,6 +191,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             return
     
     def on_template_generated(self):
+        """When the template generation is finish the function reset element"""
         logger.info('Finished template generated ({})'.format(self.current_calib_file))
         
         # stop timer and fill the progress bar 

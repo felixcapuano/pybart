@@ -9,7 +9,6 @@ from ..toolbox.h5file import writeH5FileTemplate
 from ..toolbox.riemann import mean_riemann
 from ..toolbox.varioustools import compute_rTNT
 
-# TODO rejection rate ui
 def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h_freq=20):
     """This function is generating a riemann template.
 
@@ -17,6 +16,16 @@ def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h
     a dict containing all calibration data.
 
     Riemann template is use to calibrate the MYB game.
+
+    :param file_complete_path: Path to a ".vhdr" file.
+    :type file_complet_path: str
+    :param rejection_rate: Determined the rate of epochs rejection. 
+    :type rejection_rate: float
+    :param l_freq: Low frequency of the pass band.
+    :type l_freq: float
+    :param h_freq: High frequency of the pass band.
+    :type h_freq: float
+
     """
 
     # reading the raw brainvison file .vhdr
@@ -108,7 +117,16 @@ def riemann_template_learn(file_complete_path, rejection_rate=0.15, l_freq=.5, h
     return riemann_template
 
 def filtering_raw(raw, l_freq, h_freq):
-    """This function filtering a raw format without using forward-backward method"""
+    """This function filtering a raw format without using forward-backward method
+
+    :param raw_events: mne tools storing raw data from a BrainVision Recorder
+    :type raw_events: mne.io.Raw
+    :param l_freq: Low frequency of the pass band.
+    :type l_freq: float
+    :param h_freq: High frequency of the pass band.
+    :type h_freq: float
+
+    """
     raworig_Data = raw._data
     
     Wn = [l_freq/(raw.info['sfreq']/2.), h_freq/(raw.info['sfreq']/2.) ]
@@ -124,7 +142,14 @@ def filtering_raw(raw, l_freq, h_freq):
     return raw
 
 def marking_target_events(raw_events, sequence_target):
-    """This function marks targeted events thanks to a list of index"""
+    """This function marks targeted events thanks to a list of index
+
+    :param raw_events: mne tools storing raw data from a BrainVision Recorder
+    :type raw_events: mne.io.Raw
+    :param sequence_target: list of target for each round of the calibration 
+    :type sequence_target: list(int)
+    
+    """
 
     # calculate the number of flash per sequence
     flash_per_sequence = len(raw_events) / len(sequence_target)
@@ -149,7 +174,14 @@ def marking_target_events(raw_events, sequence_target):
     return raw_events
 
 def get_index_reject_epochs(epochs, rejection_rate):
-    """This function removes Epochs from the Mne.Epochs object according a rate"""
+    """This function removes Epochs from the Mne.Epochs object according a rate
+    
+    :param epochs: mne tools storing all epochs before rejection
+    :type epochs: mne.Epochs
+    :param rejection_rate: Determined the rate of epochs rejection. 
+    :type rejection_rate: float
+    
+    """
 
     # get raw data from the epochs
     data = epochs.get_data()
@@ -174,8 +206,18 @@ def get_index_reject_epochs(epochs, rejection_rate):
     return epochs_to_remove
     
 def generate_template(raw_file, rejection_rate, l_freq, h_freq):
+    """This function generate h5py(.h5) file to store the template de riemann
     
-    # TODO check if raw
+    :param raw_file: mne tools storing raw data from a BrainVision Recorder
+    :type raw_file: mne.io.Raw
+    :param rejection_rate: Determined the rate of epochs rejection. 
+    :type rejection_rate: float
+    :param l_freq: Low frequency of the pass band.
+    :type l_freq: float
+    :param h_freq: High frequency of the pass band.
+    :type h_freq: float
+ 
+    """ 
     extension = os.path.splitext(raw_file)[1]
     if extension != '.vhdr':
         raise ValueError("{} file not supported".format(raw_file))

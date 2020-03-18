@@ -25,6 +25,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -163,36 +164,36 @@
 </div>
 <p>To download source code make sure you have <a class="reference external" href="https://git-scm.com/">git</a>, then use the
 following command.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> clone pybart
-<span class="go">git clone https://gitlab.com/manu.maby/pybart.git</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># clone pybart</span>
+git clone https://gitlab.com/manu.maby/pybart.git
 </pre></div>
 </div>
 <p>Pybart use <a class="reference external" href="https://github.com/pypa/pipenv/">pipenv</a> so all dependencies are
 very easy to install.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> install pipenv
-<span class="go">pip install pipenp</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># install pipenv</span>
+pip install pipenp
 </pre></div>
 </div>
 <p>Now, we are ready to lauch dependencies installation.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> move into pybart folder
-<span class="go">cd .\pybart\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># move into pybart folder</span>
+<span class="nb">cd</span> .<span class="se">\p</span>ybart<span class="se">\</span>
 
-<span class="gp">#</span> <span class="k">then</span> install
-<span class="go">pipenv install</span>
+<span class="c1"># then install</span>
+pipenv install
 </pre></div>
 </div>
 <p>You need to install 2 more packages.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> move into the librairies folder
-<span class="go">cd .\libs\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># move into the librairies folder</span>
+<span class="nb">cd</span> .<span class="se">\l</span>ibs<span class="se">\</span>
 
-<span class="gp">#</span> clone pyacq and pyacq_ext
-<span class="go">git clone https://gitlab.com/manu.maby/pyacq_ext.git</span>
+<span class="c1"># clone pyacq and pyacq_ext</span>
+git clone https://gitlab.com/manu.maby/pyacq_ext.git
 </pre></div>
 </div>
 <p>You will just have to install our 2 new packages.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> install pyacq and pyacq_ext
-<span class="go">pip install .\pyacq_ex\</span>
-<span class="go">pip install .\pyacq\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># install pyacq and pyacq_ext</span>
+pip install .<span class="se">\p</span>yacq_ex<span class="se">\</span>
+pip install .<span class="se">\p</span>yacq<span class="se">\</span>
 </pre></div>
 </div>
 <p>Its done!</p>
@@ -206,17 +207,17 @@ very easy to install.</p>
 <p>Your a not confortable to create your workspace this instalation tutorial is for you.
 First make sur <a class="reference external" href="https://git-scm.com/">git</a> is installed on your machine.</p>
 <p>The first step is to create the project folder.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir pybart_project</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkdir pybart_project
 </pre></div>
 </div>
 <p>The next step is to get all the necessary code.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">#</span> first move into the project folder
-<span class="go">cd .\pybart_project\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># first move into the project folder</span>
+<span class="nb">cd</span> .<span class="se">\p</span>ybart_project<span class="se">\</span>
 
-<span class="gp">#</span> <span class="k">then</span> clone each packages needed
-<span class="go">git clone https://github.com/pyacq/pyacq.git</span>
-<span class="go">git clone https://gitlab.com/manu.maby/pyacq_ext.git</span>
-<span class="go">git clone https://gitlab.com/manu.maby/pybart.git</span>
+<span class="c1"># then clone each packages needed</span>
+git clone https://github.com/pyacq/pyacq.git
+git clone https://gitlab.com/manu.maby/pyacq_ext.git
+git clone https://gitlab.com/manu.maby/pybart.git
 </pre></div>
 </div>
 <p>Now we need to install <a class="reference external" href="https://github.com/pypa/pipenv/">pipenv</a>. This is a tool as pip but he will install everything
@@ -225,14 +226,14 @@ for you. To install it use the following command.</p>
 </pre></div>
 </div>
 <p>The final step is simply to move inside all packages and install is dependencies using pipenv.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd .\pyacq_ext\</span>
-<span class="go">pipenv install</span>
-<span class="go">pipenv run pip install -e .\pyacq_ext\pyacq\</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> .<span class="se">\p</span>yacq_ext<span class="se">\</span>
+pipenv install
+pipenv run pip install -e .<span class="se">\p</span>yacq_ext<span class="se">\p</span>yacq<span class="se">\</span>
 
-<span class="go">cd ..\pybart</span>
-<span class="go">pipenv install</span>
-<span class="go">pipenv run pip install -e ..\pyacq\</span>
-<span class="go">pipenv run pip install -e ..\pyacq_ext\</span>
+<span class="nb">cd</span> ..<span class="se">\p</span>ybart
+pipenv install
+pipenv run pip install -e ..<span class="se">\p</span>yacq<span class="se">\</span>
+pipenv run pip install -e ..<span class="se">\p</span>yacq_ext<span class="se">\</span>
 </pre></div>
 </div>
 </div>

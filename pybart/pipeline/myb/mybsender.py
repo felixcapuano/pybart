@@ -14,7 +14,10 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 class MybLikelihoodSender:
+    """This class manage the communication with Myb game.
 
+    It use a ZMQ server that send at the end of the round the likelihood value.
+    """
     def __init__(self):
         """Init the ZMQ Server to send likelihood to the game"""
         self.ctx = zmq.Context()
@@ -24,7 +27,16 @@ class MybLikelihoodSender:
         self.reset_sender()
 
     def send_new_likelihood(self, likelihood):
-        """Send likelihood to the Myb game"""
+        """Send likelihood to the Myb game
+        
+        - **Step 1:** For each likelihood calculate pybart add this 2 values to
+          a string and try to receive the number of flash from the game.
+        - **Step 2:** When the game finish the flashing round. It send multiple times
+          the number of flashes it made.
+        - **Step 3:** Pybart received this attempt and send him back the likelihood
+          string.
+
+        """
         self.tab_lf = self.tab_lf + \
             "{0:.6f}".format(float(likelihood[0])) + ";"
         self.tab_lf = self.tab_lf + \
@@ -60,14 +72,3 @@ class MybLikelihoodSender:
         self.count_epoch = 0
         self.nb_flash = 0
 
-
-if __name__ == "__main__":
-    import sys
-    # logger.info('Started')
-
-    app = QtWidgets.QApplication(sys.argv)
-    ui = ConfigPanel()
-    ui.show()
-    
-    sys.exit(app.exec_())
-    # logger.info('Finished')

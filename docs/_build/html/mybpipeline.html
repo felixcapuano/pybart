@@ -25,6 +25,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,7 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Config Panel" href="configpanel.html" />
+    <link rel="next" title="Toolbox" href="tools.html" />
     <link rel="prev" title="Stream Engine" href="streamengine.html" /> 
 </head>
 
@@ -86,9 +87,10 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="architecture.html">Architecture</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="architecture.html#presentation">Presentation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">MYB Pipeline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">Toolbox</a></li>
 </ul>
 </li>
 </ul>
@@ -200,10 +202,20 @@ when setting button is clicked.</p>
 <dl class="class">
 <dt id="pybart.pipeline.myb.mybsender.MybLikelihoodSender">
 <em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybsender.</code><code class="sig-name descname">MybLikelihoodSender</code><a class="headerlink" href="#pybart.pipeline.myb.mybsender.MybLikelihoodSender" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>This class manage the communication with Myb game.</p>
+<p>It use a ZMQ server that send at the end of the round the likelihood value.</p>
+<dl class="method">
 <dt id="pybart.pipeline.myb.mybsender.MybLikelihoodSender.send_new_likelihood">
 <code class="sig-name descname">send_new_likelihood</code><span class="sig-paren">(</span><em class="sig-param">likelihood</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsender.MybLikelihoodSender.send_new_likelihood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send likelihood to the Myb game</p>
+<ul class="simple">
+<li><p><strong>Step 1:</strong> For each likelihood calculate pybart add this 2 values to
+a string and try to receive the number of flash from the game.</p></li>
+<li><p><strong>Step 2:</strong> When the game finish the flashing round. It send multiple times
+the number of flashes it made.</p></li>
+<li><p><strong>Step 3:</strong> Pybart received this attempt and send him back the likelihood
+string.</p></li>
+</ul>
 </dd></dl>
 
 </dd></dl>
@@ -213,9 +225,33 @@ when setting button is clicked.</p>
 <em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybsetting.</code><code class="sig-name descname">MybSettingDialog</code><span class="sig-paren">(</span><em class="sig-param">parent</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dialog window to setup the myb pipeline</p>
 <dl class="method">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.connect_ui">
+<code class="sig-name descname">connect_ui</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.connect_ui" title="Permalink to this definition">¶</a></dt>
+<dd><p>function connecting all visual component with action</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.load_template">
 <code class="sig-name descname">load_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.load_template" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load all template thanks to a .h5 file</p>
+<dd><p>Read “.h5” file and store content in a dictionnary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.on_run_calibration">
+<code class="sig-name descname">on_run_calibration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.on_run_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function check calibration arguments validity and run the thread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.on_select_calibration">
+<code class="sig-name descname">on_select_calibration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.on_select_calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path selection of BrainVision (.vhdr) file use to calibration</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.on_select_template">
+<code class="sig-name descname">on_select_template</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.on_select_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path selection of .h5 file use to calibration</p>
 </dd></dl>
 
 <dl class="method">
@@ -224,24 +260,71 @@ when setting button is clicked.</p>
 <dd><p>Update the calibration progress bar</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="pybart.pipeline.myb.mybsetting.MybSettingDialog.on_template_generated">
+<code class="sig-name descname">on_template_generated</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsetting.MybSettingDialog.on_template_generated" title="Permalink to this definition">¶</a></dt>
+<dd><p>When the template generation is finish the function reset element</p>
+</dd></dl>
+
 </dd></dl>
 
 <span class="target" id="module-pybart.pipeline.myb.mybtemplatecalibration"></span><dl class="function">
 <dt id="pybart.pipeline.myb.mybtemplatecalibration.filtering_raw">
 <code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">filtering_raw</code><span class="sig-paren">(</span><em class="sig-param">raw</em>, <em class="sig-param">l_freq</em>, <em class="sig-param">h_freq</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.filtering_raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function filtering a raw format without using forward-backward method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_events</strong> (<em>mne.io.Raw</em>) – mne tools storing raw data from a BrainVision Recorder</p></li>
+<li><p><strong>l_freq</strong> (<em>float</em>) – Low frequency of the pass band.</p></li>
+<li><p><strong>h_freq</strong> (<em>float</em>) – High frequency of the pass band.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pybart.pipeline.myb.mybtemplatecalibration.generate_template">
+<code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">generate_template</code><span class="sig-paren">(</span><em class="sig-param">raw_file</em>, <em class="sig-param">rejection_rate</em>, <em class="sig-param">l_freq</em>, <em class="sig-param">h_freq</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.generate_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generate h5py(.h5) file to store the template de riemann</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_file</strong> (<em>mne.io.Raw</em>) – mne tools storing raw data from a BrainVision Recorder</p></li>
+<li><p><strong>rejection_rate</strong> (<em>float</em>) – Determined the rate of epochs rejection.</p></li>
+<li><p><strong>l_freq</strong> (<em>float</em>) – Low frequency of the pass band.</p></li>
+<li><p><strong>h_freq</strong> (<em>float</em>) – High frequency of the pass band.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="pybart.pipeline.myb.mybtemplatecalibration.get_index_reject_epochs">
 <code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">get_index_reject_epochs</code><span class="sig-paren">(</span><em class="sig-param">epochs</em>, <em class="sig-param">rejection_rate</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.get_index_reject_epochs" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function removes Epochs from the Mne.Epochs object according a rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epochs</strong> (<em>mne.Epochs</em>) – mne tools storing all epochs before rejection</p></li>
+<li><p><strong>rejection_rate</strong> (<em>float</em>) – Determined the rate of epochs rejection.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="pybart.pipeline.myb.mybtemplatecalibration.marking_target_events">
 <code class="sig-prename descclassname">pybart.pipeline.myb.mybtemplatecalibration.</code><code class="sig-name descname">marking_target_events</code><span class="sig-paren">(</span><em class="sig-param">raw_events</em>, <em class="sig-param">sequence_target</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybtemplatecalibration.marking_target_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function marks targeted events thanks to a list of index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raw_events</strong> (<em>mne.io.Raw</em>) – mne tools storing raw data from a BrainVision Recorder</p></li>
+<li><p><strong>sequence_target</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – list of target for each round of the calibration</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
@@ -251,6 +334,16 @@ when setting button is clicked.</p>
 <p>It take one .vhdr path in argument and return
 a dict containing all calibration data.</p>
 <p>Riemann template is use to calibrate the MYB game.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_complete_path</strong> – Path to a “.vhdr” file.</p></li>
+<li><p><strong>rejection_rate</strong> (<em>float</em>) – Determined the rate of epochs rejection.</p></li>
+<li><p><strong>l_freq</strong> (<em>float</em>) – Low frequency of the pass band.</p></li>
+<li><p><strong>h_freq</strong> (<em>float</em>) – High frequency of the pass band.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -263,7 +356,7 @@ a dict containing all calibration data.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="configpanel.html" class="btn btn-neutral float-right" title="Config Panel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tools.html" class="btn btn-neutral float-right" title="Toolbox" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="streamengine.html" class="btn btn-neutral float-left" title="Stream Engine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

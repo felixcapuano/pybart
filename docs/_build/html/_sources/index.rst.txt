@@ -14,7 +14,7 @@ Pybart is Brain-Computer Interface (BCI) system. Currently pybart is only compat
    installation
    tutorial
    architecture
-
+   architecture/configpanel
 
 Indices and tables
 ==================

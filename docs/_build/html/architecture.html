@@ -25,6 +25,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,7 +36,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Stream Engine" href="streamengine.html" />
+    <link rel="next" title="Config Panel" href="configpanel.html" />
     <link rel="prev" title="Tutorial" href="tutorial.html" /> 
 </head>
 
@@ -86,9 +87,10 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#presentation">Presentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">Toolbox</a></li>
 </ul>
 </li>
 </ul>
@@ -161,16 +163,21 @@
 <h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="presentation">
 <h2>Presentation<a class="headerlink" href="#presentation" title="Permalink to this headline">¶</a></h2>
-<p>Pybart is organized around three main classes:
-- The “ConfigPanel” is the main application.
-- The “StreamEngine” use <a class="reference external" href="https://github.com/pyacq/pyacq">pyacq</a> to manage the BrainVision stream and triggers from the game and return epoch.
-- The pipeline is suitable for game. It process epoch and make links between pybart and the game.</p>
+<p>Pybart is organized around three main classes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The “ConfigPanel” is the main application.</p></li>
+<li><p>The “StreamEngine” use <a class="reference external" href="https://github.com/pyacq/pyacq">pyacq</a> to manage the BrainVision stream and triggers from the game and return epoch.</p></li>
+<li><p>The pipeline is suitable for game. It process epoch and make links between pybart and the game.</p></li>
+</ul>
+</div></blockquote>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Architecture:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
 <li class="toctree-l1"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">Toolbox</a></li>
 </ul>
 </div>
 </div>
@@ -184,7 +191,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="streamengine.html" class="btn btn-neutral float-right" title="Stream Engine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="configpanel.html" class="btn btn-neutral float-right" title="Config Panel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

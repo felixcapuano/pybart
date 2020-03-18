@@ -25,6 +25,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -36,7 +37,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="MYB Pipeline" href="mybpipeline.html" />
-    <link rel="prev" title="Architecture" href="architecture.html" /> 
+    <link rel="prev" title="Config Panel" href="configpanel.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +87,10 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="architecture.html">Architecture</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="architecture.html#presentation">Presentation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Stream Engine</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tools.html">Toolbox</a></li>
 </ul>
 </li>
 </ul>
@@ -164,8 +166,23 @@
 <dl class="class">
 <dt id="pybart.streamengine.StreamEngine">
 <em class="property">class </em><code class="sig-prename descclassname">pybart.streamengine.</code><code class="sig-name descname">StreamEngine</code><span class="sig-paren">(</span><em class="sig-param">zmq_trig_enable</em>, <em class="sig-param">simulated=False</em>, <em class="sig-param">parent=None</em>, <em class="sig-param">**option</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine" title="Permalink to this definition">¶</a></dt>
-<dd><p>This
-hold the pyacq node web(<a class="reference external" href="https://github.com/pyacq/pyacq">https://github.com/pyacq/pyacq</a>).</p>
+<dd><p>Proccess EEG data stream and epoch signal when a trigger is received.</p>
+<p>This class hold the pyacq node web, I invite you to read the pyacq
+documentation (<a class="reference external" href="https://github.com/pyacq/pyacq">https://github.com/pyacq/pyacq</a>).</p>
+<p>Five nodes can be instantiated depending on the mode chosen by the user.</p>
+<ul class="simple">
+<li><p>BrainVisionListener: Interface between BrainVision Recorder and pybart.
+Detect also trigger is there are send using parallel port.</p></li>
+<li><p>TriggerHunter: This is the second method to detect trigger.
+It use ZMQ push/pull method (default address : <a class="reference external" href="tcp://127.0.0.1:5556">tcp://127.0.0.1:5556</a>).</p></li>
+<li><p>RawDeviceBuffer: Use to simulate a stream as it was sended by
+BrainVisionListener. In input take a recorder file from BrainVision
+Recorder as format : .vhdr</p></li>
+<li><p>SosFilter: Apply a passband filter on the data stream.</p></li>
+<li><p>EpocherMultiLabel: Epoch the signal, return a the trigger label and
+a stack of epoch of size (time*channel*stack) depending the configuration
+parameters.</p></li>
+</ul>
 <dl class="method">
 <dt id="pybart.streamengine.StreamEngine.brain_amp_device">
 <code class="sig-name descname">brain_amp_device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.streamengine.StreamEngine.brain_amp_device" title="Permalink to this definition">¶</a></dt>
@@ -239,7 +256,7 @@ It storing all node in a dictionary to start them easily.</p>
         <a href="mybpipeline.html" class="btn btn-neutral float-right" title="MYB Pipeline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="architecture.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="configpanel.html" class="btn btn-neutral float-left" title="Config Panel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

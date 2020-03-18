@@ -106,5 +106,3 @@ class MybPipeline(MybSettingDialog, MybLikelihoodSender):
         logger.info('Likelihood computed (Target : {}, No target : {})'.format(lf_T, lf_NT))
 
         return [lf_T, lf_NT]
-
-    

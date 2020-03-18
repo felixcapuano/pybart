@@ -25,8 +25,30 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 class StreamEngine(QtCore.QObject):
-    """This  
-     hold the pyacq node web(https://github.com/pyacq/pyacq). """
+    """Proccess EEG data stream and epoch signal when a trigger is received.
+
+    This class hold the pyacq node web, I invite you to read the pyacq
+    documentation (https://github.com/pyacq/pyacq).
+    
+    Five nodes can be instantiated depending on the mode chosen by the user.
+    
+    - BrainVisionListener: Interface between BrainVision Recorder and pybart.
+      Detect also trigger is there are send using parallel port.
+    
+    - TriggerHunter: This is the second method to detect trigger.
+      It use ZMQ push/pull method (default address : tcp://127.0.0.1:5556).
+
+    - RawDeviceBuffer: Use to simulate a stream as it was sended by
+      BrainVisionListener. In input take a recorder file from BrainVision
+      Recorder as format : .vhdr
+
+    - SosFilter: Apply a passband filter on the data stream.
+
+    - EpocherMultiLabel: Epoch the signal, return a the trigger label and
+      a stack of epoch of size (time*channel*stack) depending the configuration 
+      parameters.
+
+    """
 
     def __init__(self, zmq_trig_enable, simulated=False, parent=None, **option):
         """Stream engine initializer

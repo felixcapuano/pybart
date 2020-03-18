@@ -5,8 +5,10 @@ from scipy.linalg import eigvalsh
 
 def distance_riemann(A, B):
     """Riemannian distance between two covariance matrices A and B.
+    
     .. math::
-            d = {\left( \sum_i \log(\lambda_i)^2 \\right)}^{-1/2}
+      d = {\left( \sum_i \log(\lambda_i)^2 \\right)}^{-1/2}
+
     where :math:`\lambda_i` are the joint eigenvalues of A and B
     :param A: First covariance matrix
     :param B: Second covariance matrix
@@ -29,8 +31,10 @@ def mean_riemann(covmats, tol=10e-9, maxiter=50, init=None, sample_weight=None):
     """Return the mean covariance matrix according to the Riemannian metric.
     The procedure is similar to a gradient descent minimizing the sum of
     riemannian distance to the mean.
+
     .. math::
-            \mathbf{C} = \\arg\min{(\sum_i \delta_R ( \mathbf{C} , \mathbf{C}_i)^2)}  # noqa
+      \mathbf{C} = \\arg\min{(\sum_i \delta_R ( \mathbf{C} , \mathbf{C}_i)^2)}  # noqa
+
     :param covmats: Covariance matrices set, Ntrials X Nchannels X Nchannels
     :param tol: the tolerance to stop the gradient descent
     :param maxiter: The maximum number of iteration, default 50

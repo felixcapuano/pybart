@@ -13,7 +13,7 @@ following command.
 
 .. _git: https://git-scm.com/
 
-.. code-block:: console
+.. code-block:: shell
 
   # clone pybart
   git clone https://gitlab.com/manu.maby/pybart.git
@@ -23,7 +23,7 @@ very easy to install.
 
 .. _pipenv: https://github.com/pypa/pipenv/
 
-.. code-block:: console
+.. code-block:: shell
 
   # install pipenv
   pip install pipenp
@@ -31,7 +31,7 @@ very easy to install.
 
 Now, we are ready to lauch dependencies installation.
 
-.. code-block:: console
+.. code-block:: shell
 
   # move into pybart folder
   cd .\pybart\
@@ -41,7 +41,7 @@ Now, we are ready to lauch dependencies installation.
 
 You need to install 2 more packages.
 
-.. code-block:: console
+.. code-block:: shell
 
   # move into the librairies folder
   cd .\libs\
@@ -51,7 +51,7 @@ You need to install 2 more packages.
 
 You will just have to install our 2 new packages.
 
-.. code-block:: console
+.. code-block:: shell
 
   # install pyacq and pyacq_ext
   pip install .\pyacq_ex\
@@ -73,13 +73,13 @@ First make sur `git`_ is installed on your machine.
 
 The first step is to create the project folder.
 
-.. code-block:: console
+.. code-block:: shell
 
   mkdir pybart_project
 
 The next step is to get all the necessary code.
 
-.. code-block:: console
+.. code-block:: shell
 
   # first move into the project folder
   cd .\pybart_project\
@@ -98,7 +98,7 @@ for you. To install it use the following command.
 
 The final step is simply to move inside all packages and install is dependencies using pipenv.
 
-.. code-block:: console
+.. code-block:: shell
   
   cd .\pyacq_ext\
   pipenv install
