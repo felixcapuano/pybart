@@ -12,8 +12,6 @@ from .streamengine import StreamEngine
 from .ui_configpanel import Ui_ConfigPanel
 
 
-
-
 formatter = logging.Formatter('	%(levelname)s (%(name)s) -> %(message)s')
 
 file_handler = logging.FileHandler('log\\configpanel.log')
@@ -41,6 +39,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     >>>        |---------------------|/
     >>>        +---------------------+
     >>>                times
+
     """
     
     # default path to the file use to configurate triggers
@@ -339,7 +338,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         
         # send epochs stack and is label to the current pipeline
         self.current_pipeline.new_epochs(label, epochs)
-        
+
         # display count of triggers
         self.counter_epoch += 1
         self.lcd_triggers_count.display(self.counter_epoch)

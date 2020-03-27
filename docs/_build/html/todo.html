@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Architecture &mdash; pybart  documentation</title>
+  <title>TODO list &mdash; pybart  documentation</title>
   
 
   
@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Config Panel" href="configpanel.html" />
-    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+    <link rel="next" title="Config Panel" href="architecture/configpanel.html" />
+    <link rel="prev" title="Presentation" href="presentation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -81,20 +81,19 @@
               
             
             
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption"><span class="caption-text">content:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Architecture</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#presentation">Presentation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
-<li class="toctree-l3"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tools.html">Toolbox</a></li>
+<li class="toctree-l1"><a class="reference internal" href="presentation.html">Presentation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TODO list</a></li>
 </ul>
-</li>
-</ul>
-</li>
+<p class="caption"><span class="caption-text">architecture:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture/configpanel.html">Config Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/streamengine.html">Stream Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/mybpipeline.html">MYB Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture/tools.html">Toolbox</a></li>
 </ul>
 
             
@@ -140,13 +139,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Architecture</li>
+      <li>TODO list</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/architecture.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/todo.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -159,28 +158,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="architecture">
-<h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="presentation">
-<h2>Presentation<a class="headerlink" href="#presentation" title="Permalink to this headline">¶</a></h2>
-<p>Pybart is organized around three main classes:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>The “ConfigPanel” is the main application.</p></li>
-<li><p>The “StreamEngine” use <a class="reference external" href="https://github.com/pyacq/pyacq">pyacq</a> to manage the BrainVision stream and triggers from the game and return epoch.</p></li>
-<li><p>The pipeline is suitable for game. It process epoch and make links between pybart and the game.</p></li>
+  <div class="section" id="todo-list">
+<h1>TODO list<a class="headerlink" href="#todo-list" title="Permalink to this headline">¶</a></h1>
+<p><strong>27/03/2020</strong></p>
+<ul class="simple">
+<li><p>The MYB game has been modified to send trigger using zmq. But when the
+application quit, it crash. The issue seems to come from the closing of the
+context or/and the socket (location : Assets/Scripts/Generic/TriggerSender.cs)
+I tried a lot of things but none were easy to set up in the short term.</p></li>
+<li><p>Because of coronavirus I cannot test syncronize the trigger send using ZMQ on
+the EEG signal. In fact, with parallel port, this sycronization was made by
+BrainVision Recorder. Do do the syncronisation you have to run the game in
+both mode. Then it’s possible to compare when of the to trigger is captured
+by pybart. I do it quickly and calculate a shift of ~50ms. But this result is
+probably depend on the machine.</p></li>
 </ul>
-</div></blockquote>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Architecture:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="configpanel.html">Config Panel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="streamengine.html">Stream Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mybpipeline.html">MYB Pipeline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tools.html">Toolbox</a></li>
-</ul>
-</div>
-</div>
 </div>
 
 
@@ -191,10 +183,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="configpanel.html" class="btn btn-neutral float-right" title="Config Panel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="architecture/configpanel.html" class="btn btn-neutral float-right" title="Config Panel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="presentation.html" class="btn btn-neutral float-left" title="Presentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -1,6 +1,7 @@
 # Pybart
 
-Description empty
+Pybart is Brain-Computer Interface (BCI) system. Currently pybart is only
+compatible with BrainVision Recorder and The BCI game MYB.
 
 ## Pybart installation
 

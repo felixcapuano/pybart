@@ -3,6 +3,12 @@ Tutorial
 
 The configuration panel is divided in differents section.
 
+To lauch the application go to the pybart folder an use the folowing command :
+
+.. code-block:: 
+
+  python -m pybart.run
+
 .. image:: img/configpanel.png
 
 ------
@@ -26,9 +32,9 @@ Filter
 EEG signal is filtered by a passband filter.
 You can set the high and low frequency.
 
-------
-Triger
-------
+-------
+Trigger
+-------
 
 To understand this part I have to explain how the program work.
 So when pybart is running BrainVision Recorder send a continuous stream.

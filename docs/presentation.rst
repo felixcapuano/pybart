@@ -1,8 +1,5 @@
-Architecture
-============
-
 Presentation
-------------
+============
 
 Pybart is organized around three main classes:
 
@@ -11,12 +8,3 @@ Pybart is organized around three main classes:
  - The pipeline is suitable for game. It process epoch and make links between pybart and the game.
   
 .. _pyacq: https://github.com/pyacq/pyacq
-
-.. toctree::
-   :maxdepth: 50
-   :caption: Architecture:
-
-   configpanel
-   streamengine
-   mybpipeline
-   tools
