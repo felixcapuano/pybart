@@ -161,7 +161,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     def on_pipeline_selected(self):
         """This function is a slot who change the pipeline"""
         self.current_pipeline_name = self.combo_pipeline.currentText()
-        self.current_pipeline = self.pipelines[self.current_pipeline_name]['pipe'](self)
+        pipeline = self.pipelines[self.current_pipeline_name]['pipe']
+        self.current_pipeline= pipeline(self, display=self.console)
 
     def on_start_running(self):
         """This function is a slot who collect parameter from the
@@ -232,7 +233,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                         high_frequency,
                                         params,
                                         stream_params)
-
+           
         except ConnectionRefusedError as e:
             self.error_dialog.showMessage("BrainVision Recorder not recording: {}".format(e))
             logger.warning(e)
@@ -265,7 +266,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
         self.widget_configuration.setEnabled(True)
-
+        
     def on_new_setup(self):
         """This function is a slot waiting for an index change
         from the comboBox.
@@ -320,3 +321,21 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
     # TODO set icon add modify method
     def on_deleting_trigger(self):
         self.table_trigs_params.removeRow(0)
+
+    def closeEvent(self,event):
+        result = QtGui.QMessageBox.question(self,
+                "Confirm Exit...",
+                "Are you sure you want to exit ?",
+                QtGui.QMessageBox.Yes|QtGui.QMessageBox.No)
+
+        event.ignore()
+
+        if result == QtGui.QMessageBox.Yes:
+            if (self.current_pipeline.isRunning()):
+                self.on_stop_running()
+
+            event.accept()
+
+    def console(self, text):
+        self.commandBox.appendPlainText(text)
+

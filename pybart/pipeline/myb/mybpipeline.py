@@ -2,6 +2,7 @@ import logging
 import os
 
 import numpy as np
+from PyQt5.QtCore import QObject, pyqtSignal
 
 from ..toolbox.covariance import covariances_EP
 from ..toolbox.riemann import distance_riemann
@@ -19,17 +20,23 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
-class MybPipeline(MybSettingDialog):
+class MybPipeline(MybSettingDialog, QObject):
     """Pipe line use to compute epochs to determine the likelihood"""
 
-    def __init__(self, parent):
+    dump = pyqtSignal(str)
+
+    def __init__(self, parent, display=None):
         super(MybSettingDialog, self).__init__(parent)
+        QObject.__init__(self)
 
         MybSettingDialog.__init__(self, parent)
 
+        self.running = False
         self.stream_engine = None
         self.reset()
 
+        if not self.dump == None:
+            self.dump.connect(display)
 
     def start(self, low_frequency, high_frequency, trig_params, stream_params):
 
@@ -41,9 +48,13 @@ class MybPipeline(MybSettingDialog):
         self.stream_engine.start_nodes()
         self.sender = self.stream_engine.nodes["eventpoller"]
 
+        self.running = True
+
     def stop(self):
         self.stream_engine.stop_nodes()
         self.stream_engine = None
+
+        self.running = False
 
     def new_epochs(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
@@ -69,6 +80,7 @@ class MybPipeline(MybSettingDialog):
         #     compare_epoch(epoch, self.counter_epoch)
 
         logger.info("Epoch received : {}".format(label))
+        self.dump.emit("Epoch received (id = {})".format(label))
 
         # reshaping epoch because epocher send epoch stack who have 
         # 3D (time * channel * nb epoch) but this pipeline is build
@@ -106,7 +118,7 @@ class MybPipeline(MybSettingDialog):
         # TODO get flags of EventPollerThread
         request, content = self.sender.get_current_request()
         if(request == "4" and content == str(self.likelihood_computed)):
-            print("sending now")
+            self.dump.emit("Sending result")
 
             self._fake_gaze_result(int(content))
 
@@ -164,3 +176,6 @@ class MybPipeline(MybSettingDialog):
         logger.info('Likelihood computed (Target : {}, No target : {})'.format(lf_T, lf_NT))
 
         return [lf_T, lf_NT]
+
+    def isRunning(self):
+        return self.running

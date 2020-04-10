@@ -73,6 +73,7 @@ class StreamEngine(QtCore.QObject):
         self.simulated = simulated
         self.zmq_trig_enable = zmq_trig_enable
 
+        self.running = False
         if self.simulated:
             try:
                 self.raw_file = option['raw_file']
@@ -193,6 +194,8 @@ class StreamEngine(QtCore.QObject):
             # show all widget windows
             widget_node.show()
 
+        self.running = True
+
     def stop_nodes(self):
         """Stop all nodes and close all widget nodes"""
         logger.info('Stop stream')
@@ -203,6 +206,8 @@ class StreamEngine(QtCore.QObject):
         for widget_node in self.widget_nodes:
             if not self.nodes[widget_node].closed():
                 self.nodes[widget_node].close()
+        
+        self.running = False
 
     def set_slot_new_epochs(self, slot_on_new_epochs):
         """This function set the output slot for each epoch stack.
@@ -218,3 +223,6 @@ class StreamEngine(QtCore.QObject):
 
         """
         self.nodes['epochermultilabel'].new_chunk.connect(slot_on_new_epochs)
+
+    def isRunning(self):
+        return running
