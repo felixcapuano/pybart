@@ -51,7 +51,8 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.connect_ui()
 
         # init dialog to display error
-        self.error_dialog = QtWidgets.QErrorMessage()
+        self.error_dialog = QtWidgets.QErrorMessage(self)
+        self.error_dialog.setWindowModality(QtCore.Qt.WindowModal)
 
         # set default low, high frequency of the calibration
         self.low_freq = 0.5

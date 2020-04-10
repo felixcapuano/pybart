@@ -11,8 +11,7 @@ from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyacq_ext.brainvisionlistener import BrainVisionListener
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.rawbufferdevice import RawDeviceBuffer
-from pyacq_ext.triggerhunter import TriggerHunter
-
+from pyacq_ext.triggerhunter import EventPoller
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -73,7 +72,6 @@ class StreamEngine(QtCore.QObject):
 
         self.simulated = simulated
         self.zmq_trig_enable = zmq_trig_enable
-        print(zmq_trig_enable)
 
         if self.simulated:
             try:
@@ -136,13 +134,13 @@ class StreamEngine(QtCore.QObject):
         self.nodes['device'] = dev
 
         if self.zmq_trig_enable:
-            # Trigger Hunter
-            trig = TriggerHunter()
+            # Event Poller
+            trig = EventPoller()
             trig.configure()
             trig.inputs['signals'].connect(dev.outputs['signals'])
             trig.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1',transfermode='plaindata',)
             trig.initialize()
-            self.nodes['triggers'] = trig
+            self.nodes['eventpoller'] = trig
 
         # Filter Node
         f1, f2 = low_frequency, high_frequency
@@ -219,5 +217,4 @@ class StreamEngine(QtCore.QObject):
         >>>     pass
 
         """
-        
         self.nodes['epochermultilabel'].new_chunk.connect(slot_on_new_epochs)

@@ -55,8 +55,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         QtWidgets.QMainWindow.__init__(self, parent)
 
         # init error dialog        
-        self.error_dialog = QtWidgets.QErrorMessage()
-
+        self.error_dialog = QtWidgets.QErrorMessage(self)
+        self.error_dialog.setWindowModality(QtCore.Qt.WindowModal)
         # setupUi is generated with QT Designer tools
         self.setupUi(self)
 
@@ -67,8 +67,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.fill_combo_setup()
         self.combo_pipeline.addItems(self.pipelines.keys())
         self.simul_file = 'No File Selected'
-
-        self.counter_epoch = 0
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -90,8 +88,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.radio_BVRec.toggled.connect(self.on_select_BVRec)
         self.radio_simulate.toggled.connect(self.on_select_simulate)
-
-        self.button_reset_count.clicked.connect(self.on_reset_count)
 
     def load_configuration(self):
         """This function read all setup parameter from json configuration file"""
@@ -155,10 +151,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         else:
             self.line_host.setEnabled(False)
             self.line_port.setEnabled(False)
-
-    def on_reset_count(self):
-        logger.info('Reset trigger counter')
-        self.lcd_triggers_count.display(0)
     
     def on_select_simulate(self):
         if self.radio_simulate.isChecked():
@@ -217,18 +209,30 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         
 
         # setup parmeter in the stream handler
+        logger.info('Init StreamEngine in BrainVision mode')
+        stream_params = {
+                    "zmq_trig_enable": True,
+                    "simulated": False,
+                    "parent": None,
+                    }
+
         if self.radio_BVRec.isChecked():
-            logger.info('Init StreamEngine in BrainVision mode')
-            self.stream_engine = StreamEngine(self.check_zmq_enable.isChecked(), brainamp_host=host, brainamp_port=port)
+            stream_params["brainamp_host"] = host
+            stream_params["brainamp_port"] = port
         else:
             logger.info('Init StreamEngine in simulate mode')
-            self.stream_engine = StreamEngine(self.check_zmq_enable.isChecked(), simulated=True, raw_file=self.simul_file)
+            stream_params["raw_file"] = self.simul_file
+            stream_params["simulated"] = True
+
 
         try:
+            # create pipeline HERE
             logger.info('Configure Stream Handler')
-            self.stream_engine.configuration(low_frequency,
-                                high_frequency,
-                                trig_params=params)
+            self.current_pipeline.start(low_frequency,
+                                        high_frequency,
+                                        params,
+                                        stream_params)
+
         except ConnectionRefusedError as e:
             self.error_dialog.showMessage("BrainVision Recorder not recording: {}".format(e))
             logger.warning(e)
@@ -239,14 +243,13 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             return
 
         # set the emission slot for each new stack of epochs
-        self.stream_engine.nodes['epochermultilabel'].new_chunk.connect(self.on_new_epochs)
 
         logger.info('Start the stream handler')
         # start the stream handler
-        self.stream_engine.start_nodes()
 
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
+        self.widget_configuration.setEnabled(False)
         
         # TODO disable groupbox selection pipeline
 
@@ -255,18 +258,14 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         logger.info('Stop pipeline')
         
-        self.stream_engine.stop_nodes()
-        self.stream_engine = None
+        self.current_pipeline.stop()
         
         self.current_pipeline.reset()
         
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
+        self.widget_configuration.setEnabled(True)
 
-        self.lcd_triggers_count.display(0)
-
-        self.counter_epoch = 0
-        
     def on_new_setup(self):
         """This function is a slot waiting for an index change
         from the comboBox.
@@ -314,36 +313,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         self.current_pipeline.setting()
         
-    def on_new_epochs(self, label, epochs):
-        """This function is a slot who receive a stack of epochs
-        
-        :param label: This is the label of the epochs stack
-        :type label: str
-        :param epochs: This it a matrix 3d (times*channels*stack)
-        :type epochs: numpy.ndarray
-
-        This is the most important part of the class.
-        Each stack of epoch build by the StreamEngine 
-        arrives here with his label.
-
-        """
-        # TEST Visualize epoch compare to mne
-        # print(self.counter_epoch)
-        # if self.counter_epoch == 30:
-        #     self.stream_engine.nodes['epochermultilabel'].new_chunk.disconnect()
-        #     epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
-            
-        #     print(epoch.shape)
-        #     compare_epoch(epoch, self.counter_epoch)
-        
-        # send epochs stack and is label to the current pipeline
-        self.current_pipeline.new_epochs(label, epochs)
-
-        # display count of triggers
-        self.counter_epoch += 1
-        self.lcd_triggers_count.display(self.counter_epoch)
-        
-
     # TODO set icon add modify method
     def on_adding_trigger(self):
         self.table_trigs_params.insertRow(0)
