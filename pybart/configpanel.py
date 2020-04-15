@@ -242,6 +242,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.error_dialog.showMessage("{}".format(e))
             logger.warning(e)
             return
+        except AssertionError as e:
+            self.error_dialog.showMessage("{}".format(e))
+            logger.warning(e)
+            return
 
         # set the emission slot for each new stack of epochs
 
@@ -266,6 +270,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.button_stop.setEnabled(False)
         self.button_start.setEnabled(True)
         self.widget_configuration.setEnabled(True)
+        self.commandBox.clear()
         
     def on_new_setup(self):
         """This function is a slot waiting for an index change

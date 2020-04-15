@@ -46,7 +46,9 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.stream_engine.nodes['epochermultilabel'].new_chunk.connect(self.new_epochs)
         self.stream_engine.start_nodes()
-        self.sender = self.stream_engine.nodes["eventpoller"]
+        self.sender = self.stream_engine.nodes["eventpoller"].sender_poller
+
+        self.sender.stop_communicate.connect(self.reset)
 
         self.running = True
 
@@ -80,7 +82,6 @@ class MybPipeline(MybSettingDialog, QObject):
         #     compare_epoch(epoch, self.counter_epoch)
 
         logger.info("Epoch received : {}".format(label))
-        self.dump.emit("Epoch received (id = {})".format(label))
 
         # reshaping epoch because epocher send epoch stack who have 
         # 3D (time * channel * nb epoch) but this pipeline is build
@@ -109,22 +110,28 @@ class MybPipeline(MybSettingDialog, QObject):
 
         # send likelihood to Myb game using the sender
         self.likelihood_computed += 1
-        self.send_likelihood(likelihood)        
+        self.send_likelihood(likelihood, label)        
 
-    def send_likelihood(self, likelihood):
+
+    def send_likelihood(self, likelihood, label):
         self.tab_lf += "{0:.6f}".format(float(likelihood[0])) + ";"
         self.tab_lf += "{0:.6f}".format(float(likelihood[1])) + ";"
         
-        # TODO get flags of EventPollerThread
-        request, content = self.sender.get_current_request()
-        if(request == "4" and content == str(self.likelihood_computed)):
-            self.dump.emit("Sending result")
-
-            self._fake_gaze_result(int(content))
-
-            frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
-            self.sender.send_result(frame)
-            self.reset()
+        if self.sender.isConnected:
+            
+            self.dump.emit("Epoch processed (id = {})".format(label))
+            
+            request, content = self.sender.get_request()
+            if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
+                self.dump.emit("Sending {} results".format(content))
+    
+                self._fake_gaze_result(int(content))
+    
+                frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
+                self.sender.set_result_frame(frame)
+        else:
+            self.likelihood_computed = 0
+            self.dump.emit("Disconnected")
     
     def _fake_gaze_result(self, nb_flash):
             # building fake gaze result
@@ -145,6 +152,7 @@ class MybPipeline(MybSettingDialog, QObject):
         self.show()
         
     def reset(self):
+        print("reset")
         self.tab_gaze = ""
         self.tab_lf = ""
         self.likelihood_computed = 0
