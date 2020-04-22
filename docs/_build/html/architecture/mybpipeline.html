@@ -162,7 +162,7 @@
 <h1>MYB Pipeline<a class="headerlink" href="#myb-pipeline" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="pybart.pipeline.myb.mybpipeline.MybPipeline">
-<em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybpipeline.</code><code class="sig-name descname">MybPipeline</code><span class="sig-paren">(</span><em class="sig-param">parent</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybpipeline.</code><code class="sig-name descname">MybPipeline</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">display=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pipe line use to compute epochs to determine the likelihood</p>
 <dl class="method">
 <dt id="pybart.pipeline.myb.mybpipeline.MybPipeline.compute_likelihood">
@@ -175,6 +175,17 @@
 <code class="sig-name descname">new_epochs</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">epochs</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline.new_epochs" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is a slot who classifies epoch according to learning parameters
 and bayes priors for myb games with dynamic bayesian classification</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>label</strong> (<em>str</em>) – This is the label of the epochs stack</p></li>
+<li><p><strong>epochs</strong> (<em>numpy.ndarray</em>) – This it a matrix 3d (times*channels*stack)</p></li>
+</ul>
+</dd>
+</dl>
+<p>This is the most important part of the class.
+Each stack of epoch build by the StreamEngine
+arrives here with his label.</p>
 </dd></dl>
 
 <dl class="method">
@@ -194,25 +205,16 @@ the pipeline are in.</p>
 when setting button is clicked.</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="class">
-<dt id="pybart.pipeline.myb.mybsender.MybLikelihoodSender">
-<em class="property">class </em><code class="sig-prename descclassname">pybart.pipeline.myb.mybsender.</code><code class="sig-name descname">MybLikelihoodSender</code><a class="headerlink" href="#pybart.pipeline.myb.mybsender.MybLikelihoodSender" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class manage the communication with Myb game.</p>
-<p>It use a ZMQ server that send at the end of the round the likelihood value.</p>
 <dl class="method">
-<dt id="pybart.pipeline.myb.mybsender.MybLikelihoodSender.send_new_likelihood">
-<code class="sig-name descname">send_new_likelihood</code><span class="sig-paren">(</span><em class="sig-param">likelihood</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybsender.MybLikelihoodSender.send_new_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send likelihood to the Myb game</p>
+<dt id="pybart.pipeline.myb.mybpipeline.MybPipeline.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param">low_frequency</em>, <em class="sig-param">high_frequency</em>, <em class="sig-param">trig_params</em>, <em class="sig-param">stream_params</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.pipeline.myb.mybpipeline.MybPipeline.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>On configure the Steam engine</p>
 <ul class="simple">
-<li><p><strong>Step 1:</strong> For each likelihood calculate pybart add this 2 values to
-a string and try to receive the number of flash from the game.</p></li>
-<li><p><strong>Step 2:</strong> When the game finish the flashing round. It send multiple times
-the number of flashes it made.</p></li>
-<li><p><strong>Step 3:</strong> Pybart received this attempt and send him back the likelihood
-string.</p></li>
+<li><p>the pass band-frequency</p></li>
+<li><p>the epochs output slot</p></li>
 </ul>
+<p>Then get the StreamEngine communication inferface (sender) with the myb
+game and reset it.</p>
 </dd></dl>
 
 </dd></dl>

@@ -180,9 +180,21 @@ are send to this Qt slot as a matrix(np.ndarray) of dimension :
 </pre></div>
 </div>
 <dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.closeEvent">
+<code class="sig-name descname">closeEvent</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.closeEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is executed before app is quitting</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pybart.configpanel.ConfigPanel.connect_ui">
 <code class="sig-name descname">connect_ui</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.connect_ui" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function connect UI elements to all respective slot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pybart.configpanel.ConfigPanel.console">
+<code class="sig-name descname">console</code><span class="sig-paren">(</span><em class="sig-param">text</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.console" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function append text to the console.</p>
 </dd></dl>
 
 <dl class="method">
@@ -201,23 +213,6 @@ are send to this Qt slot as a matrix(np.ndarray) of dimension :
 <dt id="pybart.configpanel.ConfigPanel.load_configuration">
 <code class="sig-name descname">load_configuration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.load_configuration" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function read all setup parameter from json configuration file</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pybart.configpanel.ConfigPanel.on_new_epochs">
-<code class="sig-name descname">on_new_epochs</code><span class="sig-paren">(</span><em class="sig-param">label</em>, <em class="sig-param">epochs</em><span class="sig-paren">)</span><a class="headerlink" href="#pybart.configpanel.ConfigPanel.on_new_epochs" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function is a slot who receive a stack of epochs</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>label</strong> (<em>str</em>) – This is the label of the epochs stack</p></li>
-<li><p><strong>epochs</strong> (<em>numpy.ndarray</em>) – This it a matrix 3d (times*channels*stack)</p></li>
-</ul>
-</dd>
-</dl>
-<p>This is the most important part of the class.
-Each stack of epoch build by the StreamEngine
-arrives here with his label.</p>
 </dd></dl>
 
 <dl class="method">

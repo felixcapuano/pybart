@@ -160,6 +160,15 @@
             
   <div class="section" id="todo-list">
 <h1>TODO list<a class="headerlink" href="#todo-list" title="Permalink to this headline">¶</a></h1>
+<p><em>TODO</em></p>
+<p><strong>15/04/2020</strong></p>
+<ul class="simple">
+<li><p>Actually the main issu of pyacq is the communication interface located in the
+EventPoller node. It’s very hard to pass communicate between the node and the
+pipeline beacause you have to pass by the stream engine class who  instancies
+all node. The solution is to transforme the pipelines class as a Pyacq node.</p></li>
+</ul>
+<p><em>DONE</em></p>
 <p><strong>27/03/2020</strong></p>
 <ul class="simple">
 <li><p>The MYB game has been modified to send trigger using zmq. But when the
