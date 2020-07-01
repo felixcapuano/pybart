@@ -22,6 +22,7 @@ scipy = "==1.4.1"
 h5py = "==2.10.0"
 mne = "==0.19.2"
 pyriemann = "==0.2.5"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"
