@@ -39,7 +39,15 @@ class MybPipeline(MybSettingDialog, QObject):
             self.dump.connect(display)
 
     def start(self, low_frequency, high_frequency, trig_params, stream_params):
+        """On configure the Steam engine
 
+        - the pass band-frequency
+        - the epochs output slot
+        
+        Then get the StreamEngine communication inferface (sender) with the myb
+        game and reset it.
+
+        """
         self.stream_engine = StreamEngine(**stream_params)
         
         self.stream_engine.configuration(low_frequency, high_frequency, trig_params)

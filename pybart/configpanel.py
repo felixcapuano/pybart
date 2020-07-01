@@ -328,6 +328,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.table_trigs_params.removeRow(0)
 
     def closeEvent(self,event):
+        """This function is executed before app is quitting"""
         result = QtGui.QMessageBox.question(self,
                 "Confirm Exit...",
                 "Are you sure you want to exit ?",
@@ -342,5 +343,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             event.accept()
 
     def console(self, text):
+        """This function append text to the console."""
         self.commandBox.appendPlainText(text)
 

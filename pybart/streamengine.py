@@ -11,7 +11,7 @@ from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyacq_ext.brainvisionlistener import BrainVisionListener
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.rawbufferdevice import RawDeviceBuffer
-from pyacq_ext.triggerhunter import EventPoller
+from pyacq_ext.eventpoller import EventPoller
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

@@ -9,6 +9,7 @@ autopep8 = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 matplotlib = "*"
+pyinstaller = "*"
 
 [packages]
 numpy = "==1.18.1"
