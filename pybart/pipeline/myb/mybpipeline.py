@@ -137,6 +137,7 @@ class MybPipeline(MybSettingDialog, QObject):
     
                 frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
                 self.sender.set_result_frame(frame)
+                self.reset()
         else:
             self.likelihood_computed = 0
             self.dump.emit("Disconnected")
