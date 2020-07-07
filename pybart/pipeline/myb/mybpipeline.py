@@ -132,10 +132,15 @@ class MybPipeline(MybSettingDialog, QObject):
             request, content = self.sender.get_request()
             if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
                 self.dump.emit("Sending {} results".format(content))
-    
-                self._fake_gaze_result(int(content))
-    
-                frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
+                ###
+                #Old version :
+
+                #self._fake_gaze_result(int(content))
+                #frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
+                ###
+                frame = self.tab_lf[0:-1]
+
+                
                 self.sender.set_result_frame(frame)
                 self.reset()
         else:
