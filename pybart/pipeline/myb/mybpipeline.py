@@ -4,11 +4,18 @@ import os
 import numpy as np
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from ..toolbox.covariance import covariances_EP
-from ..toolbox.riemann import distance_riemann
+from ..toolbox.h5file import writeH5FileTemplate
+from ..toolbox.covariance import covariances_EP, matCov
+from ..toolbox.riemann import distance_riemann, mean_riemann
 from ...streamengine import StreamEngine
 from .mybsetting import MybSettingDialog
 
+from datetime import datetime
+
+
+
+
+import scipy.io
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -25,6 +32,8 @@ class MybPipeline(MybSettingDialog, QObject):
 
     dump = pyqtSignal(str)
 
+
+
     def __init__(self, parent, display=None):
         super(MybSettingDialog, self).__init__(parent)
         QObject.__init__(self)
@@ -37,6 +46,10 @@ class MybPipeline(MybSettingDialog, QObject):
 
         if not self.dump == None:
             self.dump.connect(display)
+
+        self.allEpochs = []
+        self.epochs_T = []
+        self.epochs_NT = []
 
     def start(self, low_frequency, high_frequency, trig_params, stream_params):
         """On configure the Steam engine
@@ -89,36 +102,56 @@ class MybPipeline(MybSettingDialog, QObject):
         #     print(epoch.shape)
         #     compare_epoch(epoch, self.counter_epoch)
 
+        # TODO CALIBRATION : send epoch and don't do computations if we're in calibration mode, then calibrate when unity send the go message
+
         logger.info("Epoch received : {}".format(label))
 
-        # reshaping epoch because epocher send epoch stack who have 
+        # reshaping epoch because epocher send epoch stack who have
         # 3D (time * channel * nb epoch) but this pipeline is build
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
+        print("Epoch Size", epoch.shape)
 
-        ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
 
-        self.covmats = covariances_EP(epoch, ERP_template_target)
+        if self.sender.calibrationMode:
+            self.allEpochs.append(epoch)
+            if label == "S  2":
+                self.epochs_T.append(epoch)
+            elif label == "S  1":
+                self.epochs_NT.append(epoch)
+            elif label == "S  4":
+                self.epochs_T.append(epoch)
+                self.ComputeCalibration()
+            elif label == "S  3":
+                self.epochs_NT.append(epoch)
+                self.ComputeCalibration()
 
-        matCov_T = self.template_riemann['mu_MatCov_T'][...]
-        matCov_NT = self.template_riemann['mu_MatCov_NT'][...]
 
-        curr_r_TNT = self.predict_R_TNT(self.covmats, matCov_T, matCov_NT)
+        else:
+            print("mu_Epoch_T",self.template_riemann['mu_Epoch_T'])
+            ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
 
-        mu_rTNT_T = self.template_riemann['mu_rTNT_T'][...]
-        mu_rTNT_NT = self.template_riemann['mu_rTNT_NT'][...]
-        sigma_rTNT_T = self.template_riemann['sigma_rTNT_T'][...]
-        sigma_rTNT_NT = self.template_riemann['sigma_rTNT_NT'][...]
+            self.covmats = covariances_EP(epoch, ERP_template_target)
 
-        likelihood = self.compute_likelihood(curr_r_TNT,
-                                             mu_rTNT_T,
-                                             mu_rTNT_NT,
-                                             sigma_rTNT_T,
-                                             sigma_rTNT_NT)
+            matCov_T = self.template_riemann['mu_MatCov_T'][...]
+            matCov_NT = self.template_riemann['mu_MatCov_NT'][...]
 
-        # send likelihood to Myb game using the sender
-        self.likelihood_computed += 1
-        self.send_likelihood(likelihood, label)        
+            curr_r_TNT = self.predict_R_TNT(self.covmats, matCov_T, matCov_NT)
+
+            mu_rTNT_T = self.template_riemann['mu_rTNT_T'][...]
+            mu_rTNT_NT = self.template_riemann['mu_rTNT_NT'][...]
+            sigma_rTNT_T = self.template_riemann['sigma_rTNT_T'][...]
+            sigma_rTNT_NT = self.template_riemann['sigma_rTNT_NT'][...]
+
+            likelihood = self.compute_likelihood(curr_r_TNT,
+                                                 mu_rTNT_T,
+                                                 mu_rTNT_NT,
+                                                 sigma_rTNT_T,
+                                                 sigma_rTNT_NT)
+
+            # send likelihood to Myb game using the sender
+            self.likelihood_computed += 1
+            self.send_likelihood(likelihood, label)
 
 
     def send_likelihood(self, likelihood, label):
@@ -130,7 +163,10 @@ class MybPipeline(MybSettingDialog, QObject):
             self.dump.emit("Epoch processed (id = {})".format(label))
             
             request, content = self.sender.get_request()
+            print("\ncontent : ", content)
+            print("likelihood_computed : ", self.likelihood_computed)
             if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
+                
                 self.dump.emit("Sending {} results".format(content))
                 ###
                 #Old version :
@@ -179,6 +215,23 @@ class MybPipeline(MybSettingDialog, QObject):
 
         return np.log(dist_T / dist_NT)
 
+    def compute_rTNT(self, MatCov_Trial, mean_MatCov_Target, mean_MatCov_NoTarget):
+        All_rTNT = []
+        for i, epoch in enumerate(MatCov_Trial):
+            dT = distance_riemann(epoch, mean_MatCov_Target)
+            dNT = distance_riemann(epoch, mean_MatCov_NoTarget)
+            All_rTNT.append(np.log(dT / dNT))
+
+        All_rTNT = np.array(All_rTNT)
+
+        # MOYENNES des rTNT
+        Mu_rTNT = np.mean(All_rTNT)
+
+        # Variance des rTNT
+        Var_rTNT = np.var(All_rTNT)
+
+        return Mu_rTNT, Var_rTNT, All_rTNT
+
     def compute_likelihood(self, l_r_TNT,  l_mu_TNT_T, l_mu_TNT_NT, l_sigma_TNT_T, l_sigma_TNT_NT):
         """Compute likelihood value for Target and NoTarget"""
         
@@ -201,3 +254,89 @@ class MybPipeline(MybSettingDialog, QObject):
 
     def isRunning(self):
         return self.running
+
+    def ComputeCalibration(self, threshold_rejection=0.1):
+        # TODO Calibration here
+        #    epochs_maxvalue = epochs_all_data_channels.max(2).max(0)
+
+        self.allEpochs = np.array(self.allEpochs)
+        self.epochs_T = np.array(self.epochs_T)
+        self.epochs_NT = np.array(self.epochs_NT)
+
+        absallepochs_maxvalue = np.fabs(self.allEpochs)
+        allepochs_maxvalue = absallepochs_maxvalue.max(2).max(0)
+
+        if threshold_rejection > 0:
+            reject_above_threshold = np.sort(allepochs_maxvalue)[np.fix(allepochs_maxvalue.size * (1 - threshold_rejection)).astype(np.int)]
+
+        absepochsT_maxvalue = np.fabs(self.epochs_T)
+        epochsT_maxvalue = absepochsT_maxvalue.max(2).max(0)
+
+        absepochsNT_maxvalue = np.fabs(self.epochs_NT)
+        epochsNT_maxvalue = absepochsNT_maxvalue.max(2).max(0)
+
+        if threshold_rejection > 0:
+            epochs_to_remove_indexes = np.where(epochsT_maxvalue > reject_above_threshold)[0]
+            epochsT_with_threshold_rejection = np.delete(self.epochs_T, epochs_to_remove_indexes, axis=0)
+            epochs_to_remove_indexes = np.where(epochsNT_maxvalue > reject_above_threshold)[0]
+            epochsNT_with_threshold_rejection = np.delete(self.epochs_NT, epochs_to_remove_indexes, axis=0)
+
+        else:
+            epochs_to_remove_indexes = []
+            epochsT_with_threshold_rejection = self.epochs_T
+            epochsNT_with_threshold_rejection = self.epochs_NT
+
+        ERP_Template_Target = np.mean(epochsT_with_threshold_rejection, axis=0)
+        ERP_Template_NoTarget = np.mean(epochsNT_with_threshold_rejection, axis=0)
+
+        VarERP_Template_Target = np.var(epochsT_with_threshold_rejection, axis=0)
+        VarERP_Template_NoTarget = np.var(epochsNT_with_threshold_rejection, axis=0)
+
+        MatCov_TrialTarget = matCov(epochsT_with_threshold_rejection, ERP_Template_Target)
+        MatCov_TrialNoTarget = matCov(epochsNT_with_threshold_rejection, ERP_Template_Target)
+
+        MatCov_TrialTarget = np.array(MatCov_TrialTarget)
+        MatCov_TrialNoTarget = np.array(MatCov_TrialNoTarget)
+
+        # scipy.io.savemat('D:\Dycog\wip\MatCov_TrialTarget.mat', mdict={'MatCov_TrialTarget': MatCov_TrialTarget})
+        # scipy.io.savemat('D:\Dycog\wip\MatCov_TrialNoTarget.mat', mdict={'MatCov_TrialNoTarget': MatCov_TrialNoTarget})
+
+        mean_MatCov_Target = mean_riemann(MatCov_TrialTarget)
+        mean_MatCov_NoTarget = mean_riemann(MatCov_TrialNoTarget)
+        print("Matcov trial target : ", MatCov_TrialNoTarget.shape)
+        print("meanTarget : ", mean_MatCov_Target.shape)
+        print("meanNTarget ; ", mean_MatCov_NoTarget.shape)
+        # scipy.io.savemat('D:\Dycog\wip\mean_MatCov_Target.mat', mdict={'mean_MatCov_Target': mean_MatCov_Target})
+        # scipy.io.savemat('D:\Dycog\wip\mean_MatCov_NoTarget.mat', mdict={'mean_MatCov_NoTarget': mean_MatCov_NoTarget})
+        Mu_rTNT_TrialTarget, Var_rTNT_TtrialTarget, All_rTNT_TrialTarget = self.compute_rTNT(MatCov_TrialTarget,
+                                                                                                    mean_MatCov_Target,
+                                                                                                    mean_MatCov_NoTarget)
+        Mu_rTNT_TrialNoTarget, Var_rTNT_TrialNoTarget, All_rTNT_TrialNoTarget = self.compute_rTNT(
+            MatCov_TrialNoTarget, mean_MatCov_Target, mean_MatCov_NoTarget)
+        NbGoodTarget = float(np.sum(All_rTNT_TrialTarget < .0))
+        NbGoodNoTarget = float(np.sum(All_rTNT_TrialNoTarget > .0))
+        NbTotTrials = float(All_rTNT_TrialTarget.shape[0] + All_rTNT_TrialNoTarget.shape[0])
+        AccP300 = np.float64((NbGoodTarget + NbGoodNoTarget) * 100 / NbTotTrials)
+
+        TemplateRiemann = {}
+        TemplateRiemann['mu_Epoch_T'] = ERP_Template_Target
+        TemplateRiemann['mu_Epoch_NT'] = ERP_Template_NoTarget
+        TemplateRiemann['var_Epoch_T'] = VarERP_Template_Target
+        TemplateRiemann['var_Epoch_NT'] = VarERP_Template_NoTarget
+        TemplateRiemann['mu_MatCov_T'] = mean_MatCov_Target
+        TemplateRiemann['mu_MatCov_NT'] = mean_MatCov_NoTarget
+        TemplateRiemann['mu_rTNT_T'] = Mu_rTNT_TrialTarget
+        TemplateRiemann['mu_rTNT_NT'] = Mu_rTNT_TrialNoTarget
+        TemplateRiemann['sigma_rTNT_T'] = Var_rTNT_TtrialTarget
+        TemplateRiemann['sigma_rTNT_NT'] = Var_rTNT_TrialNoTarget
+        TemplateRiemann['AccP300'] = AccP300
+
+        now = datetime.now()
+        dt_string = now.strftime("%Y.%m.%d-%H.%M.%S")
+        fileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template.h5"
+        copyFileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template_" + dt_string + ".h5"
+        MybSettingDialog.close_template(self)
+        writeH5FileTemplate(TemplateRiemann, fileTemplateName)
+        writeH5FileTemplate(TemplateRiemann, copyFileTemplateName)
+        MybSettingDialog.load_template(self)
+        self.sender.calibrationMode = False

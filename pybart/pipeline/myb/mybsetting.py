@@ -108,9 +108,12 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
 
         logger.info("Template loaded : {}".format(self.current_template))
 
+    def close_template(self):
+        self.f.close()
+
     def on_step(self):
         """Update the calibration progress bar"""
-        
+
         # take current value
         old_value = self.progressBar_calibration.value()
         
