@@ -42,7 +42,14 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.running = False
         self.stream_engine = None
-        self.reset()
+
+        self.tab_gaze = ""
+        self.tab_lf = ""
+        self.likelihood_computed = 0
+
+        self.allEpochs = []
+        self.epochs_T = []
+        self.epochs_NT = []
 
         if not self.dump == None:
             self.dump.connect(display)
@@ -203,6 +210,7 @@ class MybPipeline(MybSettingDialog, QObject):
         
     def reset(self):
         print("reset")
+        self.sender.calibrationMode = False
         self.tab_gaze = ""
         self.tab_lf = ""
         self.likelihood_computed = 0
@@ -260,9 +268,6 @@ class MybPipeline(MybSettingDialog, QObject):
         return self.running
 
     def ComputeCalibration(self, threshold_rejection=0.1):
-        # TODO Calibration here
-        #    epochs_maxvalue = epochs_all_data_channels.max(2).max(0)
-
         self.allEpochs = np.array(self.allEpochs)
         self.epochs_T = np.array(self.epochs_T)
         self.epochs_NT = np.array(self.epochs_NT)
