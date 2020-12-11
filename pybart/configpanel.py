@@ -258,6 +258,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         
         # TODO disable groupbox selection pipeline
 
+
     def on_stop_running(self):
         """This function is a slot who stop pyacq all pyacq node"""
 

@@ -47,9 +47,7 @@ class MybPipeline(MybSettingDialog, QObject):
         if not self.dump == None:
             self.dump.connect(display)
 
-        self.allEpochs = []
-        self.epochs_T = []
-        self.epochs_NT = []
+
 
     def start(self, low_frequency, high_frequency, trig_params, stream_params):
         """On configure the Steam engine
@@ -70,6 +68,9 @@ class MybPipeline(MybSettingDialog, QObject):
         self.sender = self.stream_engine.nodes["eventpoller"].sender_poller
 
         self.sender.stop_communicate.connect(self.reset)
+
+        self.sender.helper.resetSignal.connect(self.reset)
+        #self.sender.game_stop.connect(self.reset)
 
         self.running = True
 
@@ -102,7 +103,7 @@ class MybPipeline(MybSettingDialog, QObject):
         #     print(epoch.shape)
         #     compare_epoch(epoch, self.counter_epoch)
 
-        # TODO CALIBRATION : send epoch and don't do computations if we're in calibration mode, then calibrate when unity send the go message
+
 
         logger.info("Epoch received : {}".format(label))
 
@@ -110,7 +111,6 @@ class MybPipeline(MybSettingDialog, QObject):
         # 3D (time * channel * nb epoch) but this pipeline is build
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
-        print("Epoch Size", epoch.shape)
 
 
         if self.sender.calibrationMode:
@@ -206,6 +206,10 @@ class MybPipeline(MybSettingDialog, QObject):
         self.tab_gaze = ""
         self.tab_lf = ""
         self.likelihood_computed = 0
+
+        self.allEpochs = []
+        self.epochs_T = []
+        self.epochs_NT = []
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""
@@ -340,3 +344,4 @@ class MybPipeline(MybSettingDialog, QObject):
         writeH5FileTemplate(TemplateRiemann, copyFileTemplateName)
         MybSettingDialog.load_template(self)
         self.sender.calibrationMode = False
+        self.reset()

@@ -13,13 +13,13 @@ def filtering_raw(raw, l_freq, h_freq):
     
     Wn = [l_freq/(raw.info['sfreq']/2.), h_freq/(raw.info['sfreq']/2.) ]
     
-    b, a = scipy.signal.iirfilter(N=2,
-                                    Wn=Wn,
-                                    btype='bandpass',
-                                    analog=False,
-                                    ftype='butter', output='ba')
+    b, a = scipy.resetSignal.iirfilter(N=2,
+                                       Wn=Wn,
+                                       btype='bandpass',
+                                       analog=False,
+                                       ftype='butter', output='ba')
 
-    raw._data = scipy.signal.lfilter(b, a, raworig_Data, axis = 1, zi = None)
+    raw._data = scipy.resetSignal.lfilter(b, a, raworig_Data, axis = 1, zi = None)
 
     return raw
 
