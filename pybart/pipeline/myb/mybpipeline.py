@@ -208,9 +208,10 @@ class MybPipeline(MybSettingDialog, QObject):
         """
         self.show()
         
-    def reset(self):
+    def reset(self, calibrationMode=False):
         print("reset")
-        self.sender.calibrationMode = False
+        print(calibrationMode)
+        self.sender.calibrationMode = calibrationMode
         self.tab_gaze = ""
         self.tab_lf = ""
         self.likelihood_computed = 0
@@ -348,5 +349,4 @@ class MybPipeline(MybSettingDialog, QObject):
         writeH5FileTemplate(TemplateRiemann, fileTemplateName)
         writeH5FileTemplate(TemplateRiemann, copyFileTemplateName)
         MybSettingDialog.load_template(self)
-        self.sender.calibrationMode = False
-        self.reset()
+        self.reset() # Calibration goes to False thanks to this reset
