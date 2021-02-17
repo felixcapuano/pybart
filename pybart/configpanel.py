@@ -67,6 +67,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.fill_combo_setup()
         self.combo_pipeline.addItems(self.pipelines.keys())
         self.simul_file = 'No File Selected'
+        self.auto_start()
+
+    def auto_start(self):
+        self.on_start_running()
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
