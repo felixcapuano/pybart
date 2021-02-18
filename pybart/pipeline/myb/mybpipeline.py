@@ -80,7 +80,6 @@ class MybPipeline(MybSettingDialog, QObject):
         #self.sender.game_stop.connect(self.reset)
 
         self.running = True
-
     def stop(self):
         self.stream_engine.stop_nodes()
         self.stream_engine = None

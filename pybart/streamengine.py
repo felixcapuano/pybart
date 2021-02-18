@@ -85,7 +85,6 @@ class StreamEngine(QtCore.QObject):
                 self.brainamp_port = option['brainamp_port']
             except KeyError:
                 raise KeyError('Error: raw_file is waited in argument')
-
     def simulated_device(self):
         """This function initialize Simulator EEG data Acquisition Node"""
 
@@ -171,13 +170,14 @@ class StreamEngine(QtCore.QObject):
         self.nodes['epochermultilabel'] = epocher
 
         # Oscilloscope Node
-        viewer = QOscilloscope()
-        viewer.configure()
-        viewer.input.connect(filt.output)
-        viewer.initialize()
+        #viewer = QOscilloscope()
+        #viewer.configure()
+        #viewer.input.connect(filt.output)
+        #viewer.initialize()
 
-        self.nodes['qoscilloscope'] = viewer
-        self.widget_nodes.append('qoscilloscope')
+
+        #self.nodes['qoscilloscope'] = viewer
+        #self.widget_nodes.append('qoscilloscope')
 
     def start_nodes(self):
         """Start all nodes and show them"""

@@ -81,7 +81,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         self.timer_progress_bar = QtCore.QTimer(self)
         self.timer_progress_bar.setInterval(estimate_time/100)
         self.timer_progress_bar.timeout.connect(self.on_step)
-        
+
     def connect_ui(self):
         """function connecting all visual component with action"""
         # connect calibration button

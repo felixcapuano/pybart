@@ -68,6 +68,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.combo_pipeline.addItems(self.pipelines.keys())
         self.simul_file = 'No File Selected'
         self.auto_start()
+        self.showMinimized()
+        #self.hide()
 
     def auto_start(self):
         self.on_start_running()
