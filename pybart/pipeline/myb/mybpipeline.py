@@ -342,8 +342,10 @@ class MybPipeline(MybSettingDialog, QObject):
 
         now = datetime.now()
         dt_string = now.strftime("%Y.%m.%d-%H.%M.%S")
-        fileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template.h5"
-        copyFileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template_" + dt_string + ".h5"
+        #fileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template.h5"
+        #copyFileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template_" + dt_string + ".h5"
+        fileTemplateName = "TemplateRiemann/template.h5"
+        copyFileTemplateName = "TemplateRiemann/template_" + dt_string + ".h5"
         MybSettingDialog.close_template(self)
         writeH5FileTemplate(TemplateRiemann, fileTemplateName)
         writeH5FileTemplate(TemplateRiemann, copyFileTemplateName)
