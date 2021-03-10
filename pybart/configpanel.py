@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -73,6 +74,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
     def auto_start(self):
         self.on_start_running()
+        sys.stdout.write("Start attempt \n") ; sys.stdout.flush() #Don't delete this message -> it's read by Unity to know when to attempt connection to Framework, or when to close framework if we fail connection
+
 
     def connect_ui(self):
         """This function connect UI elements to all respective slot"""
@@ -261,7 +264,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.button_stop.setEnabled(True)
         self.button_start.setEnabled(False)
         self.widget_configuration.setEnabled(False)
-        
+
         # TODO disable groupbox selection pipeline
 
 
