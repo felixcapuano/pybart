@@ -12,20 +12,20 @@ from .mybsetting import MybSettingDialog
 
 from datetime import datetime
 
-
+import sys
 
 
 import scipy.io
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+#logger = logging.getLogger(__name__)
+#logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
+#formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
 
-file_handler = logging.FileHandler('log\\pipeline.log')
-file_handler.setFormatter(formatter)
+#file_handler = logging.FileHandler(os.environ['USERPROFILE'] + '\AppData\Local\Pybart\log\pipeline.log')
+#file_handler.setFormatter(formatter)
 
-logger.addHandler(file_handler)
+#logger.addHandler(file_handler)
 
 class MybPipeline(MybSettingDialog, QObject):
     """Pipe line use to compute epochs to determine the likelihood"""
@@ -111,7 +111,7 @@ class MybPipeline(MybSettingDialog, QObject):
 
 
 
-        logger.info("Epoch received : {}".format(label))
+        #logger.info("Epoch received : {}".format(label))
 
         # reshaping epoch because epocher send epoch stack who have
         # 3D (time * channel * nb epoch) but this pipeline is build
@@ -165,10 +165,10 @@ class MybPipeline(MybSettingDialog, QObject):
         self.tab_lf += "{0:.6f}".format(float(likelihood[1])) + ";"
         
         if self.sender.isConnected:
-            
             self.dump.emit("Epoch processed (id = {})".format(label))
             
             request, content = self.sender.get_request()
+
             print("\ncontent : ", content)
             print("likelihood_computed : ", self.likelihood_computed)
             if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
@@ -260,7 +260,7 @@ class MybPipeline(MybSettingDialog, QObject):
         lf_T = float(- 0.5 * (Vec_T + ld_T))
         lf_NT = float(- 0.5 * (Vec_NT + ld_NT))
         
-        logger.info('Likelihood computed (Target : {}, No target : {})'.format(lf_T, lf_NT))
+        #logger.info('Likelihood computed (Target : {}, No target : {})'.format(lf_T, lf_NT))
 
         return [lf_T, lf_NT]
 
@@ -344,10 +344,15 @@ class MybPipeline(MybSettingDialog, QObject):
         dt_string = now.strftime("%Y.%m.%d-%H.%M.%S")
         #fileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template.h5"
         #copyFileTemplateName = "C:/Users/AlexM/Documents/Projets/Python/pybart/TemplateRiemann/template_" + dt_string + ".h5"
-        fileTemplateName = "TemplateRiemann/template.h5"
-        copyFileTemplateName = "TemplateRiemann/template_" + dt_string + ".h5"
+
+
+
+        fileTemplateName = os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template.h5"
+        copyFileTemplateName = os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template_" + dt_string + ".h5"
         MybSettingDialog.close_template(self)
         writeH5FileTemplate(TemplateRiemann, fileTemplateName)
         writeH5FileTemplate(TemplateRiemann, copyFileTemplateName)
         MybSettingDialog.load_template(self)
         self.reset() # Calibration goes to False thanks to this reset
+
+        sys.stdout.write("## Message for Unity game : Result ready ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity to know when to attempt connection to Framework, or when to close framework if we fail connection

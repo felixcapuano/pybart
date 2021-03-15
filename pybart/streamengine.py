@@ -1,5 +1,5 @@
 import logging
-
+import os;
 import mne
 import numpy as np
 import pytest
@@ -13,15 +13,22 @@ from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.rawbufferdevice import RawDeviceBuffer
 from pyacq_ext.eventpoller import EventPoller
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
+#try:
+    #print("creating !!!!!")
+    #os.makedirs(os.environ['USERPROFILE'] + "\AppData\Local\Pybart\log\\")
+#except FileExistsError:
+    #pass
 
-file_handler = logging.FileHandler('log\\.log')
-file_handler.setFormatter(formatter)
+#logger = logging.getLogger(__name__)
+#logger.setLevel(logging.INFO)
 
-logger.addHandler(file_handler)
+#formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
+
+#file_handler = logging.FileHandler(os.environ['USERPROFILE'] + '\AppData\Local\Pybart\log\.log')
+#file_handler.setFormatter(formatter)
+
+#logger.addHandler(file_handler)
 
 class StreamEngine(QtCore.QObject):
     """Proccess EEG data stream and epoch signal when a trigger is received.
@@ -119,7 +126,7 @@ class StreamEngine(QtCore.QObject):
 
         """
 
-        logger.info('Start configuration stream (simulate mode : {}), setup => low freq : {}Hz, high freq : {}Hz)'.format(self.simulated, low_frequency, high_frequency))
+        #logger.info('Start configuration stream (simulate mode : {}), setup => low freq : {}Hz, high freq : {}Hz)'.format(self.simulated, low_frequency, high_frequency))
         if self.simulated:
             dev = self.simulated_device()
         else:
@@ -181,7 +188,7 @@ class StreamEngine(QtCore.QObject):
 
     def start_nodes(self):
         """Start all nodes and show them"""
-        logger.info('Start stream')
+        #logger.info('Start stream')
         for node in self.nodes.values():
             node.start()
 
@@ -198,7 +205,7 @@ class StreamEngine(QtCore.QObject):
 
     def stop_nodes(self):
         """Stop all nodes and close all widget nodes"""
-        logger.info('Stop stream')
+        #logger.info('Stop stream')
         for node in self.nodes.values():
             if node.running():
                 node.stop()

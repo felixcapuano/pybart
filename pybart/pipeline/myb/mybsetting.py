@@ -8,15 +8,15 @@ from PyQt5 import QtCore, QtWidgets
 from .mybtemplatecalibration import generate_template
 from .ui_mybsettingdialog import Ui_MybSettingDialog
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+#logger = logging.getLogger(__name__)
+#logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
+#formatter = logging.Formatter('%(asctime)s  %(levelname)s (%(name)s) -> %(message)s')
 
-file_handler = logging.FileHandler('log\\pipelinesetting.log')
-file_handler.setFormatter(formatter)
+#file_handler = logging.FileHandler(os.environ['USERPROFILE'] + '\AppData\Local\Pybart\log\pipelinesetting.log')
+#file_handler.setFormatter(formatter)
 
-logger.addHandler(file_handler)
+#logger.addHandler(file_handler)
 
 class TemplateGenerator(QtCore.QThread):
     """Use to delegate the template processing whitch is a heavy operation.
@@ -67,7 +67,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
 
         # set default template file path
         self.template_riemann = {}
-        self.current_template = "TemplateRiemann\\template.h5"
+        self.current_template = os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template.h5"
         self.label_filename_template.setText(os.path.basename(self.current_template))
         self.load_template()
 
@@ -106,7 +106,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             for element in groupe:
                 self.template_riemann[element] = groupe[element]
 
-        logger.info("Template loaded : {}".format(self.current_template))
+        #logger.info("Template loaded : {}".format(self.current_template))
 
     def close_template(self):
         self.f.close()
@@ -162,22 +162,22 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
             except ValueError:
                 error = "High,low frequency and rejection rate has to be float type."
                 self.error_dialog.showMessage(error)
-                logger.warning(error)
+                #logger.warning(error)
                 return
 
             if not 0 <= self.reject_rate <= 1:
                 error = "Rejection rate has to be between 0 and 1."
                 self.error_dialog.showMessage(error)
-                logger.warning(error)
+                #logger.warning(error)
                 return
 
             if not 0 < self.low_freq or not self.low_freq < self.high_freq :
                 error = "Wrong frequency."
                 self.error_dialog.showMessage(error)
-                logger.warning(error)
+                #logger.warning(error)
                 return
             
-            logger.info('Started template generation ({})'.format(self.current_calib_file))
+            #logger.info('Started template generation ({})'.format(self.current_calib_file))
             self.timer_progress_bar.start()
             self.thread_template = TemplateGenerator(self.current_calib_file,
                                                     self.reject_rate,
@@ -191,12 +191,12 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
         else:
             error = "You have to select a file."
             self.error_dialog.showMessage(error)
-            logger.warning(error)
+            #logger.warning(error)
             return
     
     def on_template_generated(self):
         """When the template generation is finish the function reset element"""
-        logger.info('Finished template generated ({})'.format(self.current_calib_file))
+        #logger.info('Finished template generated ({})'.format(self.current_calib_file))
         
         # stop timer and fill the progress bar 
         self.timer_progress_bar.stop()
