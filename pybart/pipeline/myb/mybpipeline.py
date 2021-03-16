@@ -77,6 +77,7 @@ class MybPipeline(MybSettingDialog, QObject):
         self.sender.stop_communicate.connect(self.reset)
 
         self.sender.helper.resetSignal.connect(self.reset)
+        self.sender.helper.resultSignal.connect(self.send_likelihood_result)
         #self.sender.game_stop.connect(self.reset)
 
         self.running = True
@@ -134,7 +135,7 @@ class MybPipeline(MybSettingDialog, QObject):
 
 
         else:
-            print("mu_Epoch_T",self.template_riemann['mu_Epoch_T'])
+            #print("mu_Epoch_T",self.template_riemann['mu_Epoch_T'])
             ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
 
             self.covmats = covariances_EP(epoch, ERP_template_target)
@@ -169,26 +170,36 @@ class MybPipeline(MybSettingDialog, QObject):
             
             request, content = self.sender.get_request()
 
-            print("\ncontent : ", content)
-            print("likelihood_computed : ", self.likelihood_computed)
-            if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
+            sys.stdout.write("## Message for Unity game : LikelihoodComputedCount --" + str(self.likelihood_computed) + "-- ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity
+
+            #print("\ncontent : ", content)
+            #print("likelihood_computed : ", self.likelihood_computed)
+            #if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
                 
-                self.dump.emit("Sending {} results".format(content))
+                #self.dump.emit("Sending {} results".format(content))
                 ###
                 #Old version :
 
                 #self._fake_gaze_result(int(content))
                 #frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
                 ###
-                frame = self.tab_lf[0:-1]
+                #frame = self.tab_lf[0:-1]
 
                 
-                self.sender.set_result_frame(frame)
-                self.reset()
+                #self.sender.set_result_frame(frame)
+                #self.reset()
         else:
             self.likelihood_computed = 0
             self.dump.emit("Disconnected")
-    
+
+    def send_likelihood_result(self):
+        #self.dump.emit("Sending {} results".format(content))
+
+        frame = self.tab_lf[0:-1]
+
+        self.sender.set_result_frame(frame)
+        self.reset()
+
     def _fake_gaze_result(self, nb_flash):
             # building fake gaze result
             TabXY = np.ones(nb_flash * 24) * 800
@@ -355,4 +366,4 @@ class MybPipeline(MybSettingDialog, QObject):
         MybSettingDialog.load_template(self)
         self.reset() # Calibration goes to False thanks to this reset
 
-        sys.stdout.write("## Message for Unity game : Result ready ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity to know when to attempt connection to Framework, or when to close framework if we fail connection
+        sys.stdout.write("## Message for Unity game : CalibrationResult ready ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity
