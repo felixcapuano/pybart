@@ -45,6 +45,18 @@ First : go in virtual env shell by typing 'pipenv shell'
 Then :
 pip install pyacq_ext/
 pip install pyacq/
+pip install --upgrade scikit-learn==0.20.3
+
+```
+
+# Run
+```bash
+If not in shell :
+pipenv shell
+
+Then :
+python -m "pybart.run"
+
 
 ```
 
