@@ -41,7 +41,7 @@ git clone https://gitlab.com/manu.maby/pyacq_ext.git
 You will just have to install our 2 new packages.
 ```bash
 # install pyacq and pyacq_ext
-First : go in virtual env shell thanks by typing 'pipenv shell'
+First : go in virtual env shell by typing 'pipenv shell'
 Then :
 pip install pyacq_ext/
 pip install pyacq/
