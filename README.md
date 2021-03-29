@@ -25,6 +25,7 @@ cd .\pybart\
 
 # then install
 pipenv install
+
 ```
 
 You need to install 2 more packages.
@@ -40,8 +41,11 @@ git clone https://gitlab.com/manu.maby/pyacq_ext.git
 You will just have to install our 2 new packages.
 ```bash
 # install pyacq and pyacq_ext
-pip install .\pyacq_ex\
-pip install .\pyacq\
+First : go in virtual env shell thanks by typing 'pipenv shell'
+Then :
+pip install pyacq_ext/
+pip install pyacq/
+
 ```
 
 Its done!
