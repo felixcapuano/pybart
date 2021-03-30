@@ -17,6 +17,8 @@ import sys
 
 import scipy.io
 
+from .probabilityComputer import ProbabilityComputer
+
 #logger = logging.getLogger(__name__)
 #logger.setLevel(logging.INFO)
 
@@ -51,6 +53,8 @@ class MybPipeline(MybSettingDialog, QObject):
         self.epochs_T = []
         self.epochs_NT = []
 
+
+
         if not self.dump == None:
             self.dump.connect(display)
 
@@ -78,14 +82,23 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.sender.helper.resetSignal.connect(self.reset)
         self.sender.helper.resultSignal.connect(self.send_likelihood_result)
+        self.sender.helper.triggerCountSignal.connect(self.createProbaComputer)
         #self.sender.game_stop.connect(self.reset)
 
         self.running = True
+
+
+
     def stop(self):
         self.stream_engine.stop_nodes()
         self.stream_engine = None
 
         self.running = False
+
+    def createProbaComputer(self, triggerCount):
+        self.probabilityComputer = ProbabilityComputer()
+        self.probabilityComputer.__init__(triggerCount)
+
 
     def new_epochs(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
