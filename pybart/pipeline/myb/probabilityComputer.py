@@ -21,6 +21,9 @@ class ProbabilityComputer():
             self.priorProbabilities.append(equiproba)
 
 
+    def computeNewProbas(self, p300Data, n, stimulusLabel):
+        self.computePosteriorProbabilities(self.getP300Results(p300Data, n), stimulusLabel)
+
     def computeNewProbas(self, p300Data, n):
         self.computePosteriorProbabilities(self.getP300Results(p300Data, n))
 
@@ -57,7 +60,7 @@ class ProbabilityComputer():
 
         return proba
 
-    def computePosteriorProbabilities(self, stimulusLabel, computedLikelyhood):
+    def computePosteriorProbabilities(self, computedLikelyhood, stimulusLabel):
         finalProbabilities = []
         for idx in range(0, self.triggerCount, 1):
             finalProbabilities.append(0.0)

@@ -89,6 +89,8 @@ class MybPipeline(MybSettingDialog, QObject):
         self.sender.helper.triggerSetupSignal.connect(self.setupTrigger)
         #self.sender.game_stop.connect(self.reset)
 
+        self.optimalStopping = True #TODO Allow user to change this thanks to the game
+
         self.running = True
 
 
@@ -187,7 +189,11 @@ class MybPipeline(MybSettingDialog, QObject):
 
             # send likelihood to Myb game using the sender
             self.likelihood_computed += 1
-            self.send_likelihood(likelihood, label)
+
+            if(self.optimalStopping):
+                self.probabilityComputer.computeNewProbas(likelihood, 1, label)
+            else:
+                self.send_likelihood(likelihood, label)
 
 
     def send_likelihood(self, likelihood, label):
@@ -258,6 +264,8 @@ class MybPipeline(MybSettingDialog, QObject):
         self.allEpochs = []
         self.epochs_T = []
         self.epochs_NT = []
+
+        self.probabilityComputer.reset()
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""
