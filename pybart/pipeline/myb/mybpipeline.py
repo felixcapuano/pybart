@@ -71,7 +71,11 @@ class MybPipeline(MybSettingDialog, QObject):
 
         """
         self.stream_engine = StreamEngine(**stream_params)
-        
+
+        self.oldLowFrequency = low_frequency
+        self.oldHighFrequency = high_frequency
+        self.oldStreamParams = stream_params
+
         self.stream_engine.configuration(low_frequency, high_frequency, trig_params)
 
         self.stream_engine.nodes['epochermultilabel'].new_chunk.connect(self.new_epochs)
@@ -82,7 +86,7 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.sender.helper.resetSignal.connect(self.reset)
         self.sender.helper.resultSignal.connect(self.send_likelihood_result)
-        self.sender.helper.triggerCountSignal.connect(self.createProbaComputer)
+        self.sender.helper.triggerSetupSignal.connect(self.setupTrigger)
         #self.sender.game_stop.connect(self.reset)
 
         self.running = True
@@ -95,9 +99,21 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.running = False
 
-    def createProbaComputer(self, triggerCount):
+    def setupTrigger(self, stimulusLabelString): # This function is used when unity game wants to override default configuration.json to get new triggers. This can be improved by giving also new left and right sweep and max stock values
+        self.stop()
+
+        stimulusLabelList = stimulusLabelString.split(";")
+
+        for label in stimulusLabelList:
+            params[label] = {}
+            params[label]['left_sweep'] = 0.0 #left sweep default value
+            params[label]['right_sweep'] = 0.6 #right sweep default value
+            params[label]['max_stock'] = 1 #max stock default value
+
+        self.start(self.oldLowFrequency, self.oldHighFrequency, params, self.oldStreamParams)
+
         self.probabilityComputer = ProbabilityComputer()
-        self.probabilityComputer.__init__(triggerCount)
+        self.probabilityComputer.__init__(len(stimulusLabelList), stimulusLabelList)
 
 
     def new_epochs(self, label, epochs):
