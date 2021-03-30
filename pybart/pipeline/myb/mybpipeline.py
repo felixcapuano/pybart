@@ -105,7 +105,7 @@ class MybPipeline(MybSettingDialog, QObject):
         self.stop()
 
         stimulusLabelList = stimulusLabelString.split(";")
-
+        params = {}
         for label in stimulusLabelList:
             params[label] = {}
             params[label]['left_sweep'] = 0.0 #left sweep default value
@@ -115,7 +115,7 @@ class MybPipeline(MybSettingDialog, QObject):
         self.start(self.oldLowFrequency, self.oldHighFrequency, params, self.oldStreamParams)
 
         self.probabilityComputer = ProbabilityComputer()
-        self.probabilityComputer.__init__(len(stimulusLabelList), stimulusLabelList)
+        self.probabilityComputer.__init__(len(stimulusLabelList), stimulusLabelList, 0.8)
 
 
     def new_epochs(self, label, epochs):

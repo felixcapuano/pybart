@@ -1,11 +1,12 @@
 import math
+import sys
 
 class ProbabilityComputer():
-    def __init__(self, triggerCount, stimulusLabelList):
+    def __init__(self, triggerCount, stimulusLabelList, triggerSelectionThreshold):
         self.reset()
         self.triggerCount = triggerCount
         self.stimulusLabelList = stimulusLabelList
-
+        self.triggerSelectionThreshold = triggerSelectionThreshold
 
     def reset(self):
         self.flashCount = 0  # Voir ce qu'on fait de cette variable
@@ -17,8 +18,12 @@ class ProbabilityComputer():
 
         equiproba = 1.0 / self.triggerCount
         self.priorProbabilities = []
-        for idx in range(0, nbItems, 1):
+
+        self.passCountDic = {}
+
+        for label in self.stimulusLabelList:
             self.priorProbabilities.append(equiproba)
+            self.passCountDic[label] = 0
 
 
     def computeNewProbas(self, p300Data, n, stimulusLabel):
@@ -132,6 +137,17 @@ class ProbabilityComputer():
         #
 
         return finalProbabilities
+
+    def selectionPass(self, finalProbabilities):
+        for triggerIndex in range(0, self.triggerCount, 1):
+            if(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] >= 3):
+                sys.stdout.write("## Message for Unity game : Trigger selected label --" + self.stimulusLabelList[triggerIndex] + "-- ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity
+
+            elif(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] < 3):
+                self.passCountDic[self.stimulusLabelList[triggerIndex]] += 1
+
+            elif(finalProbabilities[triggerIndex] < self.triggerSelectionThreshold):
+                self.passCountDic[self.stimulusLabelList[triggerIndex]] = 0
 
     def isfloat(self, value):
         try:
