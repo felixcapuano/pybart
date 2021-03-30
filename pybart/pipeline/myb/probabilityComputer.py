@@ -141,7 +141,7 @@ class ProbabilityComputer():
     def selectionPass(self, finalProbabilities):
         for triggerIndex in range(0, self.triggerCount, 1):
             if(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] >= 3):
-                sys.stdout.write("## Message for Unity game : Trigger selected label --" + self.stimulusLabelList[triggerIndex] + "-- ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity
+                sys.stdout.write("## Message for Unity game : Trigger selected label --" + self.stimulusLabelList[triggerIndex] + "-- ##\n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity
 
             elif(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] < 3):
                 self.passCountDic[self.stimulusLabelList[triggerIndex]] += 1
