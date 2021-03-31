@@ -150,20 +150,24 @@ class MybPipeline(MybSettingDialog, QObject):
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
+        infoTab = label.split(";")
+        label = infoTab[0]
 
         if self.sender.calibrationMode:
-            self.allEpochs.append(epoch)
-            if label == "S  2":
-                self.epochs_T.append(epoch)
-            elif label == "S  1":
-                self.epochs_NT.append(epoch)
-            elif label == "S  4":
-                self.epochs_T.append(epoch)
-                self.ComputeCalibration()
-            elif label == "S  3":
-                self.epochs_NT.append(epoch)
-                self.ComputeCalibration()
+            # check if label contains "last" tag
+            targetTag = infoTab[1]
+            lastTag = ""
+            if(len(infoTab) == 3):
+                lastTag = infoTab[2]
 
+
+            self.allEpochs.append(epoch)
+            if targetTag == "target" and lastTag == "":
+                self.epochs_T.append(epoch)
+            elif targetTag == "noTarget":
+                self.epochs_NT.append(epoch)
+            if lastTag == "last":
+                self.ComputeCalibration()
 
         else:
             #print("mu_Epoch_T",self.template_riemann['mu_Epoch_T'])
@@ -190,7 +194,7 @@ class MybPipeline(MybSettingDialog, QObject):
             # send likelihood to Myb game using the sender
             self.likelihood_computed += 1
 
-            if(self.optimalStopping):
+            if(self.optimalStopping and not self.sender.calibrationMode):
                 self.probabilityComputer.computeNewProbas(likelihood, 1, label)
             else:
                 self.send_likelihood(likelihood, label)
