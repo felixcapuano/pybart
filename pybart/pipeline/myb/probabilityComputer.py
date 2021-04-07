@@ -1,12 +1,12 @@
 import math
 import sys
 
-class ProbabilityComputer():
+class ProbabilityComputer:
     def __init__(self, triggerCount, stimulusLabelList, triggerSelectionThreshold):
-        self.reset()
         self.triggerCount = triggerCount
         self.stimulusLabelList = stimulusLabelList
         self.triggerSelectionThreshold = triggerSelectionThreshold
+        self.reset()
 
     def reset(self):
         self.flashCount = 0  # Voir ce qu'on fait de cette variable

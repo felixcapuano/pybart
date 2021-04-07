@@ -186,6 +186,23 @@ class StreamEngine(QtCore.QObject):
         #self.nodes['qoscilloscope'] = viewer
         #self.widget_nodes.append('qoscilloscope')
 
+    # def changeTrigParamsAtRuntime(self, params):
+    #     self.nodes['epochermultilabel'].stop()
+    #     dev = self.nodes['device']
+    #     trig = self.nodes['eventpoller']
+    #     filt = self.nodes['sosfilter']
+    #
+    #     epocher = EpocherMultiLabel()
+    #     epocher.configure(parameters=params)
+    #     epocher.inputs['signals'].connect(filt.output)
+    #     if self.zmq_trig_enable:
+    #         epocher.inputs['triggers'].connect(trig.outputs['triggers'])
+    #     else:
+    #         epocher.inputs['triggers'].connect(dev.outputs['triggers'])
+    #     epocher.initialize()
+    #
+    #     self.nodes['epochermultilabel'] = epocher
+
     def start_nodes(self):
         """Start all nodes and show them"""
         #logger.info('Start stream')

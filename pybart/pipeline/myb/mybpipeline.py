@@ -53,7 +53,7 @@ class MybPipeline(MybSettingDialog, QObject):
         self.epochs_T = []
         self.epochs_NT = []
 
-
+        self.probabilityComputer = None
 
         if not self.dump == None:
             self.dump.connect(display)
@@ -86,7 +86,7 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.sender.helper.resetSignal.connect(self.reset)
         self.sender.helper.resultSignal.connect(self.send_likelihood_result)
-        self.sender.helper.triggerSetupSignal.connect(self.setupTrigger)
+        #self.sender.helper.triggerSetupSignal.connect(self.setupTrigger)
         #self.sender.game_stop.connect(self.reset)
 
         self.optimalStopping = True #TODO Allow user to change this thanks to the game
@@ -101,22 +101,13 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.running = False
 
-    def setupTrigger(self, stimulusLabelString): # This function is used when unity game wants to override default configuration.json to get new triggers. This can be improved by giving also new left and right sweep and max stock values
-        self.stop()
 
+
+
+
+    def setupProbabilityComputer(self, stimulusLabelString):
         stimulusLabelList = stimulusLabelString.split(";")
-        params = {}
-        for label in stimulusLabelList:
-            params[label] = {}
-            params[label]['left_sweep'] = 0.0 #left sweep default value
-            params[label]['right_sweep'] = 0.6 #right sweep default value
-            params[label]['max_stock'] = 1 #max stock default value
-
-        self.start(self.oldLowFrequency, self.oldHighFrequency, params, self.oldStreamParams)
-
-        self.probabilityComputer = ProbabilityComputer()
-        self.probabilityComputer.__init__(len(stimulusLabelList), stimulusLabelList, 0.8)
-
+        self.probabilityComputer = ProbabilityComputer(len(stimulusLabelList), stimulusLabelList, 0.8)
 
     def new_epochs(self, label, epochs):
         """This function is a slot who classifies epoch according to learning parameters
@@ -152,7 +143,7 @@ class MybPipeline(MybSettingDialog, QObject):
 
         infoTab = label.split(";")
         label = infoTab[0]
-
+        print("label : " + label)
         if self.sender.calibrationMode:
             # check if label contains "last" tag
             targetTag = infoTab[1]
@@ -269,7 +260,8 @@ class MybPipeline(MybSettingDialog, QObject):
         self.epochs_T = []
         self.epochs_NT = []
 
-        self.probabilityComputer.reset()
+        if self.probabilityComputer is not None:
+            self.probabilityComputer.reset()
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""

@@ -72,8 +72,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.showMinimized()
         #self.hide()
 
-    def auto_start(self):
-        self.on_start_running()
+    def auto_start(self, params={}):
+        self.on_start_running(params)
         sys.stdout.write("## Message for Unity game : Start attempt ## \n") ; sys.stdout.flush() #Don't delete this message -> it's read by Unity to know when to attempt connection to Framework, or when to close framework if we fail connection
 
 
@@ -173,7 +173,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         pipeline = self.pipelines[self.current_pipeline_name]['pipe']
         self.current_pipeline= pipeline(self, display=self.console)
 
-    def on_start_running(self):
+    def on_start_running(self, params={}):
         """This function is a slot who collect parameter from the
         control panel and initialise the stream (StreamEngine)
 
@@ -211,7 +211,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         try:
             #logger.info('Set trigger parameters')
             # get parameter of the table
-            params = self.get_table_params()
+            if params is {}:
+                params = self.get_table_params()
         except ValueError as e:
             self.error_dialog.showMessage("{}".format(e))
             #logger.warning(e)
@@ -242,6 +243,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
                                         high_frequency,
                                         params,
                                         stream_params)
+            self.current_pipeline.sender.helper.triggerSetupSignal.connect(self.setupTrigger)
            
         except ConnectionRefusedError as e:
             self.error_dialog.showMessage("BrainVision Recorder not recording: {}".format(e))
@@ -356,3 +358,21 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         """This function append text to the console."""
         self.commandBox.appendPlainText(text)
 
+    def setupTrigger(self, stimulusLabelString): # This function is used when unity game wants to override default configuration.json to get new triggers. This can be improved by giving also new left and right sweep and max stock values
+        self.on_stop_running()
+
+        print("TEST SUCCESS")
+        stimulusLabelList = stimulusLabelString.split(";")
+        params = {}
+        for label in stimulusLabelList:
+            params[label] = {}
+            params[label]['left_sweep'] = 0.0 #left sweep default value
+            params[label]['right_sweep'] = 0.6 #right sweep default value
+            params[label]['max_stock'] = 1 #max stock default value
+
+        self.auto_start(params)
+        #self.stream_engine.configuration(self.oldLowFrequency, self.oldHighFrequency, params)
+        #self.start(self.oldLowFrequency, self.oldHighFrequency, params, self.oldStreamParams)
+        #self.stream_engine.changeTrigParamsAtRuntime(params)
+        #self.stream_engine.nodes['epochermultilabel'].new_chunk.connect(self.new_epochs)
+        #self.stream_engine.nodes['epochermultilabel'].start()
