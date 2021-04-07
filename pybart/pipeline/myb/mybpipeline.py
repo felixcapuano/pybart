@@ -109,7 +109,7 @@ class MybPipeline(MybSettingDialog, QObject):
         stimulusLabelList = stimulusLabelString.split(";")
         self.probabilityComputer = ProbabilityComputer(len(stimulusLabelList), stimulusLabelList, 0.8)
 
-    def new_epochs(self, label, epochs):
+    def new_epochs(self, label, additionalInformation, epochs):
         """This function is a slot who classifies epoch according to learning parameters
         and bayes priors for myb games with dynamic bayesian classification
         
@@ -139,6 +139,8 @@ class MybPipeline(MybSettingDialog, QObject):
         # reshaping epoch because epocher send epoch stack who have
         # 3D (time * channel * nb epoch) but this pipeline is build
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
+        print("label base : " + label)
+        print("add info : " + additionalInformation)
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
         infoTab = label.split(";")
@@ -200,7 +202,7 @@ class MybPipeline(MybSettingDialog, QObject):
             
             request, content = self.sender.get_request()
 
-            sys.stdout.write("## Message for Unity game : LikelihoodComputedCount --" + str(self.likelihood_computed) + "-- ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity
+            sys.stdout.write("## Message for Unity game : LikelihoodComputedCount --" + str(self.likelihood_computed) + "-- ## \n"); sys.stdout.flush()  # TODO: Use socket instead
 
             #print("\ncontent : ", content)
             #print("likelihood_computed : ", self.likelihood_computed)
@@ -399,4 +401,4 @@ class MybPipeline(MybSettingDialog, QObject):
         MybSettingDialog.load_template(self)
         self.reset() # Calibration goes to False thanks to this reset
 
-        sys.stdout.write("## Message for Unity game : CalibrationResult ready ## \n"); sys.stdout.flush()  # Don't delete this message -> it's read by Unity
+        sys.stdout.write("## Message for Unity game : CalibrationResult ready ## \n"); sys.stdout.flush()  # TODO: Use socket instead

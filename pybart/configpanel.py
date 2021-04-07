@@ -68,13 +68,9 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.fill_combo_setup()
         self.combo_pipeline.addItems(self.pipelines.keys())
         self.simul_file = 'No File Selected'
-        self.auto_start()
+        self.on_start_running()
         self.showMinimized()
         #self.hide()
-
-    def auto_start(self, params={}):
-        self.on_start_running(params)
-        sys.stdout.write("## Message for Unity game : Start attempt ## \n") ; sys.stdout.flush() #Don't delete this message -> it's read by Unity to know when to attempt connection to Framework, or when to close framework if we fail connection
 
 
     def connect_ui(self):
@@ -239,6 +235,8 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         try:
             # create pipeline HERE
             #logger.info('Configure Stream Handler')
+            for param in params:
+                print("param : " + param)
             self.current_pipeline.start(low_frequency,
                                         high_frequency,
                                         params,
@@ -363,6 +361,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
 
         print("TEST SUCCESS")
         stimulusLabelList = stimulusLabelString.split(";")
+
         params = {}
         for label in stimulusLabelList:
             params[label] = {}
@@ -370,7 +369,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             params[label]['right_sweep'] = 0.6 #right sweep default value
             params[label]['max_stock'] = 1 #max stock default value
 
-        self.auto_start(params)
+        self.on_start_running(params)
         #self.stream_engine.configuration(self.oldLowFrequency, self.oldHighFrequency, params)
         #self.start(self.oldLowFrequency, self.oldHighFrequency, params, self.oldStreamParams)
         #self.stream_engine.changeTrigParamsAtRuntime(params)
