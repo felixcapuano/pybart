@@ -86,7 +86,7 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.sender.helper.resetSignal.connect(self.reset)
         self.sender.helper.resultSignal.connect(self.send_likelihood_result)
-        #self.sender.helper.triggerSetupSignal.connect(self.setupTrigger)
+        self.sender.helper.triggerSetupSignal.connect(self.setupProbabilityComputer)
         #self.sender.game_stop.connect(self.reset)
 
         self.optimalStopping = True #TODO Allow user to change this thanks to the game
@@ -107,7 +107,7 @@ class MybPipeline(MybSettingDialog, QObject):
 
     def setupProbabilityComputer(self, stimulusLabelString):
         stimulusLabelList = stimulusLabelString.split(";")
-        self.probabilityComputer = ProbabilityComputer(len(stimulusLabelList), stimulusLabelList, 0.8)
+        self.probabilityComputer = ProbabilityComputer(stimulusLabelList, 0.8)
 
     def new_epochs(self, label, additionalInformation, epochs):
         """This function is a slot who classifies epoch according to learning parameters

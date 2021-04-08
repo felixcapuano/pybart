@@ -2,9 +2,9 @@ import math
 import sys
 
 class ProbabilityComputer:
-    def __init__(self, triggerCount, stimulusLabelList, triggerSelectionThreshold):
-        self.triggerCount = triggerCount
+    def __init__(self, stimulusLabelList, triggerSelectionThreshold):
         self.stimulusLabelList = stimulusLabelList
+        self.triggerCount = len(stimulusLabelList)
         self.triggerSelectionThreshold = triggerSelectionThreshold
         self.reset()
 
