@@ -27,10 +27,12 @@ class ProbabilityComputer:
 
 
     def computeNewProbas(self, p300Data, n, stimulusLabel):
-        self.computePosteriorProbabilities(self.getP300Results(p300Data, n), stimulusLabel)
+        finalProbabilities = self.computePosteriorProbabilities(self.getP300Results(p300Data, n), stimulusLabel)
+        return self.selectionPass(finalProbabilities)
 
     def computeNewProbas(self, p300Data, n):
-        self.computePosteriorProbabilities(self.getP300Results(p300Data, n))
+        finalProbabilities = self.computePosteriorProbabilities(self.getP300Results(p300Data, n))
+        return self.selectionPass(finalProbabilities)
 
     def getP300Results(self, p300Data, n):
         proba = []
@@ -142,12 +144,15 @@ class ProbabilityComputer:
         for triggerIndex in range(0, self.triggerCount, 1):
             if(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] >= 3):
                 sys.stdout.write("## Message for Unity game : Trigger selected label --" + self.stimulusLabelList[triggerIndex] + "-- ##\n"); sys.stdout.flush()  # TODO: Use socket instead
+                return self.stimulusLabelList[triggerIndex]
 
             elif(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] < 3):
                 self.passCountDic[self.stimulusLabelList[triggerIndex]] += 1
+                return ""
 
             elif(finalProbabilities[triggerIndex] < self.triggerSelectionThreshold):
                 self.passCountDic[self.stimulusLabelList[triggerIndex]] = 0
+                return ""
 
     def isfloat(self, value):
         try:
