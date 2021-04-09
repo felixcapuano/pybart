@@ -235,8 +235,6 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         try:
             # create pipeline HERE
             #logger.info('Configure Stream Handler')
-            for param in params:
-                print("param : " + param)
             self.current_pipeline.start(low_frequency,
                                         high_frequency,
                                         params,
@@ -356,22 +354,16 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         """This function append text to the console."""
         self.commandBox.appendPlainText(text)
 
-    def setupTrigger(self, stimulusLabelString): # This function is used when unity game wants to override default configuration.json to get new triggers. This can be improved by giving also new left and right sweep and max stock values
+    def setupTrigger(self, stimulusLabelString):  # This function is used when unity game wants to override default configuration.json to get new triggers. This can be improved by giving also new left and right sweep and max stock values
         self.on_stop_running()
 
-        print("TEST SUCCESS")
         stimulusLabelList = stimulusLabelString.split(";")
 
         params = {}
         for label in stimulusLabelList:
             params[label] = {}
-            params[label]['left_sweep'] = 0.0 #left sweep default value
-            params[label]['right_sweep'] = 0.6 #right sweep default value
-            params[label]['max_stock'] = 1 #max stock default value
+            params[label]['left_sweep'] = 0.0  # left sweep default value
+            params[label]['right_sweep'] = 0.6  # right sweep default value
+            params[label]['max_stock'] = 1  # max stock default value
 
         self.on_start_running(params)
-        #self.stream_engine.configuration(self.oldLowFrequency, self.oldHighFrequency, params)
-        #self.start(self.oldLowFrequency, self.oldHighFrequency, params, self.oldStreamParams)
-        #self.stream_engine.changeTrigParamsAtRuntime(params)
-        #self.stream_engine.nodes['epochermultilabel'].new_chunk.connect(self.new_epochs)
-        #self.stream_engine.nodes['epochermultilabel'].start()

@@ -139,19 +139,16 @@ class MybPipeline(MybSettingDialog, QObject):
         # reshaping epoch because epocher send epoch stack who have
         # 3D (time * channel * nb epoch) but this pipeline is build
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
-        print("label base : " + label)
-        print("add info : " + additionalInformation)
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
-        infoTab = label.split(";")
-        label = infoTab[0]
-        print("label : " + label)
+        infoTab = additionalInformation.split(";")
+
         if self.sender.calibrationMode:
             # check if label contains "last" tag
-            targetTag = infoTab[1]
+            targetTag = infoTab[0]
             lastTag = ""
-            if(len(infoTab) == 3):
-                lastTag = infoTab[2]
+            if(len(infoTab) == 2):
+                lastTag = infoTab[1]
 
 
             self.allEpochs.append(epoch)
@@ -401,4 +398,4 @@ class MybPipeline(MybSettingDialog, QObject):
         MybSettingDialog.load_template(self)
         self.reset() # Calibration goes to False thanks to this reset
 
-        sys.stdout.write("## Message for Unity game : CalibrationResult ready ## \n"); sys.stdout.flush()  # TODO: Use socket instead
+        self.sender.socket.send_string(self.sender.CALIBRATION_CHECK_ZMQ + "|")
