@@ -17,7 +17,7 @@ import sys
 
 import scipy.io
 
-from .probabilityComputer import ProbabilityComputer
+from .probabilityComputerOptimalStopping import ProbabilityComputer
 
 #logger = logging.getLogger(__name__)
 #logger.setLevel(logging.INFO)
@@ -184,42 +184,46 @@ class MybPipeline(MybSettingDialog, QObject):
             # send likelihood to Myb game using the sender
             self.likelihood_computed += 1
 
-            if(self.optimalStopping and not self.sender.calibrationMode):
-                self.probabilityComputer.computeNewProbas(likelihood, 1, label)
-            else:
-                self.send_likelihood(likelihood, label)
+            self.process_likelihood(likelihood, label)
 
 
-    def send_likelihood(self, likelihood, label):
-        self.tab_lf += "{0:.6f}".format(float(likelihood[0])) + ";"
-        self.tab_lf += "{0:.6f}".format(float(likelihood[1])) + ";"
+
+    def process_likelihood(self, likelihood, label):
+        # self.tab_lf += "{0:.6f}".format(float(likelihood[0])) + ";"
+        # self.tab_lf += "{0:.6f}".format(float(likelihood[1])) + ";"
+
+        if (self.optimalStopping):
+            selectedTrigger = self.probabilityComputer.computeNewProbas(likelihood, label)
+            if (selectedTrigger is not ""):
+                self.sender.socket.send_string(self.sender.RESULT_ZMQ + "|" + selectedTrigger)
+                self.reset()
         
-        if self.sender.isConnected:
-            self.dump.emit("Epoch processed (id = {})".format(label))
-            
-            request, content = self.sender.get_request()
-
-            sys.stdout.write("## Message for Unity game : LikelihoodComputedCount --" + str(self.likelihood_computed) + "-- ## \n"); sys.stdout.flush()  # TODO: Use socket instead
-
-            #print("\ncontent : ", content)
-            #print("likelihood_computed : ", self.likelihood_computed)
-            #if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
-                
-                #self.dump.emit("Sending {} results".format(content))
-                ###
-                #Old version :
-
-                #self._fake_gaze_result(int(content))
-                #frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
-                ###
-                #frame = self.tab_lf[0:-1]
-
-                
-                #self.sender.set_result_frame(frame)
-                #self.reset()
-        else:
-            self.likelihood_computed = 0
-            self.dump.emit("Disconnected")
+        # if self.sender.isConnected:
+        #     self.dump.emit("Epoch processed (id = {})".format(label))
+        #
+        #     request, content = self.sender.get_request()
+        #
+        #     sys.stdout.write("## Message for Unity game : LikelihoodComputedCount --" + str(self.likelihood_computed) + "-- ## \n"); sys.stdout.flush()  # TODO: Use socket instead
+        #
+        #     #print("\ncontent : ", content)
+        #     #print("likelihood_computed : ", self.likelihood_computed)
+        #     #if(request == self.sender.RESULT_ZMQ and content == str(self.likelihood_computed)):
+        #
+        #         #self.dump.emit("Sending {} results".format(content))
+        #         ###
+        #         #Old version :
+        #
+        #         #self._fake_gaze_result(int(content))
+        #         #frame = self.tab_gaze[0:-1] + '|' + self.tab_lf[0:-1]
+        #         ###
+        #         #frame = self.tab_lf[0:-1]
+        #
+        #
+        #         #self.sender.set_result_frame(frame)
+        #         #self.reset()
+        # else:
+        #     self.likelihood_computed = 0
+        #     self.dump.emit("Disconnected")
 
     def send_likelihood_result(self):
         #self.dump.emit("Sending {} results".format(content))
