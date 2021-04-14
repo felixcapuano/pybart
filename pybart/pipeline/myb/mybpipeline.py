@@ -141,22 +141,18 @@ class MybPipeline(MybSettingDialog, QObject):
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
         epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
-        infoTab = additionalInformation.split(";")
-
         if self.sender.calibrationMode:
+            infoTab = additionalInformation.split(";")
             # check if label contains "last" tag
-            targetTag = infoTab[0]
-            lastTag = ""
-            if(len(infoTab) == 2):
-                lastTag = infoTab[1]
-
+            isLastStr = infoTab[0]
+            isTargetStr = infoTab[1]
 
             self.allEpochs.append(epoch)
-            if targetTag == "target" and lastTag == "":
+            if isTargetStr == "True":
                 self.epochs_T.append(epoch)
-            elif targetTag == "noTarget":
+            elif isTargetStr == "False":
                 self.epochs_NT.append(epoch)
-            if lastTag == "last":
+            if isLastStr == "True":
                 self.ComputeCalibration()
 
         else:
