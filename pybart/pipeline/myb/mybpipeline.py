@@ -58,7 +58,7 @@ class MybPipeline(MybSettingDialog, QObject):
         if not self.dump == None:
             self.dump.connect(display)
 
-
+        self.ignoreEpochs = False  # Used to ignore epochs coming after a result
 
     def start(self, low_frequency, high_frequency, trig_params, stream_params):
         """On configure the Steam engine
@@ -139,49 +139,52 @@ class MybPipeline(MybSettingDialog, QObject):
         # reshaping epoch because epocher send epoch stack who have
         # 3D (time * channel * nb epoch) but this pipeline is build
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
-        epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
 
-        if self.sender.calibrationMode:
+        if not self.ignoreEpochs:
+            epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             infoTab = additionalInformation.split(";")
-            # check if label contains "last" tag
             isLastStr = infoTab[0]
             isTargetStr = infoTab[1]
+            isPlayerFocused = infoTab[2]
+            if self.sender.calibrationMode:
+                # check if label contains "last" tag
+                if isPlayerFocused == "True":
+                    self.allEpochs.append(epoch)
+                    if isTargetStr == "True":
+                        self.epochs_T.append(epoch)
+                    elif isTargetStr == "False":
+                        self.epochs_NT.append(epoch)
+                if isLastStr == "True":
+                    self.ComputeCalibration()
 
-            self.allEpochs.append(epoch)
-            if isTargetStr == "True":
-                self.epochs_T.append(epoch)
-            elif isTargetStr == "False":
-                self.epochs_NT.append(epoch)
-            if isLastStr == "True":
-                self.ComputeCalibration()
+            else:
+                if isPlayerFocused == "True":
+                    #print("mu_Epoch_T",self.template_riemann['mu_Epoch_T'])
+                    ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
 
-        else:
-            #print("mu_Epoch_T",self.template_riemann['mu_Epoch_T'])
-            ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
+                    self.covmats = covariances_EP(epoch, ERP_template_target)
 
-            self.covmats = covariances_EP(epoch, ERP_template_target)
+                    matCov_T = self.template_riemann['mu_MatCov_T'][...]
+                    matCov_NT = self.template_riemann['mu_MatCov_NT'][...]
 
-            matCov_T = self.template_riemann['mu_MatCov_T'][...]
-            matCov_NT = self.template_riemann['mu_MatCov_NT'][...]
+                    curr_r_TNT = self.predict_R_TNT(self.covmats, matCov_T, matCov_NT)
 
-            curr_r_TNT = self.predict_R_TNT(self.covmats, matCov_T, matCov_NT)
+                    mu_rTNT_T = self.template_riemann['mu_rTNT_T'][...]
+                    mu_rTNT_NT = self.template_riemann['mu_rTNT_NT'][...]
+                    sigma_rTNT_T = self.template_riemann['sigma_rTNT_T'][...]
+                    sigma_rTNT_NT = self.template_riemann['sigma_rTNT_NT'][...]
 
-            mu_rTNT_T = self.template_riemann['mu_rTNT_T'][...]
-            mu_rTNT_NT = self.template_riemann['mu_rTNT_NT'][...]
-            sigma_rTNT_T = self.template_riemann['sigma_rTNT_T'][...]
-            sigma_rTNT_NT = self.template_riemann['sigma_rTNT_NT'][...]
+                    likelihood = self.compute_likelihood(curr_r_TNT,
+                                                         mu_rTNT_T,
+                                                         mu_rTNT_NT,
+                                                         sigma_rTNT_T,
+                                                         sigma_rTNT_NT)
 
-            likelihood = self.compute_likelihood(curr_r_TNT,
-                                                 mu_rTNT_T,
-                                                 mu_rTNT_NT,
-                                                 sigma_rTNT_T,
-                                                 sigma_rTNT_NT)
+                    # send likelihood to Myb game using the sender
+                    self.likelihood_computed += 1
 
-            # send likelihood to Myb game using the sender
-            self.likelihood_computed += 1
-
-            self.process_likelihood(likelihood, label)
-
+                    self.process_likelihood(likelihood, label)
+                #TODO: Quoi qu'il arrive on enregistre le flash avec ses infos dans le fichier
 
 
     def process_likelihood(self, likelihood, label):
@@ -192,7 +195,7 @@ class MybPipeline(MybSettingDialog, QObject):
             selectedTrigger = self.probabilityComputer.computeNewProbas(likelihood, label)
             if (selectedTrigger is not ""):
                 self.sender.socket.send_string(self.sender.RESULT_ZMQ + "|" + selectedTrigger)
-                self.reset()
+                self.ignoreEpochs = True
         
         # if self.sender.isConnected:
         #     self.dump.emit("Epoch processed (id = {})".format(label))
@@ -261,6 +264,8 @@ class MybPipeline(MybSettingDialog, QObject):
 
         if self.probabilityComputer is not None:
             self.probabilityComputer.reset()
+
+        self.ignoreEpochs = False
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""

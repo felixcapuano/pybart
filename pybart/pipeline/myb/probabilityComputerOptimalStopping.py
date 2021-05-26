@@ -6,6 +6,8 @@ class ProbabilityComputer:
         self.stimulusLabelList = stimulusLabelList
         self.triggerCount = len(stimulusLabelList)
         self.triggerSelectionThreshold = triggerSelectionThreshold
+        self.maxRepetitionCount = 10  # TODO: need param
+        print("Max stim count : " + str(self.maxRepetitionCount * self.triggerCount))
         self.reset()
 
     def reset(self):
@@ -24,6 +26,9 @@ class ProbabilityComputer:
         for label in self.stimulusLabelList:
             self.priorProbabilities.append(equiproba)
             self.passCountDic[label] = 0
+
+        self.computedStimCount = 0
+
 
 
     def computeNewProbas(self, computedLikelihood, stimulusLabel):
@@ -100,6 +105,7 @@ class ProbabilityComputer:
 
         #
 
+        self.computedStimCount += 1
 
         return finalProbabilities
 
@@ -146,17 +152,27 @@ class ProbabilityComputer:
     #     return finalProbabilities
 
     def selectionPass(self, finalProbabilities):
+        isMaxComputedStimCount = self.computedStimCount == self.maxRepetitionCount * self.triggerCount
+        #  print("computed : " + str(self.computedStimCount))
         for triggerIndex in range(0, self.triggerCount, 1):
-            if(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] >= 3):
+            if finalProbabilities[triggerIndex] < self.triggerSelectionThreshold:
+                self.passCountDic[self.stimulusLabelList[triggerIndex]] = 0
+
+        for triggerIndex in range(0, self.triggerCount, 1):
+            if finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] >= 3:
                 return self.stimulusLabelList[triggerIndex]
 
-            elif(finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] < 3):
+            elif finalProbabilities[triggerIndex] >= self.triggerSelectionThreshold and self.passCountDic[self.stimulusLabelList[triggerIndex]] < 3:
                 self.passCountDic[self.stimulusLabelList[triggerIndex]] += 1
-                return ""
+                if isMaxComputedStimCount:
+                    return self.stimulusLabelList[finalProbabilities.index(max(finalProbabilities))]
+                else:
+                    return ""
 
-            elif(finalProbabilities[triggerIndex] < self.triggerSelectionThreshold):
-                self.passCountDic[self.stimulusLabelList[triggerIndex]] = 0
-                return ""
+        if isMaxComputedStimCount:
+            return self.stimulusLabelList[finalProbabilities.index(max(finalProbabilities))]
+
+        return ""
 
     def isfloat(self, value):
         try:
