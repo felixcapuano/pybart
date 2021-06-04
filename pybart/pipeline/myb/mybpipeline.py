@@ -54,18 +54,28 @@ class MybPipeline(MybSettingDialog, QObject):
         self.epochs_NT = []
 
         self.probabilityComputer = None
+        now = datetime.now()
+        dt_string = now.strftime("%Y.%m.%d-%H.%M.%S")
+        self.filename = os.environ['USERPROFILE'] + "\Documents\PybartData\Feedback\\" + dt_string + ".txt"
+
 
         if not self.dump == None:
             self.dump.connect(display)
 
         self.ignoreEpochs = False  # Used to ignore epochs coming after a result
 
+        # filename  = "C:/Users/AlexM/Documents/Projets/Python/pybart/log/Trig-" +  dt_string + ".txt"
+        # self.TrigFile = open(filename, "a+")
+
+
+
+
     def start(self, low_frequency, high_frequency, trig_params, stream_params):
         """On configure the Steam engine
 
         - the pass band-frequency
         - the epochs output slot
-        
+
         Then get the StreamEngine communication inferface (sender) with the myb
         game and reset it.
 
@@ -89,8 +99,14 @@ class MybPipeline(MybSettingDialog, QObject):
         self.sender.helper.triggerSetupSignal.connect(self.setupProbabilityComputer)
         #self.sender.game_stop.connect(self.reset)
 
+
+
         self.optimalStopping = True #TODO Allow user to change this thanks to the game
 
+
+        self.pipelineFeedback = open(self.filename, "a+")
+        if self.probabilityComputer is not None:
+            self.probabilityComputer.setPipelineFeedback(self.pipelineFeedback)
         self.running = True
 
 
@@ -101,6 +117,8 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.running = False
 
+
+        self.pipelineFeedback.close()
 
 
 
@@ -190,12 +208,14 @@ class MybPipeline(MybSettingDialog, QObject):
     def process_likelihood(self, likelihood, label):
         # self.tab_lf += "{0:.6f}".format(float(likelihood[0])) + ";"
         # self.tab_lf += "{0:.6f}".format(float(likelihood[1])) + ";"
-
         if (self.optimalStopping):
+            self.pipelineFeedback.write("Label : " + label + " || likelihood[0] : " + str(likelihood[0]) + " | likelihood[1] : " + str(likelihood[1]) + '\n')
             selectedTrigger = self.probabilityComputer.computeNewProbas(likelihood, label)
             if (selectedTrigger is not ""):
                 self.sender.socket.send_string(self.sender.RESULT_ZMQ + "|" + selectedTrigger)
                 self.ignoreEpochs = True
+                self.pipelineFeedback.write("Selected label : " + selectedTrigger + "\n")
+
         
         # if self.sender.isConnected:
         #     self.dump.emit("Epoch processed (id = {})".format(label))
@@ -252,7 +272,6 @@ class MybPipeline(MybSettingDialog, QObject):
         
     def reset(self, calibrationMode=False):
         print("reset")
-        print(calibrationMode)
         self.sender.calibrationMode = calibrationMode
         self.tab_gaze = ""
         self.tab_lf = ""

@@ -29,10 +29,13 @@ class ProbabilityComputer:
 
         self.computedStimCount = 0
 
-
+    def setPipelineFeedback(self, pipelineFeedback):
+        self.pipelineFeedback = pipelineFeedback
 
     def computeNewProbas(self, computedLikelihood, stimulusLabel):
         finalProbabilities = self.computePosteriorProbabilities(computedLikelihood, stimulusLabel)
+        for triggerIndex in range(0, self.triggerCount, 1):
+            self.pipelineFeedback.write("Label : " + self.stimulusLabelList[triggerIndex] + " | " + str(finalProbabilities[triggerIndex]) + "\n")
         return self.selectionPass(finalProbabilities)
 
     # def computeNewProbas(self, computedLikelihoodList): # TODO: Enable this

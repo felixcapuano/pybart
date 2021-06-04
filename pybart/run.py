@@ -12,6 +12,11 @@ if __name__ == "__main__":
         os.makedirs(os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\")
     except FileExistsError:
         pass
+    try:
+        os.makedirs(os.environ['USERPROFILE'] + "\Documents\PybartData\Feedback\\")
+    except FileExistsError:
+        pass
+
     if(not path.exists(os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template.h5")):
         initTemplate = h5py.File(os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template.h5", 'w')
         initTemplate.close()
