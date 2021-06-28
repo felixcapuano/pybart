@@ -1,7 +1,7 @@
 import math
 import sys
 
-class ProbabilityComputer:
+class ProbabilityComputerOptimalStopping:
     def __init__(self, stimulusLabelList, triggerSelectionThreshold):
         self.stimulusLabelList = stimulusLabelList
         self.triggerCount = len(stimulusLabelList)
@@ -38,7 +38,7 @@ class ProbabilityComputer:
             self.pipelineFeedback.write("Label : " + self.stimulusLabelList[triggerIndex] + " | " + str(finalProbabilities[triggerIndex]) + "\n")
         return self.selectionPass(finalProbabilities)
 
-    # def computeNewProbas(self, computedLikelihoodList): # TODO: Enable this
+    # def computeNewProbas(self, computedLikelihoodList):
     #     finalProbabilities = self.computePosteriorProbabilities(computedLikelihoodList)
     #     return self.selectionPass(finalProbabilities)
 
@@ -113,7 +113,7 @@ class ProbabilityComputer:
         return finalProbabilities
 
 
-    # def computePosteriorProbabilities(self, computedLikelyhoodList): # TODO: Enable this
+    # def computePosteriorProbabilities(self, computedLikelyhoodList):
     #     finalProbabilities = []
     #
     #     self.priorProbabilities = []
