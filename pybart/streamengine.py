@@ -92,6 +92,9 @@ class StreamEngine(QtCore.QObject):
                 self.brainamp_port = option['brainamp_port']
             except KeyError:
                 raise KeyError('Error: raw_file is waited in argument')
+
+        self.brainAmpDevice = "BrainVision"
+
     def simulated_device(self):
         """This function initialize Simulator EEG data Acquisition Node"""
 
@@ -105,9 +108,15 @@ class StreamEngine(QtCore.QObject):
 
     def brain_amp_device(self):
         """This function initialize EEG data Acquisition Node"""
-        dev_amp = BrainVisionListener()
-        dev_amp.configure(brainamp_host=self.brainamp_host,
-                          brainamp_port=self.brainamp_port)
+        if self.brainAmpDevice is "BrainVision":
+            dev_amp = BrainVisionListener()
+            dev_amp.configure(brainamp_host=self.brainamp_host,
+                              brainamp_port=self.brainamp_port)
+        elif self.brainAmpDevice is "OpenBCI":
+            dev_amp = OpenBCIListener()
+            dev_amp.configure(device_handle='/COM7')
+
+
 
         return dev_amp
 
@@ -131,12 +140,16 @@ class StreamEngine(QtCore.QObject):
             dev = self.simulated_device()
         else:
             dev = self.brain_amp_device()
-        dev.outputs['triggers'].configure(protocol='tcp',
-                                          interface='127.0.0.1',
-                                          transfermode='plaindata',)
+
+        if self.brainAmpDevice is "BrainVision":
+            dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
+
         dev.outputs['signals'].configure(protocol='tcp',
                                          interface='127.0.0.1',
                                          transfermode='plaindata',)
+        if self.brainAmpDevice is "OpenBCI":
+            dev.outputs['aux'].configure(protocol='tcp', interface='127.0.0.1', transfermode='plaindata', )
+
         dev.initialize()
         self.nodes['device'] = dev
 
