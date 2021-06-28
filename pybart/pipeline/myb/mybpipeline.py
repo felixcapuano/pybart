@@ -142,7 +142,6 @@ class MybPipeline(MybSettingDialog, QObject):
                 self.setupProbabilityComputer("")
                 self.probabilityComputer.setPipelineFeedback(self.pipelineFeedback)
 
-
     def new_epochs(self, label, additionalInformation, epochs):
         """This function is a slot who classifies epoch according to learning parameters
         and bayes priors for myb games with dynamic bayesian classification
