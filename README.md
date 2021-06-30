@@ -46,6 +46,7 @@ Then :
 pip install pyacq_ext/
 pip install pyacq/
 pip install --upgrade scikit-learn==0.20.3
+pip install pyserial
 
 ```
 
