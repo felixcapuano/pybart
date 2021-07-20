@@ -9,6 +9,7 @@ from pyqtgraph.Qt import QtCore
 from pyacq.dsp.sosfilter import SosFilter
 from pyacq.viewers.qoscilloscope import QOscilloscope
 from pyacq_ext.brainvisionlistener import BrainVisionListener
+from pyacq_ext.eeg_openBCIListener import OpenBCIListener
 from pyacq_ext.epochermultilabel import EpocherMultiLabel
 from pyacq_ext.rawbufferdevice import RawDeviceBuffer
 from pyacq_ext.eventpoller import EventPoller
@@ -93,8 +94,6 @@ class StreamEngine(QtCore.QObject):
             except KeyError:
                 raise KeyError('Error: raw_file is waited in argument')
 
-        self.brainAmpDevice = "BrainVision"
-
     def simulated_device(self):
         """This function initialize Simulator EEG data Acquisition Node"""
 
@@ -106,21 +105,19 @@ class StreamEngine(QtCore.QObject):
 
         return dev_sim
 
-    def brain_amp_device(self):
+    def brain_amp_device_setup(self, brain_amp_device):
         """This function initialize EEG data Acquisition Node"""
-        if self.brainAmpDevice is "BrainVision":
+        if brain_amp_device == "BrainVision":
             dev_amp = BrainVisionListener()
             dev_amp.configure(brainamp_host=self.brainamp_host,
                               brainamp_port=self.brainamp_port)
-        elif self.brainAmpDevice is "OpenBCI":
+        elif brain_amp_device == "OpenBCI":
             dev_amp = OpenBCIListener()
             dev_amp.configure(device_handle='/COM7')
 
-
-
         return dev_amp
 
-    def configuration(self, low_frequency, high_frequency, trig_params):
+    def configuration(self, low_frequency, high_frequency, trig_params, brain_amp_device):
         """Create, configure and plug all pyacq node
 
         :param low_frequency: set low frequency of the pass band
@@ -129,6 +126,8 @@ class StreamEngine(QtCore.QObject):
         :type high_frequency: float
         :param trig_params: triggers parameter on a dict format
         :type trig_params: dict
+        :param brain_amp_device: set the brain amp used for this session
+        :type brain_amp_device: str
 
         This function initialize all node depending on the mode selected.
         It storing all node in a dictionary to start them easily.
@@ -138,16 +137,22 @@ class StreamEngine(QtCore.QObject):
         #logger.info('Start configuration stream (simulate mode : {}), setup => low freq : {}Hz, high freq : {}Hz)'.format(self.simulated, low_frequency, high_frequency))
         if self.simulated:
             dev = self.simulated_device()
+        elif brain_amp_device != "":
+            dev = self.brain_amp_device_setup(brain_amp_device)
         else:
-            dev = self.brain_amp_device()
+            dev = RawDeviceBuffer()
+            try:
+                dev.configure(raw_file="eeg_data_sample/CAPFE_0001.vhdr", chunksize=10)
+            except ValueError as e:
+                raise ValueError('{}'.format(e))
 
-        if self.brainAmpDevice is "BrainVision":
+        if brain_amp_device == "BrainVision" or brain_amp_device == "":
             dev.outputs['triggers'].configure(protocol='tcp', interface='127.0.0.1', transfermode='plaindata',)
 
         dev.outputs['signals'].configure(protocol='tcp',
                                          interface='127.0.0.1',
                                          transfermode='plaindata',)
-        if self.brainAmpDevice is "OpenBCI":
+        if brain_amp_device == "OpenBCI":
             dev.outputs['aux'].configure(protocol='tcp', interface='127.0.0.1', transfermode='plaindata', )
 
         dev.initialize()

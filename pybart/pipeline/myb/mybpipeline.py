@@ -20,7 +20,10 @@ import scipy.io
 from .probabilityComputerOptimalStopping import ProbabilityComputerOptimalStopping
 from .probabilityComputerClassic import ProbabilityComputerClassic
 
-#Todo : implement rawdata and openbci
+import distutils
+from distutils import util
+
+#Todo : Create new file after each calib or game without restarting pipeline
 
 #logger = logging.getLogger(__name__)
 #logger.setLevel(logging.INFO)
@@ -57,9 +60,6 @@ class MybPipeline(MybSettingDialog, QObject):
         self.epochs_NT = []
 
         self.probabilityComputer = None
-        now = datetime.now()
-        dt_string = now.strftime("%Y.%m.%d-%H.%M.%S")
-        self.filename = os.environ['USERPROFILE'] + "\Documents\PybartData\Feedback\\" + dt_string + ".txt"
 
 
         if not self.dump == None:
@@ -67,18 +67,26 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.ignoreEpochs = False  # Used to ignore epochs coming after a result
 
-        self.optimalStopping = True #TODO Allow user to change this thanks to the game
+        self.optimalStopping = True
         self.likelihood_list = []
 
         self.stimulusLabelStringReceived = ""
-
+        np.set_printoptions(threshold=np.inf)
         # filename  = "C:/Users/AlexM/Documents/Projets/Python/pybart/log/Trig-" +  dt_string + ".txt"
         # self.TrigFile = open(filename, "a+")
+        self.pipelineFeedback = None
+        self.epochTFile = None
+        self.epochNTFile = None
+        self.gameEpochFile = None
+
+        self.sessionPath = ""
 
 
 
 
-    def start(self, low_frequency, high_frequency, trig_params, stream_params):
+
+
+    def start(self, low_frequency, high_frequency, trig_params, brain_amp_device, stream_params):
         """On configure the Steam engine
 
         - the pass band-frequency
@@ -94,7 +102,7 @@ class MybPipeline(MybSettingDialog, QObject):
         self.oldHighFrequency = high_frequency
         self.oldStreamParams = stream_params
 
-        self.stream_engine.configuration(low_frequency, high_frequency, trig_params)
+        self.stream_engine.configuration(low_frequency, high_frequency, trig_params, brain_amp_device)
 
         self.stream_engine.nodes['epochermultilabel'].new_chunk.connect(self.new_epochs)
         self.stream_engine.start_nodes()
@@ -106,11 +114,10 @@ class MybPipeline(MybSettingDialog, QObject):
         self.sender.helper.resultSignal.connect(self.send_probas)
         self.sender.helper.triggerSetupSignal.connect(self.setupProbabilityComputer)
         self.sender.helper.settingSignal.connect(self.setSettingValue)
+        self.sender.helper.startSessionSignal.connect(self.on_game_session_start)
         #self.sender.game_stop.connect(self.reset)
 
-        self.pipelineFeedback = open(self.filename, "a+")
-        if self.probabilityComputer is not None:
-            self.probabilityComputer.setPipelineFeedback(self.pipelineFeedback)
+
         self.running = True
 
 
@@ -121,12 +128,23 @@ class MybPipeline(MybSettingDialog, QObject):
 
         self.running = False
 
+        self.closeFiles()
 
-        self.pipelineFeedback.close()
+    def closeFiles(self):
+        if self.pipelineFeedback is not None:
+            self.pipelineFeedback.close()
+        if self.epochTFile is not None:
+            self.epochTFile.close()
+        if self.epochNTFile is not None:
+            self.epochNTFile.close()
+        if self.gameEpochFile is not None:
+            self.gameEpochFile.close()
 
-    def setupProbabilityComputer(self, stimulusLabelString):
-        if stimulusLabelString is not "":
-            self.stimulusLabelStringReceived = stimulusLabelString
+    def setupProbabilityComputer(self, setupString):
+        if setupString != "":
+            setupTab = setupString.split(":")
+            brainAmpDevice = setupTab[0]
+            self.stimulusLabelStringReceived = setupTab[1]
         stimulusLabelList = self.stimulusLabelStringReceived.split(";")
         if self.optimalStopping:
             self.probabilityComputer = ProbabilityComputerOptimalStopping(stimulusLabelList, 0.8)
@@ -137,12 +155,12 @@ class MybPipeline(MybSettingDialog, QObject):
         newSettings = newSettingsValues.split(";")
         for setting in newSettings:
             if "optimalStopping" in setting:
-                print("value : " + setting.partition("=")[2])
+                # print("value : " + setting.partition("=")[2])
                 self.optimalStopping = bool(distutils.util.strtobool(setting.partition("=")[2]))
                 self.setupProbabilityComputer("")
                 self.probabilityComputer.setPipelineFeedback(self.pipelineFeedback)
 
-    def new_epochs(self, label, additionalInformation, epochs):
+    def new_epochs(self, label, additionalInformation, epochs): # TODO: create raw data files
         """This function is a slot who classifies epoch according to learning parameters
         and bayes priors for myb games with dynamic bayesian classification
         
@@ -172,8 +190,8 @@ class MybPipeline(MybSettingDialog, QObject):
         # reshaping epoch because epocher send epoch stack who have
         # 3D (time * channel * nb epoch) but this pipeline is build
         # to receive epochs one by one, so `nb epoch` dimension isn't use.
-
         if not self.ignoreEpochs:
+
             epoch = epochs.reshape((epochs.shape[1], epochs.shape[2]))
             infoTab = additionalInformation.split(";")
             isLastStr = infoTab[0]
@@ -181,17 +199,22 @@ class MybPipeline(MybSettingDialog, QObject):
             isPlayerFocused = infoTab[2]
             if self.sender.calibrationMode:
                 # check if label contains "last" tag
-                if isPlayerFocused == "True":
+                if isPlayerFocused == "True" or isPlayerFocused == "null":
+                    # print("process epoch")
                     self.allEpochs.append(epoch)
                     if isTargetStr == "True":
                         self.epochs_T.append(epoch)
+                        self.epochTFile.write(str(epoch) + "\r\n \r\n")
                     elif isTargetStr == "False":
                         self.epochs_NT.append(epoch)
+                        self.epochNTFile.write(str(epoch) + "\r\n \r\n")
                 if isLastStr == "True":
                     self.ComputeCalibration()
 
             else:
-                if isPlayerFocused == "True" or isPlayerFocused is "null":
+                if isPlayerFocused == "True" or isPlayerFocused == "null":
+                    # print("process epoch")
+                    self.gameEpochFile.write(str(epoch) + "\r\n \r\n")
                     #print("mu_Epoch_T",self.template_riemann['mu_Epoch_T'])
                     ERP_template_target = self.template_riemann['mu_Epoch_T'][...]
 
@@ -219,17 +242,16 @@ class MybPipeline(MybSettingDialog, QObject):
                     if self.optimalStopping:
                         self.process_likelihood(likelihood, label)
                     else:
-                        self.likelihood_list.append()
+                        self.likelihood_list.append(likelihood)
                         if isLastStr == "True":
-                            self.process_likelihood(self.likelihood_list)
+                            self.process_likelihood(self.likelihood_list, "")
                 #TODO: Quoi qu'il arrive on enregistre le flash avec ses infos dans le fichier
 
     def process_likelihood(self, likelihood, label):
         # self.tab_lf += "{0:.6f}".format(float(likelihood[0])) + ";"
         # self.tab_lf += "{0:.6f}".format(float(likelihood[1])) + ";"
-
         self.pipelineFeedback.write("Label : " + label + " || likelihood[0] : " + str(likelihood[0]) + " | likelihood[1] : " + str(likelihood[1]) + '\n')
-        if (self.optimalStopping):
+        if self.optimalStopping:
             selectedTrigger = self.probabilityComputer.computeNewProbas(likelihood, label)
             if (selectedTrigger is not ""):
                 self.sender.socket.send_string(self.sender.RESULT_ZMQ + "|" + selectedTrigger)
@@ -239,11 +261,11 @@ class MybPipeline(MybSettingDialog, QObject):
         else:
             probas = self.probabilityComputer.computeNewProbas(likelihood)
             probaStr = ""
-            for i in range(probas.length):
-                if(i == probas.length - 1):
-                    probaStr += str(proba[i])
+            for i in range(len(probas)):
+                if i == len(probas) - 1:
+                    probaStr += str(probas[i])
                 else:
-                    probaStr += str(proba[i]) + ";"
+                    probaStr += str(probas[i]) + ";"
             self.sender.socket.send_string(self.sender.RESULT_ZMQ + "|" + probaStr)
             self.ignoreEpochs = True
 
@@ -272,10 +294,48 @@ class MybPipeline(MybSettingDialog, QObject):
         when setting button is clicked.
         """
         self.show()
-        
-    def reset(self, calibrationMode=False):
-        print("reset")
-        self.sender.calibrationMode = calibrationMode
+
+    def on_game_session_start(self, sessionInfo):
+        sessionInfoTab = sessionInfo.split(";")
+        calibrationModeStr = sessionInfoTab[0]
+        sessionPath = sessionInfoTab[1]
+        self.sessionPath = sessionPath
+        self.sender.calibrationMode = bool(distutils.util.strtobool(calibrationModeStr))
+        # self.sender.calibrationMode = calibrationMode
+        self.reset()
+        self.closeFiles()
+        now = datetime.now()
+        dt_string = now.strftime("%Y.%m.%d-%H.%M.%S")
+        filename = os.environ['USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\PybartFeedback\\" + dt_string + ".txt"
+        epochTargetFilename = os.environ[
+                                       'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\EpochTarget_" + dt_string + ".txt"
+        epochNonTargetFilename = os.environ[
+                                          'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\EpochNonTarget_" + dt_string + ".txt"
+        gameEpochFilename = os.environ[
+                                     'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\GameEpoch_" + dt_string + ".txt"
+
+        if self.sender.calibrationMode :
+            self.createDirectories(epochTargetFilename)
+            self.createDirectories(epochNonTargetFilename)
+            self.epochTFile = open(epochTargetFilename, "a+")
+            self.epochNTFile = open(epochNonTargetFilename, "a+")
+        else:
+            self.createDirectories(gameEpochFilename)
+            self.createDirectories(filename)
+            self.pipelineFeedback = open(filename, "a+")
+            self.gameEpochFile = open(gameEpochFilename, "a+")
+            if self.probabilityComputer is not None:
+                self.probabilityComputer.setPipelineFeedback(self.pipelineFeedback)
+
+    def createDirectories(self, filename):
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
+
+    def reset(self):
         self.tab_gaze = ""
         self.tab_lf = ""
         self.likelihood_computed = 0
@@ -345,16 +405,16 @@ class MybPipeline(MybSettingDialog, QObject):
         self.epochs_NT = np.array(self.epochs_NT)
 
         absallepochs_maxvalue = np.fabs(self.allEpochs)
-        allepochs_maxvalue = absallepochs_maxvalue.max(2).max(0)
+        allepochs_maxvalue = absallepochs_maxvalue.max(2).max(1)
 
         if threshold_rejection > 0:
             reject_above_threshold = np.sort(allepochs_maxvalue)[np.fix(allepochs_maxvalue.size * (1 - threshold_rejection)).astype(np.int)]
 
         absepochsT_maxvalue = np.fabs(self.epochs_T)
-        epochsT_maxvalue = absepochsT_maxvalue.max(2).max(0)
+        epochsT_maxvalue = absepochsT_maxvalue.max(2).max(1)
 
         absepochsNT_maxvalue = np.fabs(self.epochs_NT)
-        epochsNT_maxvalue = absepochsNT_maxvalue.max(2).max(0)
+        epochsNT_maxvalue = absepochsNT_maxvalue.max(2).max(1)
 
         if threshold_rejection > 0:
             epochs_to_remove_indexes = np.where(epochsT_maxvalue > reject_above_threshold)[0]
@@ -419,8 +479,9 @@ class MybPipeline(MybSettingDialog, QObject):
 
 
 
-        fileTemplateName = os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template.h5"
-        copyFileTemplateName = os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template_" + dt_string + ".h5"
+        fileTemplateName = os.environ['USERPROFILE'] + "\Documents\CophyExperimentsData\TemplateRiemann\\template.h5"
+        copyFileTemplateName = os.environ['USERPROFILE'] + "\Documents\CophyExperimentsData" + self.sessionPath + "\TemplateRiemann\\template_" + dt_string + ".h5"
+        self.createDirectories(copyFileTemplateName)
         MybSettingDialog.close_template(self)
         writeH5FileTemplate(TemplateRiemann, fileTemplateName)
         writeH5FileTemplate(TemplateRiemann, copyFileTemplateName)

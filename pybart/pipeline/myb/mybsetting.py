@@ -67,7 +67,7 @@ class MybSettingDialog(QtWidgets.QDialog, Ui_MybSettingDialog):
 
         # set default template file path
         self.template_riemann = {}
-        self.current_template = os.environ['USERPROFILE'] + "\Documents\PybartData\TemplateRiemann\\template.h5"
+        self.current_template = os.environ['USERPROFILE'] + "\Documents\CophyExperimentsData\TemplateRiemann\\template.h5"
         self.label_filename_template.setText(os.path.basename(self.current_template))
         self.load_template()
 

@@ -169,7 +169,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         pipeline = self.pipelines[self.current_pipeline_name]['pipe']
         self.current_pipeline= pipeline(self, display=self.console)
 
-    def on_start_running(self, params={}):
+    def on_start_running(self, brain_amp_device="", params={}):
         """This function is a slot who collect parameter from the
         control panel and initialise the stream (StreamEngine)
 
@@ -238,9 +238,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             self.current_pipeline.start(low_frequency,
                                         high_frequency,
                                         params,
+                                        brain_amp_device,
                                         stream_params)
             self.current_pipeline.sender.helper.triggerSetupSignal.connect(self.setupTrigger)
-           
+            self.current_pipeline.sender.helper.stopSignal.connect(self.on_stop_running)
+
         except ConnectionRefusedError as e:
             self.error_dialog.showMessage("BrainVision Recorder not recording: {}".format(e))
             #logger.warning(e)
@@ -266,7 +268,7 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         # TODO disable groupbox selection pipeline
 
 
-    def on_stop_running(self):
+    def on_stop_running(self, exitApp=False):
         """This function is a slot who stop pyacq all pyacq node"""
 
         #logger.info('Stop pipeline')
@@ -279,6 +281,10 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         self.button_start.setEnabled(True)
         self.widget_configuration.setEnabled(True)
         self.commandBox.clear()
+
+        if exitApp:
+            os._exit(1)
+
         
     def on_new_setup(self):
         """This function is a slot waiting for an index change
@@ -354,11 +360,11 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
         """This function append text to the console."""
         self.commandBox.appendPlainText(text)
 
-    def setupTrigger(self, stimulusLabelString):  # This function is used when unity game wants to override default configuration.json to get new triggers. This can be improved by giving also new left and right sweep and max stock values
+    def setupTrigger(self, setupString):  # This function is used when unity game wants to override default configuration.json to get new triggers. This can be improved by giving also new left and right sweep and max stock values
         self.on_stop_running()
-
-        stimulusLabelList = stimulusLabelString.split(";")
-
+        setupTab = setupString.split(":")
+        brainAmpDevice = setupTab[0]
+        stimulusLabelList = setupTab[1].split(";")
         params = {}
         for label in stimulusLabelList:
             params[label] = {}
@@ -366,4 +372,4 @@ class ConfigPanel(QtWidgets.QMainWindow, Ui_ConfigPanel):
             params[label]['right_sweep'] = 0.6  # right sweep default value
             params[label]['max_stock'] = 1  # max stock default value
 
-        self.on_start_running(params)
+        self.on_start_running(brainAmpDevice, params)
