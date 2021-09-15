@@ -2,11 +2,12 @@ import math
 import sys
 
 class ProbabilityComputerOptimalStopping:
-    def __init__(self, stimulusLabelList, triggerSelectionThreshold):
+    def __init__(self, stimulusLabelList, triggerSelectionThreshold, optimalStopping):
         self.stimulusLabelList = stimulusLabelList
         self.triggerCount = len(stimulusLabelList)
         self.triggerSelectionThreshold = triggerSelectionThreshold
         self.maxRepetitionCount = 10  # TODO: need param
+        self.optimalStopping = optimalStopping
         print("Max stim count : " + str(self.maxRepetitionCount * self.triggerCount))
         self.reset()
 
@@ -37,7 +38,10 @@ class ProbabilityComputerOptimalStopping:
         for triggerIndex in range(0, self.triggerCount, 1):
             print("Label : " + self.stimulusLabelList[triggerIndex] + " | " + str(finalProbabilities[triggerIndex]) + "\n")
             self.pipelineFeedback.write("Label : " + self.stimulusLabelList[triggerIndex] + " | " + str(finalProbabilities[triggerIndex]) + "\n")
-        return self.selectionPass(finalProbabilities)
+        if self.optimalStopping:
+            return self.selectionPass(finalProbabilities)
+        else:
+            return finalProbabilities
 
     def computePosteriorProbabilities(self, computedLikelyhood, stimulusLabel):
         finalProbabilities = []

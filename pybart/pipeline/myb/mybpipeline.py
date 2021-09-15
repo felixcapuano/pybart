@@ -18,7 +18,7 @@ import sys
 import scipy.io
 
 from .probabilityComputerOptimalStopping import ProbabilityComputerOptimalStopping
-from .probabilityComputerClassic import ProbabilityComputerClassic
+
 
 import distutils
 from distutils import util
@@ -68,7 +68,6 @@ class MybPipeline(MybSettingDialog, QObject):
         self.ignoreEpochs = False  # Used to ignore epochs coming after a result
 
         self.optimalStopping = True
-        self.likelihood_list = []
 
         self.stimulusLabelStringReceived = ""
         np.set_printoptions(threshold=np.inf)
@@ -146,10 +145,8 @@ class MybPipeline(MybSettingDialog, QObject):
             brainAmpDevice = setupTab[0]
             self.stimulusLabelStringReceived = setupTab[1]
         stimulusLabelList = self.stimulusLabelStringReceived.split(";")
-        if self.optimalStopping:
-            self.probabilityComputer = ProbabilityComputerOptimalStopping(stimulusLabelList, 0.8)
-        else:
-            self.probabilityComputer = ProbabilityComputerClassic(stimulusLabelList)
+
+        self.probabilityComputer = ProbabilityComputerOptimalStopping(stimulusLabelList, 0.8, self.optimalStopping)
 
     def setSettingValue(self, newSettingsValues): # Todo: some setting need a restart of pipeline, see if we can avoid this
         newSettings = newSettingsValues.split(";")
@@ -157,8 +154,10 @@ class MybPipeline(MybSettingDialog, QObject):
             if "optimalStopping" in setting:
                 # print("value : " + setting.partition("=")[2])
                 self.optimalStopping = bool(distutils.util.strtobool(setting.partition("=")[2]))
-                self.setupProbabilityComputer("")
+                self.probabilityComputer.optimalStopping = self.optimalStopping
+                # self.setupProbabilityComputer("")
                 self.probabilityComputer.setPipelineFeedback(self.pipelineFeedback)
+                print("optimal stopping : " + str(self.optimalStopping))
 
     def new_epochs(self, label, additionalInformation, epochs): # TODO: create raw data files
         """This function is a slot who classifies epoch according to learning parameters
@@ -239,15 +238,11 @@ class MybPipeline(MybSettingDialog, QObject):
                     # send likelihood to Myb game using the sender
                     self.likelihood_computed += 1
 
-                    if self.optimalStopping:
-                        self.process_likelihood(likelihood, label)
-                    else:
-                        self.likelihood_list.append(likelihood)
-                        if isLastStr == "True":
-                            self.process_likelihood(self.likelihood_list, "")
+                    self.process_likelihood(likelihood, label, isLastStr)
+
                 #TODO: Quoi qu'il arrive on enregistre le flash avec ses infos dans le fichier
 
-    def process_likelihood(self, likelihood, label):
+    def process_likelihood(self, likelihood, label, isLastStr):
         # self.tab_lf += "{0:.6f}".format(float(likelihood[0])) + ";"
         # self.tab_lf += "{0:.6f}".format(float(likelihood[1])) + ";"
         self.pipelineFeedback.write("Label : " + label + " || likelihood[0] : " + str(likelihood[0]) + " | likelihood[1] : " + str(likelihood[1]) + '\n')
@@ -259,15 +254,16 @@ class MybPipeline(MybSettingDialog, QObject):
                 self.pipelineFeedback.write("Selected label : " + selectedTrigger + "\n")
 
         else:
-            probas = self.probabilityComputer.computeNewProbas(likelihood)
-            probaStr = ""
-            for i in range(len(probas)):
-                if i == len(probas) - 1:
-                    probaStr += str(probas[i])
-                else:
-                    probaStr += str(probas[i]) + ";"
-            self.sender.socket.send_string(self.sender.RESULT_ZMQ + "|" + probaStr)
-            self.ignoreEpochs = True
+            probas = self.probabilityComputer.computeNewProbas(likelihood, label)
+            if isLastStr == "True":
+                probaStr = ""
+                for i in range(len(probas)):
+                    if i == len(probas) - 1:
+                        probaStr += str(probas[i])
+                    else:
+                        probaStr += str(probas[i]) + ";"
+                self.sender.socket.send_string(self.sender.RESULT_ZMQ + "|" + probaStr)
+                self.ignoreEpochs = True
 
     def send_probas(self): # todo: delete if not used
         #self.dump.emit("Sending {} results".format(content))
@@ -348,8 +344,8 @@ class MybPipeline(MybSettingDialog, QObject):
             self.probabilityComputer.reset()
 
         self.ignoreEpochs = False
-        if self.optimalStopping is not True:
-            self.likelihood_list = []
+        print("reset")
+
 
     def predict_R_TNT(self, X, mu_MatCov_T, mu_MatCov_NT):
         """Predict the r_TNT for a new set of trials."""
