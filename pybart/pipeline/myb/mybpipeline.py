@@ -77,7 +77,6 @@ class MybPipeline(MybSettingDialog, QObject):
         self.epochTFile = None
         self.epochNTFile = None
         self.gameEpochFile = None
-
         self.sessionPath = ""
 
 
@@ -96,7 +95,6 @@ class MybPipeline(MybSettingDialog, QObject):
 
         """
         self.stream_engine = StreamEngine(**stream_params)
-
         self.oldLowFrequency = low_frequency
         self.oldHighFrequency = high_frequency
         self.oldStreamParams = stream_params
@@ -295,6 +293,7 @@ class MybPipeline(MybSettingDialog, QObject):
         sessionInfoTab = sessionInfo.split(";")
         calibrationModeStr = sessionInfoTab[0]
         sessionPath = sessionInfoTab[1]
+        repetitionCount = sessionInfoTab[2]
         self.sessionPath = sessionPath
         self.sender.calibrationMode = bool(distutils.util.strtobool(calibrationModeStr))
         # self.sender.calibrationMode = calibrationMode
@@ -304,17 +303,22 @@ class MybPipeline(MybSettingDialog, QObject):
         dt_string = now.strftime("%Y.%m.%d-%H.%M.%S")
         filename = os.environ['USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\PybartFeedback\\" + dt_string + ".txt"
         epochTargetFilename = os.environ[
-                                       'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\EpochTarget_" + dt_string + ".txt"
+                                       'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\Calibration\EpochTarget_" + dt_string + ".txt"
         epochNonTargetFilename = os.environ[
-                                          'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\EpochNonTarget_" + dt_string + ".txt"
+                                          'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\Calibration\EpochNonTarget_" + dt_string + ".txt"
         gameEpochFilename = os.environ[
-                                     'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\GameEpoch_" + dt_string + ".txt"
+                                     'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\Game\GameEpoch_" + dt_string + ".txt"
+
 
         if self.sender.calibrationMode :
             self.createDirectories(epochTargetFilename)
             self.createDirectories(epochNonTargetFilename)
             self.epochTFile = open(epochTargetFilename, "a+")
             self.epochNTFile = open(epochNonTargetFilename, "a+")
+            eegConfigFileName = os.environ[
+                                    'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\Calibration\Setting_" + dt_string + ".txt"
+
+
         else:
             self.createDirectories(gameEpochFilename)
             self.createDirectories(filename)
@@ -322,6 +326,16 @@ class MybPipeline(MybSettingDialog, QObject):
             self.gameEpochFile = open(gameEpochFilename, "a+")
             if self.probabilityComputer is not None:
                 self.probabilityComputer.setPipelineFeedback(self.pipelineFeedback)
+            eegConfigFileName = os.environ[
+                                    'USERPROFILE'] + "\Documents\CophyExperimentsData" + sessionPath + "\EEGRawData\Game\Setting_" + dt_string + ".txt"
+
+
+        self.createDirectories(eegConfigFileName)
+        eegConfigInfoFile = open(eegConfigFileName, "a+")
+        eegConfigInfoFile.write("Electrodes : " + str(self.stream_engine.nodes['eventpoller'].inputs['signals'].params['channel_info']) + "\r\n")
+        eegConfigInfoFile.write("Sample rate : " + str(self.stream_engine.nodes['eventpoller'].inputs['signals'].params['sample_rate']) + "\r\n")
+        eegConfigInfoFile.write("Repetition count : " + str(repetitionCount))
+        eegConfigInfoFile.close()
 
     def createDirectories(self, filename):
         if not os.path.exists(os.path.dirname(filename)):
